@@ -77,7 +77,7 @@ const login = async (req, res) => {
   try {
     const { username, email, password } = req.body;
 
-    if (!username || !email) {
+    if (!username && !email) {
       return res
         .status(400)
         .json({ message: "Please provide username or email" });
@@ -138,9 +138,9 @@ const getMe = async (req, res) => {
 
 const createUser = async (req, res) => {
   try {
-    const { username, email, password, role } = req.body;
+    const { username, email, password } = req.body;
 
-    if (!username || !email || !password || !role) {
+    if (!username || !email || !password) {
       return res.status(400).json({
         message: "Please provide username, email, password and role",
       });
@@ -162,7 +162,6 @@ const createUser = async (req, res) => {
       username,
       email,
       password: hashedPassword,
-      role,
       isAuthorized: true,
     });
 
