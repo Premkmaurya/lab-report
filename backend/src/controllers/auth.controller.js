@@ -29,7 +29,6 @@ const sendTokenResponse = (user, statusCode, res) => {
 
   res.status(statusCode).json({
     success: true,
-    token,
     user: {
       id: user._id,
       username: user.username,
@@ -76,11 +75,17 @@ const signup = async (req, res) => {
 
 const login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { username, email, password } = req.body;
 
-    if (!email || !password) {
+    if (!username || !email) {
+      return res
+        .status(400)
+        .json({ message: "Please provide username or email" });
+    }
+
+    if (!password) {
       return res.status(400).json({
-        message: "Please provide email and password",
+        message: "Please provide password",
       });
     }
 
@@ -115,7 +120,164 @@ const logout = (req, res) => {
 };
 
 const getMe = async (req, res) => {
+  const user = req.user;
 
+  res.status(200).json({
+    success: true,
+    user: {
+      id: user._id,
+      username: user.username,
+      email: user.email,
+      role: user.role,
+      isAuthorized: user.isAuthorized,
+    },
+  });
+};
+
+// admin functions
+
+const createUser = async (req, res) => {
+  try {
+    const { username, email, password, role } = req.body;
+
+    if (!username || !email || !password || !role) {
+      return res.status(400).json({
+        message: "Please provide username, email, password and role",
+      });
+    }
+
+    const existingUser = await User.findOne({
+      $or: [{ email }, { username }],
+    });
+
+    if (existingUser) {
+      return res.status(400).json({
+        message: "User already exists",
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = await User.create({
+      username,
+      email,
+      password: hashedPassword,
+      role,
+      isAuthorized: true,
+    });
+
+    res.status(201).json({
+      success: true,
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        isAuthorized: user.isAuthorized,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message || "User creation failed" });
+  }
+};
+
+const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find({
+      _id: { $ne: req.user._id },
+    });
+
+    res.status(200).json({
+      success: true,
+      users: users.map((user) => ({
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        isAuthorized: user.isAuthorized,
+      })),
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message || "Failed to fetch users" });
+  }
+};
+
+const getUserById = async (req, res) => {
+  try {
+    if (req.params.id === req.user._id.toString()) {
+      return res.status(403).json({
+        message: "You cannot access your own account here",
+      });
+    }
+
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        isAuthorized: user.isAuthorized,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message || "Failed to fetch user" });
+  }
+};
+
+const updateUserStatus = async (req, res) => {
+  try {
+    if (req.params.id === req.user._id.toString()) {
+      return res.status(403).json({
+        message: "You cannot update your own account status",
+      });
+    }
+
+    const { status } = req.body;
+
+    if (typeof status !== "boolean") {
+      return res.status(400).json({
+        message: "Please provide a valid status (true or false)",
+      });
+    }
+
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      {
+        isAuthorized: status,
+      },
+      { new: true },
+    );
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: `User status updated successfully`,
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        isAuthorized: user.isAuthorized,
+      },
+    });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: error.message || "Failed to update user status" });
+  }
 };
 
 module.exports = {
@@ -123,4 +285,8 @@ module.exports = {
   signup,
   logout,
   getMe,
+  createUser,
+  getAllUsers,
+  getUserById,
+  updateUserStatus,
 };
