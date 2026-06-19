@@ -14,11 +14,13 @@ import {
   Download,
   ShieldAlert,
   CheckCircle,
+  Plus,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export const Dashboard = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [stats, setStats] = useState({
     patients: 0,
     doctors: 0,
@@ -140,7 +142,7 @@ export const Dashboard = () => {
       </div>
 
       {/* Grid of Metric Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {/* Patients Card */}
         <div className="bg-paper-white border border-cream-border p-6 rounded-cards transition-all duration-300 hover:border-smoke hover:shadow-sm">
           <div className="flex items-center justify-between">
@@ -157,24 +159,6 @@ export const Dashboard = () => {
             </span>
           </div>
           <p className="text-xs text-stone mt-2">Registered in database</p>
-        </div>
-
-        {/* Reports Card */}
-        <div className="bg-paper-white border border-cream-border p-6 rounded-cards transition-all duration-300 hover:border-smoke hover:shadow-sm">
-          <div className="flex items-center justify-between">
-            <span className="font-abcfavoritvariable text-xs font-semibold text-graphite uppercase tracking-wider">
-              Generated Reports
-            </span>
-            <div className="p-2 bg-lavender-mist rounded-2xl">
-              <FileSpreadsheet className="h-5 w-5 text-electric-cobalt" />
-            </div>
-          </div>
-          <div className="mt-4 flex items-baseline">
-            <span className="text-3xl font-bold font-abcfavoritvariable text-charcoal">
-              {stats.reports}
-            </span>
-          </div>
-          <p className="text-xs text-stone mt-2">Laboratory reports completed</p>
         </div>
 
         {/* Tests Card */}
@@ -342,21 +326,29 @@ export const Dashboard = () => {
         </div>
       )}
 
-      {/* Two-Column split of lists */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="w-full gap-8">
         {/* Recent Patients */}
         <div className="bg-paper-white border border-cream-border rounded-cards p-6">
           <div className="flex items-center justify-between mb-6">
             <h2 className="font-abcfavoritvariable text-lg font-medium text-charcoal">
               Recent <span className="font-martinaplantijn italic text-ink-navy">Patients</span>
             </h2>
-            <Link
-              to="/patients"
-              className="text-xs font-medium text-electric-cobalt hover:underline flex items-center space-x-1"
-            >
-              <span>View all</span>
-              <ArrowRight className="h-3 w-3" />
-            </Link>
+            <div className="flex items-center space-x-3">
+              <button
+                onClick={() => navigate("/patients/create")}
+                className="text-xs font-medium text-paper-white bg-electric-cobalt hover:bg-opacity-90 px-3 py-2 rounded-buttons transition duration-200 flex items-center space-x-1"
+              >
+                <Plus className="h-4 w-4" />
+                <span>Create Patient</span>
+              </button>
+              <Link
+                to="/patients"
+                className="text-xs font-medium text-electric-cobalt hover:underline flex items-center space-x-1"
+              >
+                <span>View all</span>
+                <ArrowRight className="h-3 w-3" />
+              </Link>
+            </div>
           </div>
 
           <div className="space-y-4">
@@ -379,55 +371,6 @@ export const Dashboard = () => {
                   <span className="text-xs text-stone font-mono">
                     {new Date(patient.createdAt || patient.date).toLocaleDateString()}
                   </span>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-
-        {/* Recent Reports */}
-        <div className="bg-paper-white border border-cream-border rounded-cards p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="font-abcfavoritvariable text-lg font-medium text-charcoal">
-              Completed <span className="font-martinaplantijn italic text-ink-navy">Reports</span>
-            </h2>
-            <Link
-              to="/reports"
-              className="text-xs font-medium text-electric-cobalt hover:underline flex items-center space-x-1"
-            >
-              <span>View all</span>
-              <ArrowRight className="h-3 w-3" />
-            </Link>
-          </div>
-
-          <div className="space-y-4">
-            {recentReports.length === 0 ? (
-              <p className="text-sm text-stone py-4 text-center">No reports found.</p>
-            ) : (
-              recentReports.map((report) => (
-                <div
-                  key={report._id}
-                  className="flex items-center justify-between p-3 rounded-2xl hover:bg-warm-canvas/50 border border-transparent hover:border-cream-border transition-all duration-200"
-                >
-                  <div>
-                    <h4 className="text-sm font-semibold text-charcoal">
-                      {report.patientId?.name || "Unknown Patient"}
-                    </h4>
-                    <p className="text-xs text-stone mt-0.5">
-                      Tests: {report.tests?.map((t) => t.testName).join(", ")}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-xs text-stone font-mono block">
-                      {new Date(report.createdAt || report.date).toLocaleDateString()}
-                    </span>
-                    <Link
-                      to={`/reports/${report._id}`}
-                      className="text-xs font-medium text-electric-cobalt hover:underline"
-                    >
-                      View Report
-                    </Link>
-                  </div>
                 </div>
               ))
             )}

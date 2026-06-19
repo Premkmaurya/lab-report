@@ -1,5 +1,10 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { ProtectedRoute } from "./routes/ProtectedRoute";
 import { RoleGuard } from "./routes/RoleGuard";
@@ -61,14 +66,14 @@ export const App = () => {
             <Route element={<DashboardLayout />}>
               {/* Common Authorized Views (Both Admin and Lab Tech) */}
               <Route path="/" element={<Dashboard />} />
-              
+
               <Route path="/patients" element={<PatientList />} />
               <Route path="/patients/create" element={<CreatePatient />} />
               <Route path="/patients/:id" element={<PatientDetails />} />
               <Route path="/patients/edit/:id" element={<EditPatient />} />
-              
+
               <Route path="/tests" element={<TestList />} />
-                            <Route path="/reports" element={<ReportList />} />
+              <Route path="/reports" element={<ReportList />} />
               <Route path="/reports/create" element={<CreateReport />} />
               <Route path="/reports/:id" element={<ViewReport />} />
               {/* Admin Only Views */}

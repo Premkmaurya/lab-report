@@ -57,12 +57,6 @@ export const DashboardLayout = () => {
       roles: ["admin", "user"],
     },
     {
-      name: "Reports",
-      path: "/reports",
-      icon: FileSpreadsheet,
-      roles: ["admin", "user"],
-    },
-    {
       name: "Settings",
       path: "/settings",
       icon: Settings,
