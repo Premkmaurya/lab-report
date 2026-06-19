@@ -5,6 +5,8 @@ const {
   getPatientById,
   createPatient,
   updatePatient,
+  getPatientsSummary,
+  exportPatientsSummary,
 } = require("../controllers/patient.controller");
 
 const authMiddleware = require("../middlewares/auth.middleware");
@@ -23,6 +25,20 @@ router.use(authMiddleware.userAuth);
 
 // Get all patients
 router.get("/", getPatients);
+
+// Get patient summaries (Admin only)
+router.get(
+  "/summary/:period",
+  authMiddleware.authorizeRoles("admin"),
+  getPatientsSummary
+);
+
+// Export patient summaries as CSV (Admin only)
+router.get(
+  "/export/:period",
+  authMiddleware.authorizeRoles("admin"),
+  exportPatientsSummary
+);
 
 // Get patient by ID
 router.get(

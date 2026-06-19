@@ -1,0 +1,246 @@
+import React, { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { useNavigate, useParams, Link } from "react-router-dom";
+import { doctorService } from "../../services/doctorService";
+import { ArrowLeft, ShieldAlert, Upload } from "lucide-react";
+
+export const EditDoctor = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [submitError, setSubmitError] = useState("");
+  const [currentDoctor, setCurrentDoctor] = useState(null);
+  const [fileName, setFileName] = useState("");
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm();
+
+  useEffect(() => {
+    const fetchDoctorDetails = async () => {
+      try {
+        const data = await doctorService.getDoctorById(id);
+        setCurrentDoctor(data.doctor);
+        reset({
+          name: data.doctor.name,
+          qualification: data.doctor.qualification,
+          isActive: data.doctor.isActive,
+        });
+      } catch (err) {
+        setSubmitError("Failed to fetch doctor details.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDoctorDetails();
+  }, [id, reset]);
+
+  const handleFileChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      setFileName(e.target.files[0].name);
+    }
+  };
+
+  const onSubmit = async (data) => {
+    setIsSubmitting(true);
+    setSubmitError("");
+    try {
+      const formData = new FormData();
+      formData.append("name", data.name);
+      formData.append("qualification", data.qualification);
+      formData.append("isActive", data.isActive);
+
+      if (data.signature && data.signature[0]) {
+        formData.append("signature", data.signature[0]);
+      }
+
+      await doctorService.updateDoctor(id, formData);
+      navigate("/doctors");
+    } catch (err) {
+      setSubmitError(
+        err.response?.data?.message || "Failed to update doctor. Please try again."
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[500px]">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-cream-border border-t-electric-cobalt"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6 max-w-2xl">
+      {/* Back Link */}
+      <div>
+        <Link
+          to="/doctors"
+          className="inline-flex items-center space-x-2 text-sm text-stone hover:text-charcoal transition-colors duration-200"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          <span>Back to Specialists</span>
+        </Link>
+      </div>
+
+      {/* Header */}
+      <div>
+        <span className="font-abcfavoritvariable text-xs font-bold text-electric-cobalt uppercase tracking-widest block mb-2">
+          DOCTOR PROFILE EDIT
+        </span>
+        <h1 className="font-martinaplantijn text-4xl text-ink-navy">
+          Edit Doctor <span className="italic font-light">Profile</span>
+        </h1>
+        <p className="font-inter text-stone text-sm mt-1">
+          Modify doctor credentials, active status, or update signature scan.
+        </p>
+      </div>
+
+      {submitError && (
+        <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-cards flex items-center space-x-2">
+          <ShieldAlert className="h-4 w-4 shrink-0" />
+          <span>{submitError}</span>
+        </div>
+      )}
+
+      {/* Form Card */}
+      <div className="bg-paper-white border border-cream-border rounded-cards p-6 md:p-8">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+              <label className="block text-xs font-bold text-charcoal uppercase tracking-wider mb-2">
+                Doctor Full Name
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. Stephen Strange"
+                className={`w-full ${errors.name ? "border-red-500" : ""}`}
+                {...register("name", {
+                  required: "Doctor name is required",
+                  maxLength: {
+                    value: 100,
+                    message: "Name cannot exceed 100 characters",
+                  },
+                })}
+              />
+              {errors.name && (
+                <p className="text-xs text-red-500 mt-1">{errors.name.message}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-charcoal uppercase tracking-wider mb-2">
+                Qualification
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. MBBS, MD"
+                className={`w-full ${errors.qualification ? "border-red-500" : ""}`}
+                {...register("qualification", {
+                  required: "Qualification is required",
+                  maxLength: {
+                    value: 100,
+                    message: "Qualification cannot exceed 100 characters",
+                  },
+                })}
+              />
+              {errors.qualification && (
+                <p className="text-xs text-red-500 mt-1">
+                  {errors.qualification.message}
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 items-center">
+            <div>
+              <label className="block text-xs font-bold text-charcoal uppercase tracking-wider mb-2">
+                Doctor Status
+              </label>
+              <select
+                className="w-full bg-paper-white border border-cream-border rounded-inputs px-4 py-3 outline-none"
+                {...register("isActive")}
+              >
+                <option value="true">Active (Can receive referrals)</option>
+                <option value="false">Inactive</option>
+              </select>
+            </div>
+
+            {/* Current Signature Image Preview */}
+            <div className="text-center md:text-left">
+              <p className="text-xs font-bold text-stone uppercase tracking-wider mb-1">
+                Current Signature preview
+              </p>
+              {currentDoctor?.signUrl ? (
+                <div className="inline-block border border-cream-border bg-warm-canvas/30 rounded-2xl p-2 mt-1">
+                  <img
+                    src={currentDoctor.signUrl}
+                    alt="Current signature"
+                    className="max-h-12 object-contain"
+                  />
+                </div>
+              ) : (
+                <span className="text-xs text-stone italic">No signature file uploaded</span>
+              )}
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-charcoal uppercase tracking-wider mb-2">
+              Replace Signature Image (Optional)
+            </label>
+            <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-cream-border border-dashed rounded-cards bg-warm-canvas/20 hover:bg-warm-canvas/40 transition-colors duration-200">
+              <div className="space-y-2 text-center">
+                <Upload className="mx-auto h-8 w-8 text-stone" />
+                <div className="flex text-sm text-stone">
+                  <label className="relative cursor-pointer bg-transparent rounded-md font-semibold text-electric-cobalt hover:underline focus-within:outline-none">
+                    <span>Upload a new signature image</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="sr-only"
+                      {...register("signature", {
+                        onChange: handleFileChange,
+                      })}
+                    />
+                  </label>
+                </div>
+                <p className="text-xs text-stone">PNG, JPG, JPEG up to 5MB</p>
+                {fileName && (
+                  <p className="text-xs font-semibold text-electric-cobalt mt-2 font-mono">
+                    Selected: {fileName}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-3 pt-4 border-t border-cream-border">
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="bg-electric-cobalt text-paper-white font-medium py-2.5 px-6 rounded-buttons hover:bg-opacity-95 transition duration-200 disabled:opacity-50 text-sm cursor-pointer"
+            >
+              {isSubmitting ? "Saving..." : "Save Changes"}
+            </button>
+            <Link
+              to="/doctors"
+              className="bg-paper-white border border-cream-border text-graphite font-medium py-2.5 px-6 rounded-buttons hover:bg-warm-canvas transition duration-200 text-sm"
+            >
+              Cancel
+            </Link>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+export default EditDoctor;

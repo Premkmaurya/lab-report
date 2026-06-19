@@ -1,0 +1,57 @@
+/* Load Google Fonts as substitutes for Martinaplantijn and Abcfavorit */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap');
+
+@import "tailwindcss";
+@import "../theme.css";
+
+@theme {
+  --font-martinaplantijn: "Playfair Display", Georgia, serif;
+  --font-abcfavoritvariable: "Outfit", system-ui, sans-serif;
+  --font-inter: "Inter", system-ui, sans-serif;
+}
+
+body {
+  background-color: var(--color-warm-canvas);
+  color: var(--color-charcoal);
+  font-family: var(--font-inter);
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-warm-canvas);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-cream-border);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-smoke);
+}
+
+/* Base custom input reset for consistent editorial borders */
+input, select, textarea {
+  border: 1px solid var(--color-cream-border);
+  background-color: var(--color-paper-white);
+  border-radius: var(--radius-inputs);
+  padding: 12px 16px;
+  color: var(--color-charcoal);
+  font-family: var(--font-inter);
+  outline: none;
+  transition: all 0.2s ease-in-out;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: var(--color-electric-cobalt);
+  box-shadow: 0 0 0 2px var(--color-lavender-mist);
+}
+
+button {
+  cursor: pointer;
+}
