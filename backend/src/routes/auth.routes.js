@@ -10,11 +10,18 @@ const {
   updateUserStatus,
 } = require("../controllers/auth.controller");
 const authMiddleware = require("../middlewares/auth.middleware");
+const {
+  validateSignup,
+  validateLogin,
+  validateCreateUser,
+  validateUpdateUserStatus,
+} = require("../validators/auth.validator");
+const validateRequest = require("../validators/validationMiddleware");
 
 const router = express.Router();
 
-router.post("/signup", signup);
-router.post("/login", login);
+router.post("/signup", validateSignup, validateRequest, signup);
+router.post("/login", validateLogin, validateRequest, login);
 router.post("/logout", logout);
 router.get("/me", authMiddleware.userAuth, getMe);
 
@@ -23,6 +30,8 @@ router.post(
   "/users",
   authMiddleware.userAuth,
   authMiddleware.authorizeRoles("admin"),
+  validateCreateUser,
+  validateRequest,
   createUser,
 );
 router.get(
@@ -41,6 +50,8 @@ router.patch(
   "/users/:id/status",
   authMiddleware.userAuth,
   authMiddleware.authorizeRoles("admin"),
+  validateUpdateUserStatus,
+  validateRequest,
   updateUserStatus,
 );
 

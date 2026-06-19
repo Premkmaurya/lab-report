@@ -1,0 +1,103 @@
+const { body, param } = require("express-validator");
+
+/**
+ * Signup Validator
+ * Validates: username, email, password
+ */
+const validateSignup = [
+  body("username")
+    .trim()
+    .isLength({ min: 3, max: 30 })
+    .withMessage("Username must be between 3 and 30 characters")
+    .matches(/^[a-zA-Z0-9_-]+$/)
+    .withMessage("Username can only contain letters, numbers, underscores, and hyphens"),
+  
+  body("email")
+    .trim()
+    .toLowerCase()
+    .isEmail()
+    .withMessage("Please provide a valid email address"),
+  
+  body("password")
+    .isLength({ min: 6 })
+    .withMessage("Password must be at least 6 characters long"),
+];
+
+/**
+ * Login Validator
+ * Validates: username or email (at least one required), password
+ */
+const validateLogin = [
+  body("username")
+    .optional()
+    .trim(),
+  
+  body("email")
+    .optional()
+    .trim()
+    .toLowerCase()
+    .if((value) => value)
+    .isEmail()
+    .withMessage("Please provide a valid email address"),
+  
+  body()
+    .custom((value, { req }) => {
+      if (!req.body.username && !req.body.email) {
+        throw new Error("Please provide either username or email");
+      }
+      return true;
+    }),
+  
+  body("password")
+    .notEmpty()
+    .withMessage("Password is required"),
+];
+
+/**
+ * Create User Validator (Admin)
+ * Validates: username, email, password, role
+ */
+const validateCreateUser = [
+  body("username")
+    .trim()
+    .isLength({ min: 3, max: 30 })
+    .withMessage("Username must be between 3 and 30 characters")
+    .matches(/^[a-zA-Z0-9_-]+$/)
+    .withMessage("Username can only contain letters, numbers, underscores, and hyphens"),
+  
+  body("email")
+    .trim()
+    .toLowerCase()
+    .isEmail()
+    .withMessage("Please provide a valid email address"),
+  
+  body("password")
+    .isLength({ min: 6 })
+    .withMessage("Password must be at least 6 characters long"),
+  
+  body("role")
+    .optional()
+    .isIn(["user", "admin"])
+    .withMessage("Role must be either 'user' or 'admin'"),
+];
+
+/**
+ * Update User Status Validator (Admin)
+ * Validates: id (MongoDB ObjectId), isAuthorized
+ */
+const validateUpdateUserStatus = [
+  param("id")
+    .isMongoId()
+    .withMessage("Invalid user ID format"),
+  
+  body("isAuthorized")
+    .isBoolean()
+    .withMessage("isAuthorized must be a boolean value"),
+];
+
+module.exports = {
+  validateSignup,
+  validateLogin,
+  validateCreateUser,
+  validateUpdateUserStatus,
+};

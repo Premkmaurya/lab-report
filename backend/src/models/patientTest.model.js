@@ -12,6 +12,19 @@ const patientTestItemSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    value: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    unit: {
+      type: String,
+      trim: true,
+    },
+    normalRange: {
+      type: String,
+      trim: true,
+    },
   },
   {
     _id: false,
