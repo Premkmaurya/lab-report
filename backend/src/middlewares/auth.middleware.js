@@ -21,6 +21,12 @@ const userAuth = async (req, res, next) => {
       return res.status(401).json({ message: "User not found" });
     }
 
+    if (!user.isAuthorized) {
+      return res.status(403).json({ 
+        message: "Your account is not authorized yet. Please contact the administrator." 
+      });
+    }
+
     req.user = user;
     next();
   } catch (error) {

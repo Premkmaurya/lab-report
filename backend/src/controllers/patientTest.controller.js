@@ -4,6 +4,7 @@ const getPatientTests = async (req, res) => {
   try {
     const patientTests = await PatientTest.find()
       .populate("patientId", "name age")
+      .populate("createdBy", "username email")
       .sort({ createdAt: -1 });
 
     res.status(200).json({
@@ -19,10 +20,9 @@ const getPatientTests = async (req, res) => {
 
 const getPatientTestById = async (req, res) => {
   try {
-    const patientTest = await PatientTest.findById(req.params.id).populate(
-      "patientId",
-      "name age"
-    );
+    const patientTest = await PatientTest.findById(req.params.id)
+      .populate("patientId", "name age")
+      .populate("createdBy", "username email");
 
     if (!patientTest) {
       return res.status(404).json({
@@ -47,6 +47,7 @@ const getTestsByPatientId = async (req, res) => {
       patientId: req.params.patientId,
     })
       .populate("patientId", "name age")
+      .populate("createdBy", "username email")
       .sort({ createdAt: -1 });
 
     res.status(200).json({
@@ -62,9 +63,9 @@ const getTestsByPatientId = async (req, res) => {
 
 const createPatientTest = async (req, res) => {
   try {
-    const { patientId, test, date } = req.body;
+    const { patientId, tests, date } = req.body;
 
-    if (!patientId || !test || test.length === 0) {
+    if (!patientId || !tests || tests.length === 0) {
       return res.status(400).json({
         message: "Please provide patientId and at least one test",
       });
@@ -72,7 +73,8 @@ const createPatientTest = async (req, res) => {
 
     const patientTest = await PatientTest.create({
       patientId,
-      test,
+      tests,
+      createdBy: req.user._id,
       date: date || new Date(),
     });
 
@@ -89,7 +91,7 @@ const createPatientTest = async (req, res) => {
 
 const updatePatientTest = async (req, res) => {
   try {
-    const allowedFields = ["test", "date"];
+    const allowedFields = ["tests", "date"];
     const updates = {};
 
     for (const field of allowedFields) {
@@ -110,7 +112,8 @@ const updatePatientTest = async (req, res) => {
       {
         new: true,
       }
-    ).populate("patientId", "name age");
+    ).populate("patientId", "name age")
+     .populate("createdBy", "username email");
 
     if (!patientTest) {
       return res.status(404).json({

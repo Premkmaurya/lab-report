@@ -3,7 +3,7 @@ const Patient = require("../models/patient.model");
 const getPatients = async (req, res) => {
   try {
     const patients = await Patient.find()
-      .populate("createdBy", "name email")
+      .populate("createdBy", "username email")
       .sort({ createdAt: -1 });
 
     res.status(200).json({
@@ -21,7 +21,7 @@ const getPatientById = async (req, res) => {
   try {
     const patient = await Patient.findById(req.params.id).populate(
       "createdBy",
-      "name email"
+      "username email"
     );
 
     if (!patient) {

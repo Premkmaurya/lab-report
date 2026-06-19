@@ -1,16 +1,20 @@
 const express = require("express");
+
 const {
   getPatients,
   getPatientById,
   createPatient,
   updatePatient,
 } = require("../controllers/patient.controller");
+
 const authMiddleware = require("../middlewares/auth.middleware");
+
 const {
   validateCreatePatient,
   validateUpdatePatient,
   validateGetPatientById,
 } = require("../validators/patient.validator");
+
 const validateRequest = require("../validators/validationMiddleware");
 
 const router = express.Router();

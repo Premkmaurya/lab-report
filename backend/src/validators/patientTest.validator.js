@@ -2,25 +2,54 @@ const { body, param } = require("express-validator");
 
 /**
  * Create PatientTest Validator
- * Validates: patientId, test array with testId and testName
+ * Validates: patientId, tests array with testId, testName, and result details
  */
 const validateCreatePatientTest = [
   body("patientId")
     .isMongoId()
     .withMessage("Invalid patient ID format"),
   
-  body("test")
+  body("tests")
     .isArray({ min: 1 })
-    .withMessage("Test array must contain at least one test"),
+    .withMessage("Tests array must contain at least one test"),
   
-  body("test.*.testId")
+  body("tests.*.testId")
     .isMongoId()
     .withMessage("Each test must have a valid testId (MongoDB ObjectId)"),
   
-  body("test.*.testName")
+  body("tests.*.testName")
     .trim()
     .isLength({ min: 1, max: 100 })
     .withMessage("Test name must be between 1 and 100 characters"),
+  
+  body("tests.*.result")
+    .optional()
+    .isArray()
+    .withMessage("Result must be an array"),
+  
+  body("tests.*.result.*.parameter")
+    .optional()
+    .trim()
+    .isLength({ max: 100 })
+    .withMessage("Parameter must not exceed 100 characters"),
+  
+  body("tests.*.result.*.value")
+    .optional()
+    .trim()
+    .isLength({ min: 1, max: 100 })
+    .withMessage("Value must be between 1 and 100 characters"),
+  
+  body("tests.*.result.*.unit")
+    .optional()
+    .trim()
+    .isLength({ max: 50 })
+    .withMessage("Unit must not exceed 50 characters"),
+  
+  body("tests.*.result.*.normalRange")
+    .optional()
+    .trim()
+    .isLength({ max: 100 })
+    .withMessage("Normal range must not exceed 100 characters"),
   
   body("date")
     .optional()
@@ -30,28 +59,57 @@ const validateCreatePatientTest = [
 
 /**
  * Update PatientTest Validator
- * Validates: id (MongoDB ObjectId), test array, date
+ * Validates: id (MongoDB ObjectId), tests array, date
  */
 const validateUpdatePatientTest = [
   param("id")
     .isMongoId()
     .withMessage("Invalid patient test ID format"),
   
-  body("test")
+  body("tests")
     .optional()
     .isArray({ min: 1 })
-    .withMessage("Test array must contain at least one test"),
+    .withMessage("Tests array must contain at least one test"),
   
-  body("test.*.testId")
+  body("tests.*.testId")
     .optional()
     .isMongoId()
     .withMessage("Each test must have a valid testId (MongoDB ObjectId)"),
   
-  body("test.*.testName")
+  body("tests.*.testName")
     .optional()
     .trim()
     .isLength({ min: 1, max: 100 })
     .withMessage("Test name must be between 1 and 100 characters"),
+  
+  body("tests.*.result")
+    .optional()
+    .isArray()
+    .withMessage("Result must be an array"),
+  
+  body("tests.*.result.*.parameter")
+    .optional()
+    .trim()
+    .isLength({ max: 100 })
+    .withMessage("Parameter must not exceed 100 characters"),
+  
+  body("tests.*.result.*.value")
+    .optional()
+    .trim()
+    .isLength({ min: 1, max: 100 })
+    .withMessage("Value must be between 1 and 100 characters"),
+  
+  body("tests.*.result.*.unit")
+    .optional()
+    .trim()
+    .isLength({ max: 50 })
+    .withMessage("Unit must not exceed 50 characters"),
+  
+  body("tests.*.result.*.normalRange")
+    .optional()
+    .trim()
+    .isLength({ max: 100 })
+    .withMessage("Normal range must not exceed 100 characters"),
   
   body("date")
     .optional()

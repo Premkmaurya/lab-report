@@ -12,19 +12,27 @@ const patientTestItemSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-    value: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    unit: {
-      type: String,
-      trim: true,
-    },
-    normalRange: {
-      type: String,
-      trim: true,
-    },
+    result: [
+      {
+        parameter: {
+          type: String,
+          trim: true,
+        },
+        value: {
+          type: String,
+          required: true,
+          trim: true,
+        },
+        unit: {
+          type: String,
+          trim: true,
+        },
+        normalRange: {
+          type: String,
+          trim: true,
+        },
+      },
+    ],
   },
   {
     _id: false,
@@ -38,7 +46,12 @@ const patientTestSchema = new mongoose.Schema(
       ref: "Patient",
       required: true,
     },
-    test: [patientTestItemSchema],
+    tests: [patientTestItemSchema],
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
     date: {
       type: Date,
       default: Date.now,
