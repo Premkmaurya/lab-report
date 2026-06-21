@@ -141,63 +141,6 @@ export const Dashboard = () => {
         </p>
       </div>
 
-      {/* Grid of Metric Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* Patients Card */}
-        <div className="bg-paper-white border border-cream-border p-6 rounded-cards transition-all duration-300 hover:border-smoke hover:shadow-sm">
-          <div className="flex items-center justify-between">
-            <span className="font-abcfavoritvariable text-xs font-semibold text-graphite uppercase tracking-wider">
-              Total Patients
-            </span>
-            <div className="p-2 bg-lavender-mist rounded-2xl">
-              <HeartPulse className="h-5 w-5 text-electric-cobalt" />
-            </div>
-          </div>
-          <div className="mt-4 flex items-baseline">
-            <span className="text-3xl font-bold font-abcfavoritvariable text-charcoal">
-              {stats.patients}
-            </span>
-          </div>
-          <p className="text-xs text-stone mt-2">Registered in database</p>
-        </div>
-
-        {/* Tests Card */}
-        <div className="bg-paper-white border border-cream-border p-6 rounded-cards transition-all duration-300 hover:border-smoke hover:shadow-sm">
-          <div className="flex items-center justify-between">
-            <span className="font-abcfavoritvariable text-xs font-semibold text-graphite uppercase tracking-wider">
-              Available Tests
-            </span>
-            <div className="p-2 bg-lavender-mist rounded-2xl">
-              <FlaskConical className="h-5 w-5 text-electric-cobalt" />
-            </div>
-          </div>
-          <div className="mt-4 flex items-baseline">
-            <span className="text-3xl font-bold font-abcfavoritvariable text-charcoal">
-              {stats.tests}
-            </span>
-          </div>
-          <p className="text-xs text-stone mt-2">Services in catalog</p>
-        </div>
-
-        {/* Doctors Card */}
-        <div className="bg-paper-white border border-cream-border p-6 rounded-cards transition-all duration-300 hover:border-smoke hover:shadow-sm">
-          <div className="flex items-center justify-between">
-            <span className="font-abcfavoritvariable text-xs font-semibold text-graphite uppercase tracking-wider">
-              Active Doctors
-            </span>
-            <div className="p-2 bg-lavender-mist rounded-2xl">
-              <Users className="h-5 w-5 text-electric-cobalt" />
-            </div>
-          </div>
-          <div className="mt-4 flex items-baseline">
-            <span className="text-3xl font-bold font-abcfavoritvariable text-charcoal">
-              {stats.doctors}
-            </span>
-          </div>
-          <p className="text-xs text-stone mt-2">Referred specialists</p>
-        </div>
-      </div>
-
       {/* Patient Summary Card (Admin Only) */}
       {isAdmin && (
         <div className="bg-paper-white border border-cream-border rounded-cards p-6 md:p-8 space-y-6">

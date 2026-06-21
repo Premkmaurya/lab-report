@@ -35,6 +35,14 @@ export const patientService = {
     });
     return response.data;
   },
+
+  createPatientTests: async (patientId, testIds) => {
+    const response = await API.post("/patient-tests", {
+      patientId,
+      tests: testIds,
+    });
+    return response.data;
+  },
 };
 
 export default patientService;

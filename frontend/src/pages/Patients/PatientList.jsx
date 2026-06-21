@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { patientService } from "../../services/patientService";
 import { Plus, Search, Eye, Edit2 } from "lucide-react";
 
@@ -8,6 +8,7 @@ export const PatientList = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchPatients = async () => {
@@ -112,7 +113,9 @@ export const PatientList = () => {
                 </tr>
               ) : (
                 filteredPatients.map((patient) => (
-                  <tr key={patient._id} className="hover:bg-warm-canvas/30 transition duration-150">
+                  <tr
+                  onClick={() => navigate(`/patients/${patient._id}`)}
+                   key={patient._id} className="hover:bg-warm-canvas/30 transition cursor-pointer duration-150">
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-charcoal">
                       {patient.name}
                     </td>
@@ -127,13 +130,6 @@ export const PatientList = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-right">
                       <div className="flex items-center justify-end space-x-2">
-                        <Link
-                          to={`/patients/${patient._id}`}
-                          className="inline-flex items-center space-x-1 border border-cream-border text-graphite bg-paper-white hover:bg-warm-canvas px-3 py-1.5 rounded-buttons text-xs transition duration-200 cursor-pointer"
-                        >
-                          <Eye className="h-3.5 w-3.5" />
-                          <span>View Details</span>
-                        </Link>
                         <Link
                           to={`/patients/edit/${patient._id}`}
                           className="inline-flex items-center space-x-1 border border-cream-border text-electric-cobalt bg-paper-white hover:bg-lavender-mist/40 px-3 py-1.5 rounded-buttons text-xs transition duration-200 cursor-pointer"

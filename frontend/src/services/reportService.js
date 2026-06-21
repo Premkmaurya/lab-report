@@ -26,6 +26,11 @@ export const reportService = {
     return response.data;
   },
 
+  updatePatientTest: async (id, reportData) => {
+    const response = await API.patch(`/patient-tests/${id}`, reportData);
+    return response.data;
+  },
+
   deleteReport: async (id) => {
     const response = await API.delete(`/patient-tests/${id}`);
     return response.data;
