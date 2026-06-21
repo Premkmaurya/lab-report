@@ -34,6 +34,9 @@ import { TestList } from "../pages/Tests/TestList";
 import { CreateTest } from "../pages/Tests/CreateTest";
 import { EditTest } from "../pages/Tests/EditTest";
 
+// Reports
+import { CreateReport } from "../pages/Reports/CreateReport";
+
 // Settings
 import { Settings } from "../pages/Settings";
 
@@ -60,6 +63,7 @@ export const AppRoutes = () => {
           <Route path="/patients/create" element={<CreatePatient />} />
           <Route path="/patients/:id" element={<PatientDetails />} />
           <Route path="/patients/edit/:id" element={<EditPatient />} />
+          <Route path="/reports/create/:id" element={<CreateReport />} />
 
           <Route path="/tests" element={<TestList />} />
           {/* Admin Only Views */}

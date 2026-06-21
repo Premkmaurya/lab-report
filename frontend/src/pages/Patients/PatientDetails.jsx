@@ -155,13 +155,13 @@ export const PatientDetails = () => {
                 >
                   Edit Profile
                 </Link>
-                <button
-                  onClick={() => window.print()}
+                <Link
+                  to={`/reports/create/${patient._id}`}
                   className="bg-electric-cobalt text-paper-white font-medium py-2.5 px-6 rounded-buttons hover:bg-opacity-95 transition duration-200 text-sm inline-flex items-center space-x-2 text-center"
                 >
-                  <Printer className="h-4 w-4" />
-                  <span>Print</span>
-                </button>
+                  <Plus className="h-4 w-4" />
+                  <span>Add Reports</span>
+                </Link>
               </div>
             </div>
 
@@ -232,7 +232,7 @@ export const PatientDetails = () => {
                   </p>
                   {canCreateReport && (
                     <Link
-                      to={`/reports/create?patientId=${patient._id}`}
+                      to={`/reports/create/${patient._id}`}
                       className="inline-flex items-center space-x-2 bg-electric-cobalt text-paper-white font-medium py-2 px-5 rounded-buttons hover:bg-opacity-95 transition duration-200 text-xs"
                     >
                       <Plus className="h-3.5 w-3.5" />
