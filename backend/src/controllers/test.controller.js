@@ -81,6 +81,8 @@ const updateTest = async (req, res) => {
 
     const test = await Test.findByIdAndUpdate(req.params.id, updates, {
       new: true,
+      returnDocument: "after",
+      runValidators: true,
     });
 
     if (!test) {

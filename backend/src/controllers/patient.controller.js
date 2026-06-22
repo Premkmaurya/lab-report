@@ -21,7 +21,7 @@ const getPatientById = async (req, res) => {
   try {
     const patient = await Patient.findById(req.params.id).populate(
       "createdBy",
-      "username email"
+      "username email",
     );
 
     if (!patient) {
@@ -47,8 +47,7 @@ const createPatient = async (req, res) => {
 
     if (!name || !age || !gender || !referredDoctor) {
       return res.status(400).json({
-        message:
-          "Please provide name, age, gender, and referred doctor",
+        message: "Please provide name, age, gender, and referred doctor",
       });
     }
 
@@ -91,6 +90,8 @@ const updatePatient = async (req, res) => {
 
     const patient = await Patient.findByIdAndUpdate(req.params.id, updates, {
       new: true,
+      returnDocument: "after",
+      runValidators: true,
     }).populate("createdBy", "name email");
 
     if (!patient) {
@@ -132,7 +133,9 @@ const getRange = (period, timezoneOffsetMinutes = 0) => {
     start.setUTCDate(1);
     start.setUTCHours(0, 0, 0, 0);
   } else {
-    throw new Error("Invalid period type. Supported periods: today, week, month");
+    throw new Error(
+      "Invalid period type. Supported periods: today, week, month",
+    );
   }
 
   // Convert back to UTC to query the database
@@ -235,7 +238,8 @@ const exportPatientsSummary = async (req, res) => {
       csv += `This Month,${monthCount}\n\n`;
     }
 
-    csv += "Patient ID,Patient Name,Age,Gender,Phone,Referred Doctor,Registration Date,Reports\n";
+    csv +=
+      "Patient ID,Patient Name,Age,Gender,Phone,Referred Doctor,Registration Date,Reports\n";
 
     const PatientTest = require("../models/patientTest.model");
 
@@ -264,9 +268,9 @@ const exportPatientsSummary = async (req, res) => {
       };
 
       csv += `${clean(patient._id)},${clean(patient.name)},${clean(patient.age)},${clean(
-        patient.gender
+        patient.gender,
       )},"N/A",${clean(patient.referredDoctor)},${clean(
-        patient.createdAt.toISOString()
+        patient.createdAt.toISOString(),
       )},${clean(reportsString)}\n`;
     }
 
@@ -275,7 +279,7 @@ const exportPatientsSummary = async (req, res) => {
       "Content-Disposition",
       `attachment; filename=patient_summary_${period}_${
         new Date().toISOString().split("T")[0]
-      }.csv`
+      }.csv`,
     );
 
     res.status(200).send(csv);

@@ -111,9 +111,12 @@ const updatePatientTest = async (req, res) => {
       updates,
       {
         new: true,
-      }
-    ).populate("patientId", "name age")
-     .populate("createdBy", "username email");
+        returnDocument: "after",
+        runValidators: true,
+      },
+    )
+      .populate("patientId", "name age")
+      .populate("createdBy", "username email");
 
     if (!patientTest) {
       return res.status(404).json({
@@ -157,14 +160,16 @@ const deletePatientTest = async (req, res) => {
 const addTestToReport = async (req, res) => {
   try {
     const { testId, testName } = req.body;
-    
+
     const patientTest = await PatientTest.findById(req.params.id);
     if (!patientTest) {
       return res.status(404).json({ message: "Patient test not found" });
     }
 
     // Duplicate Check
-    const exists = patientTest.tests.some(t => t.testId.toString() === testId);
+    const exists = patientTest.tests.some(
+      (t) => t.testId.toString() === testId,
+    );
     if (exists) {
       return res.status(400).json({ message: "Test already exists in report" });
     }

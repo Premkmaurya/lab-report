@@ -28,7 +28,7 @@ export const ReportBody = ({ test }) => {
             ))
           ) : (
             <tr>
-              <td colSpan="4" className="py-4 text-center text-gray-500 italic border-b border-gray-200">
+              <td colSpan="4" className="py-4 text-center text-gray-500 italic">
                 No parameters recorded for this test.
               </td>
             </tr>

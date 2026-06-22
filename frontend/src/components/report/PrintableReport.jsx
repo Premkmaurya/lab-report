@@ -11,7 +11,7 @@ export const PrintableReport = ({ patient, report }) => {
       <div className="print:block h-full flex flex-col font-sans">
         <ReportHeader patient={patient} report={report} />
         
-        <div className="flex-grow my-6">
+        <div className="grow my-6">
           {report.tests && report.tests.length > 0 ? (
             report.tests.map((test, index) => (
               <ReportBody key={index} test={test} />
