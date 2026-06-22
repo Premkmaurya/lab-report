@@ -147,10 +147,30 @@ const validateDeletePatientTest = [
     .withMessage("Invalid patient test ID format"),
 ];
 
+/**
+ * Add Test to Existing Report Validator
+ * Validates: id, testId, testName
+ */
+const validateAddTestToReport = [
+  param("id")
+    .isMongoId()
+    .withMessage("Invalid patient test ID format"),
+  
+  body("testId")
+    .isMongoId()
+    .withMessage("Valid testId (MongoDB ObjectId) is required"),
+    
+  body("testName")
+    .trim()
+    .isLength({ min: 1, max: 100 })
+    .withMessage("Test name must be between 1 and 100 characters"),
+];
+
 module.exports = {
   validateCreatePatientTest,
   validateUpdatePatientTest,
   validateGetPatientTestById,
   validateGetTestsByPatientId,
   validateDeletePatientTest,
+  validateAddTestToReport,
 };

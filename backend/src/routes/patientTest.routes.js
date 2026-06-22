@@ -6,6 +6,7 @@ const {
   createPatientTest,
   updatePatientTest,
   deletePatientTest,
+  addTestToReport,
 } = require("../controllers/patientTest.controller");
 const authMiddleware = require("../middlewares/auth.middleware");
 const {
@@ -14,6 +15,7 @@ const {
   validateGetPatientTestById,
   validateGetTestsByPatientId,
   validateDeletePatientTest,
+  validateAddTestToReport,
 } = require("../validators/patientTest.validator");
 const validateRequest = require("../validators/validationMiddleware");
 
@@ -63,6 +65,14 @@ router.delete(
   validateDeletePatientTest,
   validateRequest,
   deletePatientTest
+);
+
+// Add test to existing report
+router.patch(
+  "/:id/add-test",
+  validateAddTestToReport,
+  validateRequest,
+  addTestToReport
 );
 
 module.exports = router;

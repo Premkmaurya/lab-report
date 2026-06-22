@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { patientService } from "../../services/patientService";
 import { reportService } from "../../services/reportService";
+import { testService } from "../../services/testService";
 import { ArrowLeft, ShieldAlert, Plus, FileText, ChevronRight, Edit, X, Printer } from "lucide-react";
 import { PrintableReport } from "../../components/report/PrintableReport";
 
@@ -17,6 +18,11 @@ export const PatientDetails = () => {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [testParameters, setTestParameters] = useState([]);
   const [reportToPrint, setReportToPrint] = useState(null);
+  const [addTestModalOpen, setAddTestModalOpen] = useState(false);
+  const [selectedReportForAdd, setSelectedReportForAdd] = useState(null);
+  const [availableTests, setAvailableTests] = useState([]);
+  const [selectedTestIdToAdd, setSelectedTestIdToAdd] = useState("");
+  const [isAddingTest, setIsAddingTest] = useState(false);
 
   useEffect(() => {
     const handleAfterPrint = () => {
@@ -31,6 +37,49 @@ export const PatientDetails = () => {
     setTimeout(() => {
       window.print();
     }, 100);
+  };
+
+  const openAddTestModal = async (report) => {
+    setSelectedReportForAdd(report);
+    setAddTestModalOpen(true);
+    setSelectedTestIdToAdd("");
+    
+    try {
+      const testsData = await testService.getAllTests();
+      const existingTestIds = report.tests.map(t => t.testId.toString());
+      const filtered = testsData.tests.filter(t => !existingTestIds.includes(t._id.toString()));
+      setAvailableTests(filtered);
+    } catch (err) {
+      console.error("Failed to fetch available tests", err);
+    }
+  };
+
+  const closeAddTestModal = () => {
+    setAddTestModalOpen(false);
+    setSelectedReportForAdd(null);
+    setAvailableTests([]);
+    setSelectedTestIdToAdd("");
+  };
+
+  const handleAddTest = async () => {
+    if (!selectedTestIdToAdd) return;
+    setIsAddingTest(true);
+    try {
+      const selectedTest = availableTests.find(t => t._id === selectedTestIdToAdd);
+      const res = await reportService.addTestToReport(selectedReportForAdd._id, {
+        testId: selectedTest._id,
+        testName: selectedTest.name
+      });
+      
+      setReports(reports.map(r => 
+        r._id === selectedReportForAdd._id ? res.patientTest : r
+      ));
+      closeAddTestModal();
+    } catch (err) {
+      console.error("Failed to add test", err);
+    } finally {
+      setIsAddingTest(false);
+    }
   };
 
   const canCreateReport = user?.role === "admin" || user?.role === "user";
@@ -151,17 +200,9 @@ export const PatientDetails = () => {
               <div className="flex flex-wrap gap-3">
                 <Link
                   to={`/patients/edit/${patient._id}`}
-                  className="bg-paper-white border border-cream-border text-graphite font-medium py-2.5 px-6 rounded-buttons hover:bg-warm-canvas transition duration-200 text-sm text-center"
+                  className="bg-electric-cobalt border border-cream-border text-white font-medium py-2.5 px-6 rounded-buttons transition duration-200 text-sm text-center"
                 >
                   Edit Profile
-                </Link>
-                <Link
-                  to={`/reports/update/${patient._id}`}
-                  state={{ patientId: patient._id, assignedTests: patient.tests || [] }}
-                  className="bg-electric-cobalt text-paper-white font-medium py-2.5 px-6 rounded-buttons hover:bg-opacity-95 transition duration-200 text-sm inline-flex items-center space-x-2 text-center"
-                >
-                  <Plus className="h-4 w-4" />
-                  <span>Add Reports</span>
                 </Link>
               </div>
             </div>
@@ -259,6 +300,13 @@ export const PatientDetails = () => {
                         </div>
                       </div>
                       <div className="flex items-center space-x-3">
+                        <button
+                          onClick={() => openAddTestModal(report)}
+                          className="text-xs font-semibold text-charcoal hover:underline flex items-center space-x-1"
+                        >
+                          <Plus className="h-3 w-3" />
+                          <span>Add Test</span>
+                        </button>
                         <button
                           onClick={() => handlePrintReport(report)}
                           className="text-xs font-semibold text-electric-cobalt hover:underline flex items-center space-x-1"
@@ -423,6 +471,54 @@ export const PatientDetails = () => {
         </div>
       )}
     </div>
+
+    {/* Add Test Modal */}
+    {addTestModalOpen && selectedReportForAdd && (
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+        <div className="bg-paper-white rounded-cards max-w-md w-full">
+          <div className="border-b border-cream-border p-6 flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-semibold text-charcoal">Add Test to Report</h2>
+              <p className="text-xs text-stone mt-1">Select a test to append to this report.</p>
+            </div>
+            <button onClick={closeAddTestModal} className="text-stone hover:text-charcoal transition-colors">
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+          <div className="p-6">
+            <label className="text-xs font-bold text-charcoal uppercase tracking-wider mb-2 block">
+              Available Tests
+            </label>
+            {availableTests.length === 0 ? (
+              <p className="text-sm text-stone italic">No additional tests available to add.</p>
+            ) : (
+              <select
+                className="w-full border border-cream-border rounded-inputs px-3 py-2 text-sm focus:outline-none"
+                value={selectedTestIdToAdd}
+                onChange={(e) => setSelectedTestIdToAdd(e.target.value)}
+              >
+                <option value="">-- Select a Test --</option>
+                {availableTests.map(t => (
+                  <option key={t._id} value={t._id}>{t.name}</option>
+                ))}
+              </select>
+            )}
+          </div>
+          <div className="bg-warm-canvas border-t border-cream-border p-6 flex justify-end space-x-3">
+            <button onClick={closeAddTestModal} className="bg-paper-white border border-cream-border text-graphite font-medium py-2 px-4 rounded-buttons text-sm">
+              Cancel
+            </button>
+            <button 
+              onClick={handleAddTest} 
+              disabled={!selectedTestIdToAdd || isAddingTest}
+              className="bg-electric-cobalt text-paper-white font-medium py-2 px-4 rounded-buttons text-sm disabled:opacity-50"
+            >
+              {isAddingTest ? "Adding..." : "Add Test"}
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
 
     {reportToPrint && (
       <div className="hidden print:block fixed inset-0 bg-white z-50 overflow-visible">

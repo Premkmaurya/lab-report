@@ -35,6 +35,11 @@ export const reportService = {
     const response = await API.delete(`/patient-tests/${id}`);
     return response.data;
   },
+
+  addTestToReport: async (id, testData) => {
+    const response = await API.patch(`/patient-tests/${id}/add-test`, testData);
+    return response.data;
+  },
 };
 
 export default reportService;
