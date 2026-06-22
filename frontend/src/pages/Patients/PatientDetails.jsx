@@ -105,7 +105,7 @@ export const PatientDetails = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[500px]">
+      <div className="flex items-center justify-center min-h-125">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-cream-border border-t-electric-cobalt"></div>
       </div>
     );
@@ -156,7 +156,8 @@ export const PatientDetails = () => {
                   Edit Profile
                 </Link>
                 <Link
-                  to={`/reports/create/${patient._id}`}
+                  to={`/reports/update/${patient._id}`}
+                  state={{ patientId: patient._id, assignedTests: patient.tests || [] }}
                   className="bg-electric-cobalt text-paper-white font-medium py-2.5 px-6 rounded-buttons hover:bg-opacity-95 transition duration-200 text-sm inline-flex items-center space-x-2 text-center"
                 >
                   <Plus className="h-4 w-4" />
@@ -257,13 +258,15 @@ export const PatientDetails = () => {
                           </span>
                         </div>
                       </div>
-                      <button
-                        onClick={() => handlePrintReport(report)}
-                        className="text-xs font-semibold text-electric-cobalt hover:underline flex items-center space-x-1"
-                      >
-                        <span>Print Report</span>
-                        <Printer className="h-3 w-3" />
-                      </button>
+                      <div className="flex items-center space-x-3">
+                        <button
+                          onClick={() => handlePrintReport(report)}
+                          className="text-xs font-semibold text-electric-cobalt hover:underline flex items-center space-x-1"
+                        >
+                          <span>Print Report</span>
+                          <Printer className="h-3 w-3" />
+                        </button>
+                      </div>
                     </div>
 
                     {/* Tests List */}
