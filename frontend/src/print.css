@@ -1,0 +1,51 @@
+/* Print Rules for Reports */
+@page {
+    size: A4;
+    margin: 0; /* Removing page margins prevents browsers from rendering URL/Date headers and footers */
+}
+
+@media print {
+    html,
+    body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        background-color: white !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    .report-page {
+        min-height: 100%;
+        display: flex;
+        flex-direction: column;
+        padding: 20mm; /* Re-introduce safe print margins inside the container */
+        box-sizing: border-box;
+    }
+
+    .report-content {
+        flex: 1;
+    }
+
+    .report-footer {
+        margin-top: auto;
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+
+    tr {
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+
+    /* 
+       FUTURE PDF SUPPORT NOTE
+       For server-side PDF generation (Puppeteer/Playwright):
+       Use the following launch arguments to ensure identical output:
+       {
+           printBackground: true,
+           displayHeaderFooter: false, // Ensures completely headless output
+           margin: { top: 0, bottom: 0, left: 0, right: 0 }
+       }
+    */
+}

@@ -4,8 +4,10 @@ import { useAuth } from "../../hooks/useAuth";
 import { patientService } from "../../services/patientService";
 import { reportService } from "../../services/reportService";
 import { testService } from "../../services/testService";
+import { handlePrint } from "../../utils/printUtils";
 import { ArrowLeft, ShieldAlert, Plus, FileText, ChevronRight, Edit, X, Printer } from "lucide-react";
-import { PrintableReport } from "../../components/report/PrintableReport";
+import { ReportLayout } from "../../components/report/ReportLayout";
+import { PrintWarningModal } from "../../components/report/PrintWarningModal";
 
 export const PatientDetails = () => {
   const { id } = useParams();
@@ -14,10 +16,10 @@ export const PatientDetails = () => {
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
-  const [editingTest, setEditingTest] = useState(null);
-  const [editModalOpen, setEditModalOpen] = useState(false);
   const [testParameters, setTestParameters] = useState([]);
   const [reportToPrint, setReportToPrint] = useState(null);
+  const [showWarningModal, setShowWarningModal] = useState(false);
+  const [selectedReportForPrint, setSelectedReportForPrint] = useState(null);
   const [addTestModalOpen, setAddTestModalOpen] = useState(false);
   const [selectedReportForAdd, setSelectedReportForAdd] = useState(null);
   const [availableTests, setAvailableTests] = useState([]);
@@ -32,11 +34,24 @@ export const PatientDetails = () => {
     return () => window.removeEventListener('afterprint', handleAfterPrint);
   }, []);
 
-  const handlePrintReport = (report) => {
-    setReportToPrint(report);
-    setTimeout(() => {
-      window.print();
-    }, 100);
+  const triggerPrintRequest = (report) => {
+    const hideWarning = localStorage.getItem('hidePrintWarning');
+    if (hideWarning === 'true') {
+      executePrint(report);
+    } else {
+      setSelectedReportForPrint(report);
+      setShowWarningModal(true);
+    }
+  };
+
+  const executePrint = (report) => {
+    setShowWarningModal(false);
+    setSelectedReportForPrint(null);
+    
+    handlePrint(
+      () => setReportToPrint(report),
+      null
+    );
   };
 
   const openAddTestModal = async (report) => {
@@ -308,7 +323,7 @@ export const PatientDetails = () => {
                           <span>Add Test</span>
                         </button>
                         <button
-                          onClick={() => handlePrintReport(report)}
+                          onClick={() => triggerPrintRequest(report)}
                           className="text-xs font-semibold text-electric-cobalt hover:underline flex items-center space-x-1"
                         >
                           <span>Print Report</span>
@@ -520,9 +535,20 @@ export const PatientDetails = () => {
       </div>
     )}
 
+    {/* Print Warning Modal */}
+    {showWarningModal && selectedReportForPrint && (
+      <PrintWarningModal 
+        onContinue={() => executePrint(selectedReportForPrint)}
+        onCancel={() => {
+          setShowWarningModal(false);
+          setSelectedReportForPrint(null);
+        }}
+      />
+    )}
+
     {reportToPrint && (
       <div className="hidden print:block fixed inset-0 bg-white z-50 overflow-visible">
-        <PrintableReport patient={patient} report={reportToPrint} />
+        <ReportLayout patient={patient} report={reportToPrint} />
       </div>
     )}
     </>
