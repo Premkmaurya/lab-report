@@ -16,6 +16,8 @@ export const PatientDetails = () => {
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
+  const [editingTest, setEditingTest] = useState(null);
+  const [editModalOpen, setEditModalOpen] = useState(false);
   const [testParameters, setTestParameters] = useState([]);
   const [reportToPrint, setReportToPrint] = useState(null);
   const [showWarningModal, setShowWarningModal] = useState(false);

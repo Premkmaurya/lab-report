@@ -7,32 +7,24 @@ export const PatientInfo = ({ patient, report }) => {
     <div className="border border-slate-300 p-4 mb-6 text-[13px] text-slate-900 bg-white">
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-1">
-          <div className="grid grid-cols-[100px_auto] gap-2">
+          <div className="grid grid-cols-[80px_auto] gap-1">
             <span className="text-[11px] text-slate-500 font-medium">Name:</span>
             <span className="font-semibold">{patient.name}</span>
           </div>
-          <div className="grid grid-cols-[100px_auto] gap-2">
+          <div className="grid grid-cols-[80px_auto] gap-1">
             <span className="text-[11px] text-slate-500 font-medium">Age/Gender:</span>
             <span className="font-semibold capitalize">{patient.age} Years / {patient.gender}</span>
-          </div>
-          <div className="grid grid-cols-[100px_auto] gap-2">
-            <span className="text-[11px] text-slate-500 font-medium">Patient ID:</span>
-            <span className="font-semibold">LAB-{patient._id.substring(18).toUpperCase()}</span>
           </div>
         </div>
         
         <div className="space-y-1">
-          <div className="grid grid-cols-[100px_auto] gap-2">
+          <div className="grid grid-cols-[80px_auto] gap-1">
             <span className="text-[11px] text-slate-500 font-medium">Report Date:</span>
             <span className="font-semibold">{reportDate}</span>
           </div>
-          <div className="grid grid-cols-[100px_auto] gap-2">
-            <span className="text-[11px] text-slate-500 font-medium">Collected On:</span>
-            <span className="font-semibold">{reportDate}</span>
-          </div>
-          <div className="grid grid-cols-[100px_auto] gap-2">
+          <div className="grid grid-cols-[80px_auto] gap-1">
             <span className="text-[11px] text-slate-500 font-medium">Ref. Doctor:</span>
-            <span className="font-semibold">Dr. {patient.referredDoctor}</span>
+            <span className="font-semibold">{patient.referredDoctor}</span>
           </div>
         </div>
       </div>
