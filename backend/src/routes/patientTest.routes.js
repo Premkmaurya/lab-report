@@ -7,6 +7,7 @@ const {
   updatePatientTest,
   deletePatientTest,
   addTestToReport,
+  getReportAndTestTemplate,
 } = require("../controllers/patientTest.controller");
 const authMiddleware = require("../middlewares/auth.middleware");
 const {
@@ -16,6 +17,7 @@ const {
   validateGetTestsByPatientId,
   validateDeletePatientTest,
   validateAddTestToReport,
+  validateGetReportAndTestTemplate,
 } = require("../validators/patientTest.validator");
 const validateRequest = require("../validators/validationMiddleware");
 
@@ -41,6 +43,14 @@ router.get(
   validateGetPatientTestById,
   validateRequest,
   getPatientTestById,
+);
+
+// Get patient test and specific test template
+router.get(
+  "/:id/test/:testId",
+  validateGetReportAndTestTemplate,
+  validateRequest,
+  getReportAndTestTemplate,
 );
 
 // Create patient test

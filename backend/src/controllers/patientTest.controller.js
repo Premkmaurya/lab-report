@@ -1,4 +1,45 @@
 const PatientTest = require("../models/patientTest.model");
+const Test = require("../models/test.model");
+
+const getReportAndTestTemplate = async (req, res) => {
+  try {
+    const { id, testId } = req.params;
+
+    const patientTest = await PatientTest.findById(id)
+      .populate("patientId", "name age")
+      .populate("createdBy", "username email");
+
+    if (!patientTest) {
+      return res.status(404).json({ message: "Patient test not found" });
+    }
+
+    let testTemplate = await Test.findById(testId);
+    if (!testTemplate) {
+      // Fallback: If the test was deleted and recreated, the ID may be stale.
+      // Lookup the template by the testName stored in the patient's report.
+      const reportTest = patientTest.tests.find(
+        (t) => t.testId.toString() === testId
+      );
+      if (reportTest && reportTest.testName) {
+        testTemplate = await Test.findOne({ name: reportTest.testName });
+      }
+    }
+
+    if (!testTemplate) {
+      return res.status(404).json({ message: "Test template not found" });
+    }
+
+    res.status(200).json({
+      success: true,
+      patientTest,
+      testTemplate,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message || "Failed to fetch report and test template",
+    });
+  }
+};
 
 const getPatientTests = async (req, res) => {
   try {
@@ -201,4 +242,5 @@ module.exports = {
   updatePatientTest,
   deletePatientTest,
   addTestToReport,
+  getReportAndTestTemplate,
 };

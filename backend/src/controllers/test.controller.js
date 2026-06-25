@@ -38,7 +38,9 @@ const getTestById = async (req, res) => {
 
 const createTest = async (req, res) => {
   try {
-    const { name, price } = req.body;
+    const { name, price, subTests } = req.body;
+
+    console.log("SUBTESTS ARE ", name, price, subTests);
 
     if (!name || price === undefined) {
       return res.status(400).json({
@@ -49,6 +51,7 @@ const createTest = async (req, res) => {
     const test = await Test.create({
       name,
       price,
+      subTests,
     });
 
     res.status(201).json({
@@ -64,7 +67,7 @@ const createTest = async (req, res) => {
 
 const updateTest = async (req, res) => {
   try {
-    const allowedFields = ["name", "price"];
+    const allowedFields = ["name", "price", "subTests"];
     const updates = {};
 
     for (const field of allowedFields) {

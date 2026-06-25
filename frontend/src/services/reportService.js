@@ -16,6 +16,11 @@ export const reportService = {
     return response.data;
   },
 
+  getReportAndTestTemplate: async (reportId, testId) => {
+    const response = await API.get(`/patient-tests/${reportId}/test/${testId}`);
+    return response.data;
+  },
+
   createReport: async (reportData) => {
     const response = await API.post("/patient-tests", reportData);
     return response.data;

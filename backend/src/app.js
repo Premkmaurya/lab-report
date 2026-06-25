@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
 const authRoutes = require('./routes/auth.routes');
 const doctorRoutes = require('./routes/doctor.routes');
@@ -15,6 +16,7 @@ app.use(cors({
     origin: ['http://localhost:5173','https://lab-report-theta.vercel.app'],
     credentials: true,
 }));
+app.use(morgan('dev'));
 
 
 

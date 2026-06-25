@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "https://lab-report-779w.onrender.com/api",
+  baseURL: "http://localhost:3000/api",
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",

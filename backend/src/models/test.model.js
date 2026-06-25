@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const testSchema = new mongoose.Schema(
+const subTestSchema = new mongoose.Schema(
   {
     name: {
       type: String,
@@ -10,8 +10,30 @@ const testSchema = new mongoose.Schema(
     price: {
       type: Number,
       required: true,
-      min: 0,
     },
+    normalRange: {
+      type: String,
+      required: true,
+    },
+    unit: {
+      type: String,
+      required: true,
+    },
+  },
+  {
+    timestamps: true,
+    id: false,
+  },
+);
+
+const testSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    subTests: [subTestSchema],
     createdAt: {
       type: Date,
       default: Date.now,

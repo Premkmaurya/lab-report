@@ -166,6 +166,20 @@ const validateAddTestToReport = [
     .withMessage("Test name must be between 1 and 100 characters"),
 ];
 
+/**
+ * Get Report and Test Template Validator
+ * Validates: id, testId (MongoDB ObjectIds)
+ */
+const validateGetReportAndTestTemplate = [
+  param("id")
+    .isMongoId()
+    .withMessage("Invalid patient test ID format"),
+  
+  param("testId")
+    .isMongoId()
+    .withMessage("Invalid test ID format"),
+];
+
 module.exports = {
   validateCreatePatientTest,
   validateUpdatePatientTest,
@@ -173,4 +187,5 @@ module.exports = {
   validateGetTestsByPatientId,
   validateDeletePatientTest,
   validateAddTestToReport,
+  validateGetReportAndTestTemplate,
 };

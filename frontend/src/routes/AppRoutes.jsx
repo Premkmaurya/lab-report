@@ -36,6 +36,7 @@ import { EditTest } from "../pages/Tests/EditTest";
 
 // Reports
 import { CreateReport } from "../pages/Reports/CreateReport";
+import { EditTestResult } from "../pages/Reports/EditTestResult";
 
 // Settings
 import { Settings } from "../pages/Settings";
@@ -64,6 +65,7 @@ export const AppRoutes = () => {
           <Route path="/patients/:id" element={<PatientDetails />} />
           <Route path="/patients/edit/:id" element={<EditPatient />} />
           <Route path="/reports/create/:id" element={<CreateReport />} />
+          <Route path="/reports/:reportId/edit-test/:testId" element={<EditTestResult />} />
 
           <Route path="/tests" element={<TestList />} />
           {/* Admin Only Views */}
@@ -77,6 +79,7 @@ export const AppRoutes = () => {
             <Route path="/doctors/edit/:id" element={<EditDoctor />} />
 
             <Route path="/tests/create" element={<CreateTest />} />
+            <Route path="/tests/edit" element={<EditTest />} />
             <Route path="/tests/edit/:id" element={<EditTest />} />
 
             <Route path="/settings" element={<Settings />} />

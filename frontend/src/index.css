@@ -36,21 +36,23 @@ body {
   background: var(--color-smoke);
 }
 
-/* Base custom input reset for consistent editorial borders */
-input, select, textarea {
-  border: 1px solid var(--color-cream-border);
-  background-color: var(--color-paper-white);
-  border-radius: var(--radius-inputs);
-  padding: 12px 16px;
-  color: var(--color-charcoal);
-  font-family: var(--font-inter);
-  outline: none;
-  transition: all 0.2s ease-in-out;
-}
+@layer base {
+  /* Base custom input reset for consistent editorial borders */
+  input, select, textarea {
+    border: 1px solid var(--color-cream-border);
+    background-color: var(--color-paper-white);
+    border-radius: var(--radius-inputs);
+    padding: 12px 16px;
+    color: var(--color-charcoal);
+    font-family: var(--font-inter);
+    outline: none;
+    transition: all 0.2s ease-in-out;
+  }
 
-input:focus, select:focus, textarea:focus {
-  border-color: var(--color-electric-cobalt);
-  box-shadow: 0 0 0 2px var(--color-lavender-mist);
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--color-electric-cobalt);
+    box-shadow: 0 0 0 2px var(--color-lavender-mist);
+  }
 }
 
 button {
