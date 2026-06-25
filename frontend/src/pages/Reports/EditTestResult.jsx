@@ -184,7 +184,7 @@ export const EditTestResult = () => {
                         <input
                           type="text"
                           placeholder="Enter value"
-                          className="w-full md:w-32 bg-white border border-electric-cobalt focus:border-ink-navy focus:ring-1 focus:ring-ink-navy rounded-inputs px-3 py-2 text-sm font-medium text-charcoal transition-colors"
+                          className="w-full min-w-[160px] md:w-64 bg-white border border-electric-cobalt focus:border-ink-navy focus:ring-1 focus:ring-ink-navy rounded-inputs px-3 py-2 text-sm font-medium text-charcoal transition-colors"
                           {...register(`results.${index}.value`)}
                           autoComplete="off"
                         />
