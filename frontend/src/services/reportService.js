@@ -1,8 +1,8 @@
 import API from "./api";
 
 export const reportService = {
-  getAllReports: async () => {
-    const response = await API.get("/patient-tests");
+  getAllReports: async (params = {}) => {
+    const response = await API.get("/patient-tests", { params });
     return response.data;
   },
 

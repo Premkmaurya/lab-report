@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { reportService } from "../../services/reportService";
@@ -15,6 +15,10 @@ export const EditTestResult = () => {
   const [report, setReport] = useState(null);
   const [testTemplate, setTestTemplate] = useState(null);
   const [saving, setSaving] = useState(false);
+
+  // Keyboard Navigation Refs
+  const inputRefs = useRef([]);
+  const saveButtonRef = useRef(null);
 
   const { register, handleSubmit, control, reset } = useForm({
     defaultValues: {
@@ -94,6 +98,29 @@ export const EditTestResult = () => {
     } catch (err) {
       setErrorMsg(err.response?.data?.message || "Failed to save test results.");
       setSaving(false);
+    }
+  };
+
+  const handleKeyDown = (e, index) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      if (index < fields.length - 1) {
+        inputRefs.current[index + 1]?.focus();
+      } else {
+        saveButtonRef.current?.focus();
+      }
+    } else if (e.key === "ArrowDown") {
+      e.preventDefault();
+      if (index < fields.length - 1) {
+        inputRefs.current[index + 1]?.focus();
+      } else {
+        saveButtonRef.current?.focus();
+      }
+    } else if ((e.key === "Enter" && e.shiftKey) || e.key === "ArrowUp") {
+      e.preventDefault();
+      if (index > 0) {
+        inputRefs.current[index - 1]?.focus();
+      }
     }
   };
 
@@ -181,13 +208,23 @@ export const EditTestResult = () => {
 
                       {/* Editable Result */}
                       <td className="py-4 px-4 align-middle">
-                        <input
-                          type="text"
-                          placeholder="Enter value"
-                          className="w-full min-w-[160px] md:w-64 bg-white border border-electric-cobalt focus:border-ink-navy focus:ring-1 focus:ring-ink-navy rounded-inputs px-3 py-2 text-sm font-medium text-charcoal transition-colors"
-                          {...register(`results.${index}.value`)}
-                          autoComplete="off"
-                        />
+                        {(() => {
+                          const { ref, ...rest } = register(`results.${index}.value`);
+                          return (
+                            <input
+                              type="text"
+                              placeholder="Enter value"
+                              className="w-full min-w-[160px] md:w-64 bg-white border border-electric-cobalt focus:border-ink-navy focus:ring-1 focus:ring-ink-navy rounded-inputs px-3 py-2 text-sm font-medium text-charcoal transition-colors"
+                              {...rest}
+                              ref={(e) => {
+                                ref(e);
+                                inputRefs.current[index] = e;
+                              }}
+                              onKeyDown={(e) => handleKeyDown(e, index)}
+                              autoComplete="off"
+                            />
+                          );
+                        })()}
                       </td>
 
                       {/* Read-only Unit */}
@@ -234,6 +271,7 @@ export const EditTestResult = () => {
               </Link>
               <button
                 type="submit"
+                ref={saveButtonRef}
                 disabled={saving}
                 className="bg-electric-cobalt text-paper-white font-medium py-2.5 px-8 rounded-buttons hover:bg-opacity-95 transition duration-200 text-sm flex items-center space-x-2 disabled:opacity-70"
               >

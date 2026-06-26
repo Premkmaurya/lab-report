@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { patientService } from "../../services/patientService";
 import { reportService } from "../../services/reportService";
@@ -24,6 +24,7 @@ export const PatientDetails = () => {
   const [availableTests, setAvailableTests] = useState([]);
   const [selectedTestIdToAdd, setSelectedTestIdToAdd] = useState("");
   const [isAddingTest, setIsAddingTest] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleAfterPrint = () => {
@@ -60,8 +61,8 @@ export const PatientDetails = () => {
     
     try {
       const testsData = await testService.getAllTests();
-      const existingTestIds = report.tests.map(t => t.testId.toString());
-      const filtered = testsData.tests.filter(t => !existingTestIds.includes(t._id.toString()));
+      const existingTestIds = report.tests.map(t => t.testId?.toString() || "");
+      const filtered = testsData.tests.filter(t => !existingTestIds.includes(t._id?.toString()));
       setAvailableTests(filtered);
     } catch (err) {
       console.error("Failed to fetch available tests", err);
@@ -85,10 +86,15 @@ export const PatientDetails = () => {
         testName: selectedTest.name
       });
       
+      const updatedReport = res.patientTest;
+
       setReports(reports.map(r => 
-        r._id === selectedReportForAdd._id ? res.patientTest : r
+        r._id === selectedReportForAdd._id ? updatedReport : r
       ));
-      closeAddTestModal();
+      
+      setSelectedReportForAdd(updatedReport);
+      setAvailableTests(current => current.filter(t => t._id !== selectedTest._id));
+      setSelectedTestIdToAdd("");
     } catch (err) {
       console.error("Failed to add test", err);
     } finally {
@@ -293,8 +299,11 @@ export const PatientDetails = () => {
                       {report.tests && report.tests.length > 0 ? (
                         report.tests.map((test, idx) => (
                           <div
+                            onClick={()=>{
+                              navigate(`/reports/${report._id}/edit-test/${test.testId}`);
+                            }}
                             key={idx}
-                            className="flex items-center justify-between px-4 py-3 bg-warm-canvas rounded-lg hover:bg-opacity-80 transition-colors"
+                            className="flex cursor-pointer items-center justify-between px-4 py-3 bg-warm-canvas hover:bg-gray-300 transition-colors"
                           >
                             <span className="text-sm font-medium text-charcoal">
                               {test.testName}
@@ -341,7 +350,7 @@ export const PatientDetails = () => {
               Available Tests
             </label>
             {availableTests.length === 0 ? (
-              <p className="text-sm text-stone italic">No additional tests available to add.</p>
+              <p className="text-sm text-stone italic">All available laboratory tests have already been added to this report.</p>
             ) : (
               <select
                 className="w-full border border-cream-border rounded-inputs px-3 py-2 text-sm focus:outline-none"
@@ -361,7 +370,7 @@ export const PatientDetails = () => {
             </button>
             <button 
               onClick={handleAddTest} 
-              disabled={!selectedTestIdToAdd || isAddingTest}
+              disabled={!selectedTestIdToAdd || isAddingTest || availableTests.length === 0}
               className="bg-electric-cobalt text-paper-white font-medium py-2 px-4 rounded-buttons text-sm disabled:opacity-50"
             >
               {isAddingTest ? "Adding..." : "Add Test"}

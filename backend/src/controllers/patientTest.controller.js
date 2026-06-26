@@ -41,10 +41,62 @@ const getReportAndTestTemplate = async (req, res) => {
   }
 };
 
+const getRange = (period, timezoneOffsetMinutes = 0, customStart = null, customEnd = null) => {
+  const tzOffset = parseInt(timezoneOffsetMinutes, 10) || 0;
+
+  const now = new Date();
+  const clientLocalTime = new Date(now.getTime() - tzOffset * 60 * 1000);
+
+  let start = new Date(clientLocalTime);
+  let end = new Date(clientLocalTime);
+  end.setUTCHours(23, 59, 59, 999);
+
+  if (period === "today") {
+    start.setUTCHours(0, 0, 0, 0);
+  } else if (period === "yesterday") {
+    start.setUTCDate(start.getUTCDate() - 1);
+    start.setUTCHours(0, 0, 0, 0);
+    end.setUTCDate(end.getUTCDate() - 1);
+    end.setUTCHours(23, 59, 59, 999);
+  } else if (period === "week") {
+    const day = start.getUTCDay();
+    const diff = start.getUTCDate() - day; // get Sunday
+    start.setUTCDate(diff);
+    start.setUTCHours(0, 0, 0, 0);
+  } else if (period === "month") {
+    start.setUTCDate(1);
+    start.setUTCHours(0, 0, 0, 0);
+  } else if (period === "custom" && customStart && customEnd) {
+    // Treat custom start/end as local dates parsed in UTC
+    start = new Date(customStart);
+    start.setUTCHours(0, 0, 0, 0);
+    end = new Date(customEnd);
+    end.setUTCHours(23, 59, 59, 999);
+  } else {
+    // Default to today
+    start.setUTCHours(0, 0, 0, 0);
+  }
+
+  // Convert back to UTC to query the database
+  const utcStart = new Date(start.getTime() + tzOffset * 60 * 1000);
+  const utcEnd = new Date(end.getTime() + tzOffset * 60 * 1000);
+
+  return { start: utcStart, end: utcEnd };
+};
+
 const getPatientTests = async (req, res) => {
   try {
-    const patientTests = await PatientTest.find()
-      .populate("patientId", "name age")
+    const { date, startDate, endDate, timezoneOffset } = req.query;
+    let query = {};
+    
+    // Only apply date filtering if explicitly requested or if it's the default workflow
+    if (date) {
+      const { start, end } = getRange(date, timezoneOffset, startDate, endDate);
+      query.createdAt = { $gte: start, $lte: end };
+    }
+
+    const patientTests = await PatientTest.find(query)
+      .populate("patientId", "name age gender referredDoctor")
       .populate("createdBy", "username email")
       .sort({ createdAt: -1 });
 
