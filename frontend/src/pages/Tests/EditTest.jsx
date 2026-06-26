@@ -41,6 +41,8 @@ export const EditTest = () => {
   const testName = watch("name");
   const watchSubTests = watch("subTests");
 
+  const inputRefs = useRef({});
+
   const isEmptyRow = (st) => {
     if (!st) return true;
     return !st.name && !st.unit && !st.normalRange && (st.price === "" || st.price === null || st.price === undefined);
@@ -51,21 +53,90 @@ export const EditTest = () => {
     return !!st.name && !!st.unit && !!st.normalRange && st.price !== "" && st.price !== null && st.price !== undefined;
   };
 
-  const watchSubTestsStr = JSON.stringify(watchSubTests);
-
-  useEffect(() => {
-    if (step === 2 && !loading) {
-      const currentSubTests = watchSubTestsStr ? JSON.parse(watchSubTestsStr) : [];
-      if (currentSubTests.length > 0) {
-        const lastItem = currentSubTests[currentSubTests.length - 1];
-        if (isRowComplete(lastItem)) {
-          append({ name: "", price: "", unit: "", normalRange: "" });
+  const handleKeyDown = (e, index, fieldName) => {
+    const fieldsOrder = ["name", "price", "unit", "normalRange"];
+    const fieldIndex = fieldsOrder.indexOf(fieldName);
+    
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (e.shiftKey) {
+        if (fieldIndex > 0) {
+          inputRefs.current[index]?.[fieldsOrder[fieldIndex - 1]]?.focus();
+        } else if (index > 0) {
+          inputRefs.current[index - 1]?.[fieldsOrder[fieldsOrder.length - 1]]?.focus();
         }
       } else {
-        append({ name: "", price: "", unit: "", normalRange: "" });
+        if (fieldIndex < fieldsOrder.length - 1) {
+          inputRefs.current[index]?.[fieldsOrder[fieldIndex + 1]]?.focus();
+        } else {
+          const currentValues = watch("subTests");
+          if (index === fields.length - 1 && isRowComplete(currentValues[index])) {
+            append({ name: "", price: "", unit: "", normalRange: "" });
+            setTimeout(() => {
+              inputRefs.current[index + 1]?.name?.focus();
+            }, 0);
+          } else if (index < fields.length - 1) {
+            inputRefs.current[index + 1]?.name?.focus();
+          }
+        }
+      }
+    } else if (e.key === "ArrowDown") {
+      e.preventDefault();
+      if (index < fields.length - 1) {
+        inputRefs.current[index + 1]?.[fieldName]?.focus();
+      }
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      if (index > 0) {
+        inputRefs.current[index - 1]?.[fieldName]?.focus();
+      }
+    } else if (e.key === "ArrowRight") {
+      let isAtEnd = false;
+      try {
+        if (typeof e.target.selectionStart === "number") {
+          isAtEnd = e.target.selectionStart === e.target.value.length;
+        }
+      } catch (err) {
+        isAtEnd = true;
+      }
+      if (isAtEnd) {
+        e.preventDefault();
+        if (fieldIndex < fieldsOrder.length - 1) {
+          inputRefs.current[index]?.[fieldsOrder[fieldIndex + 1]]?.focus();
+        } else if (index < fields.length - 1) {
+          inputRefs.current[index + 1]?.[fieldsOrder[0]]?.focus();
+        }
+      }
+    } else if (e.key === "ArrowLeft") {
+      let isAtStart = false;
+      try {
+        if (typeof e.target.selectionStart === "number") {
+          isAtStart = e.target.selectionStart === 0;
+        }
+      } catch (err) {
+        isAtStart = true;
+      }
+      if (isAtStart) {
+        e.preventDefault();
+        if (fieldIndex > 0) {
+          inputRefs.current[index]?.[fieldsOrder[fieldIndex - 1]]?.focus();
+        } else if (index > 0) {
+          inputRefs.current[index - 1]?.[fieldsOrder[fieldsOrder.length - 1]]?.focus();
+        }
       }
     }
-  }, [watchSubTestsStr, append, step, loading]);
+  };
+
+  const handleBlur = (index, fieldName) => {
+    if (index === fields.length - 1 && fieldName === "normalRange") {
+      setTimeout(() => {
+        const currentValues = watch("subTests");
+        if (isRowComplete(currentValues[index])) {
+          append({ name: "", price: "", unit: "", normalRange: "" });
+        }
+      }, 100);
+    }
+  };
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -348,7 +419,9 @@ export const EditTest = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-cream-border">
-                    {fields.map((item, index) => (
+                    {fields.map((item, index) => {
+                      if (!inputRefs.current[index]) inputRefs.current[index] = {};
+                      return (
                       <tr key={item.id} className="bg-paper-white">
                         <td className="px-4 py-3 align-top">
                           <input
@@ -358,6 +431,11 @@ export const EditTest = () => {
                             {...register(`subTests.${index}.name`, { 
                               validate: (val, formValues) => isEmptyRow(formValues.subTests[index]) ? true : (!!val || "Required")
                             })}
+                            onKeyDown={(e) => handleKeyDown(e, index, "name")}
+                            ref={(el) => {
+                              register(`subTests.${index}.name`).ref(el);
+                              inputRefs.current[index].name = el;
+                            }}
                           />
                         </td>
                         <td className="px-4 py-3 align-top">
@@ -374,6 +452,11 @@ export const EditTest = () => {
                                 return true;
                               }
                             })}
+                            onKeyDown={(e) => handleKeyDown(e, index, "price")}
+                            ref={(el) => {
+                              register(`subTests.${index}.price`).ref(el);
+                              inputRefs.current[index].price = el;
+                            }}
                           />
                         </td>
                         <td className="px-4 py-3 align-top">
@@ -384,6 +467,11 @@ export const EditTest = () => {
                             {...register(`subTests.${index}.unit`, { 
                               validate: (val, formValues) => isEmptyRow(formValues.subTests[index]) ? true : (!!val || "Required")
                             })}
+                            onKeyDown={(e) => handleKeyDown(e, index, "unit")}
+                            ref={(el) => {
+                              register(`subTests.${index}.unit`).ref(el);
+                              inputRefs.current[index].unit = el;
+                            }}
                           />
                         </td>
                         <td className="px-4 py-3 align-top">
@@ -394,13 +482,25 @@ export const EditTest = () => {
                             {...register(`subTests.${index}.normalRange`, { 
                               validate: (val, formValues) => isEmptyRow(formValues.subTests[index]) ? true : (!!val || "Required")
                             })}
+                            onKeyDown={(e) => handleKeyDown(e, index, "normalRange")}
+                            onBlur={() => handleBlur(index, "normalRange")}
+                            ref={(el) => {
+                              register(`subTests.${index}.normalRange`).ref(el);
+                              inputRefs.current[index].normalRange = el;
+                            }}
                           />
                         </td>
                         <td className="px-4 py-3 align-top text-right">
                           {index !== fields.length - 1 && (
                             <button
                               type="button"
-                              onClick={() => remove(index)}
+                              onClick={() => {
+                                remove(index);
+                                const currentValues = watch("subTests");
+                                if (currentValues.length <= 1) {
+                                  append({ name: "", price: "", unit: "", normalRange: "" });
+                                }
+                              }}
                               className="text-red-600 hover:text-red-800 p-2 rounded-full hover:bg-red-50 transition-colors"
                               title="Delete Parameter"
                             >
@@ -409,7 +509,7 @@ export const EditTest = () => {
                           )}
                         </td>
                       </tr>
-                    ))}
+                    )})}
                   </tbody>
                 </table>
               </div>
