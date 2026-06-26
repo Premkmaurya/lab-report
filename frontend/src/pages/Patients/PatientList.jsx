@@ -166,9 +166,6 @@ export const PatientList = () => {
                   <th className="px-6 py-4 font-abcfavoritvariable text-xs font-bold text-graphite uppercase tracking-wider">
                     Report Date
                   </th>
-                  <th className="px-6 py-4 font-abcfavoritvariable text-xs font-bold text-graphite uppercase tracking-wider">
-                    Assigned Tests
-                  </th>
                   <th className="px-6 py-4 font-abcfavoritvariable text-xs font-bold text-graphite uppercase tracking-wider text-right">
                     Actions
                   </th>
@@ -177,7 +174,7 @@ export const PatientList = () => {
               <tbody className="divide-y divide-cream-border">
                 {filteredReports.length === 0 ? (
                   <tr>
-                    <td colSpan="5" className="px-6 py-16 text-center">
+                    <td colSpan="4" className="px-6 py-16 text-center">
                       <div className="flex flex-col items-center">
                         <div className="bg-warm-canvas p-4 rounded-full mb-3">
                           <FileText className="h-8 w-8 text-stone/50" />
@@ -208,19 +205,6 @@ export const PatientList = () => {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-stone font-mono">
                           {new Date(report.date || report.createdAt).toLocaleDateString()}
-                        </td>
-                        <td className="px-6 py-4 text-sm text-charcoal">
-                          {report.tests && report.tests.length > 0 ? (
-                            <div className="flex flex-wrap gap-1">
-                              {report.tests.map(t => (
-                                <span key={t.testId || t._id} className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-electric-cobalt/10 text-electric-cobalt border border-electric-cobalt/20 uppercase tracking-wide">
-                                  {t.testName}
-                                </span>
-                              ))}
-                            </div>
-                          ) : (
-                            <span className="text-stone italic text-xs">No tests assigned</span>
-                          )}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-right">
                           <div className="flex items-center justify-end space-x-2">

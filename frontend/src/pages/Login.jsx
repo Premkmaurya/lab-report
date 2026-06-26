@@ -17,6 +17,7 @@ export const Login = () => {
 
   const onSubmit = async (data) => {
     setIsSubmitting(true);
+    console.log(import.meta.env.VITE_BACKEND_URL)
     setLocalError("");
     try {
       await login(data.email, data.password);
