@@ -358,9 +358,22 @@ export const PatientDetails = () => {
                 onChange={(e) => setSelectedTestIdToAdd(e.target.value)}
               >
                 <option value="">-- Select a Test --</option>
-                {availableTests.map(t => (
-                  <option key={t._id} value={t._id}>{t.name}</option>
-                ))}
+                {(() => {
+                  const grouped = availableTests.reduce((acc, t) => {
+                    const dName = t.departmentId?.name || "General";
+                    if (!acc[dName]) acc[dName] = [];
+                    acc[dName].push(t);
+                    return acc;
+                  }, {});
+                  
+                  return Object.keys(grouped).sort().map(dept => (
+                    <optgroup key={dept} label={dept}>
+                      {grouped[dept].map(t => (
+                        <option key={t._id} value={t._id}>{t.name}</option>
+                      ))}
+                    </optgroup>
+                  ));
+                })()}
               </select>
             )}
           </div>

@@ -9,6 +9,10 @@ const validateCreateTest = [
     .trim()
     .isLength({ min: 1, max: 100 })
     .withMessage("Test name must be between 1 and 100 characters"),
+
+  body("departmentId")
+    .isMongoId()
+    .withMessage("Invalid department ID format"),
   
   body("price")
     .isFloat({ min: 0, max: 1000000 })
@@ -29,6 +33,11 @@ const validateUpdateTest = [
     .trim()
     .isLength({ min: 1, max: 100 })
     .withMessage("Test name must be between 1 and 100 characters"),
+  
+  body("departmentId")
+    .optional()
+    .isMongoId()
+    .withMessage("Invalid department ID format"),
   
   body("price")
     .optional()

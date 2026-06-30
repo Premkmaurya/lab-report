@@ -33,6 +33,11 @@ const testSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    departmentId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Department',
+      required: true,
+    },
     subTests: [subTestSchema],
     createdAt: {
       type: Date,

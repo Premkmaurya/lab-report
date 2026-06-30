@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Plus, Edit2, Search } from "lucide-react";
+import { Plus, Edit2, Search, ChevronDown, ChevronRight } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { testService } from "../../services/testService";
 
@@ -11,6 +11,14 @@ export const TestList = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [expandedDepts, setExpandedDepts] = useState({});
+
+  const toggleDept = (deptName) => {
+    setExpandedDepts(prev => ({
+      ...prev,
+      [deptName]: !prev[deptName]
+    }));
+  };
 
   useEffect(() => {
     if (isAdmin) {
@@ -32,9 +40,28 @@ export const TestList = () => {
     }
   };
 
-  const filteredTests = tests.filter((test) =>
-    test.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredTests = tests.filter((test) => {
+    const searchLower = searchQuery.toLowerCase();
+    const testMatch = test.name.toLowerCase().includes(searchLower);
+    const deptMatch = (test.departmentId?.name || "General").toLowerCase().includes(searchLower);
+    return testMatch || deptMatch;
+  });
+
+  const groupedTests = filteredTests.reduce((acc, test) => {
+    const deptName = test.departmentId?.name || "General";
+    if (!acc[deptName]) acc[deptName] = [];
+    acc[deptName].push(test);
+    return acc;
+  }, {});
+
+  // By default expand all if search is active, else expand all initially
+  useEffect(() => {
+    if (Object.keys(groupedTests).length > 0 && Object.keys(expandedDepts).length === 0) {
+      const initial = {};
+      Object.keys(groupedTests).forEach(k => initial[k] = true);
+      setExpandedDepts(initial);
+    }
+  }, [groupedTests, expandedDepts]);
 
   return (
     <div className="space-y-8 max-w-4xl mx-auto py-10">
@@ -120,22 +147,46 @@ export const TestList = () => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-cream-border">
-                      {filteredTests.map((test) => {
-                        const totalPrice = test.subTests?.reduce((sum, st) => sum + (st.price || 0), 0) || 0;
+                      {Object.keys(groupedTests).sort().map(deptName => {
+                        const deptTests = groupedTests[deptName];
+                        const isExpanded = expandedDepts[deptName] !== false; // default true
+                        
                         return (
-                          <tr key={test._id} className="hover:bg-warm-canvas/50 transition-colors group">
-                            <td className="px-6 py-4 text-sm font-medium text-charcoal">
-                              {test.name}
-                            </td>
-                            <td className="px-6 py-4 text-sm text-stone text-center">
-                              <span className="bg-cream-border/30 px-2 py-1 rounded text-xs">
-                                {test.subTests?.length || 0}
-                              </span>
-                            </td>
-                            <td className="px-6 py-4 text-sm text-charcoal font-medium text-right font-inter">
-                              ₹{totalPrice.toFixed(2)}
-                            </td>
-                          </tr>
+                          <React.Fragment key={deptName}>
+                            {/* Department Header Row */}
+                            <tr 
+                              className="bg-paper-white cursor-pointer hover:bg-warm-canvas/50 transition-colors"
+                              onClick={() => toggleDept(deptName)}
+                            >
+                              <td colSpan="3" className="px-6 py-3 border-t-4 border-t-cream-border/50">
+                                <div className="flex items-center space-x-2 text-charcoal font-semibold">
+                                  {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                                  <span>{deptName}</span>
+                                  <span className="text-xs text-stone font-normal ml-2">({deptTests.length} tests)</span>
+                                </div>
+                              </td>
+                            </tr>
+                            
+                            {/* Test Rows */}
+                            {isExpanded && deptTests.map(test => {
+                              const totalPrice = test.subTests?.reduce((sum, st) => sum + (st.price || 0), 0) || 0;
+                              return (
+                                <tr key={test._id} className="hover:bg-warm-canvas/50 transition-colors group bg-paper-white/50">
+                                  <td className="px-6 py-3 text-sm font-medium text-charcoal pl-12">
+                                    {test.name}
+                                  </td>
+                                  <td className="px-6 py-3 text-sm text-stone text-center">
+                                    <span className="bg-cream-border/30 px-2 py-1 rounded text-xs">
+                                      {test.subTests?.length || 0}
+                                    </span>
+                                  </td>
+                                  <td className="px-6 py-3 text-sm text-charcoal font-medium text-right font-inter">
+                                    ₹{totalPrice.toFixed(2)}
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </React.Fragment>
                         );
                       })}
                     </tbody>

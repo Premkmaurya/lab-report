@@ -2,7 +2,7 @@ const Test = require("../models/test.model");
 
 const getTests = async (req, res) => {
   try {
-    const tests = await Test.find().sort({ createdAt: -1 });
+    const tests = await Test.find().populate('departmentId').sort({ createdAt: -1 });
 
     res.status(200).json({
       success: true,
@@ -17,7 +17,7 @@ const getTests = async (req, res) => {
 
 const getTestById = async (req, res) => {
   try {
-    const test = await Test.findById(req.params.id);
+    const test = await Test.findById(req.params.id).populate('departmentId');
 
     if (!test) {
       return res.status(404).json({
@@ -38,18 +38,17 @@ const getTestById = async (req, res) => {
 
 const createTest = async (req, res) => {
   try {
-    const { name, price, subTests } = req.body;
+    const { name, departmentId, price, subTests } = req.body;
 
-    console.log("SUBTESTS ARE ", name, price, subTests);
-
-    if (!name || price === undefined) {
+    if (!name || price === undefined || !departmentId) {
       return res.status(400).json({
-        message: "Please provide name and price",
+        message: "Please provide name, departmentId, and price",
       });
     }
 
     const test = await Test.create({
       name,
+      departmentId,
       price,
       subTests,
     });
@@ -67,7 +66,7 @@ const createTest = async (req, res) => {
 
 const updateTest = async (req, res) => {
   try {
-    const allowedFields = ["name", "price", "subTests"];
+    const allowedFields = ["name", "price", "subTests", "departmentId"];
     const updates = {};
 
     for (const field of allowedFields) {
@@ -86,7 +85,7 @@ const updateTest = async (req, res) => {
       new: true,
       returnDocument: "after",
       runValidators: true,
-    });
+    }).populate('departmentId');
 
     if (!test) {
       return res.status(404).json({

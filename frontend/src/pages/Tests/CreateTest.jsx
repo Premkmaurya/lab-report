@@ -1,7 +1,8 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { useNavigate, Link } from "react-router-dom";
 import { testService } from "../../services/testService";
+import { departmentService } from "../../services/departmentService";
 import { ArrowLeft, ShieldAlert, Trash2 } from "lucide-react";
 
 export const CreateTest = () => {
@@ -9,6 +10,11 @@ export const CreateTest = () => {
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  const [departments, setDepartments] = useState([]);
+  const [loadingDepts, setLoadingDepts] = useState(true);
+  const [isCreatingDept, setIsCreatingDept] = useState(false);
+  const [newDeptName, setNewDeptName] = useState("");
+  const [isSavingDept, setIsSavingDept] = useState(false);
 
   const {
     register,
@@ -16,13 +22,29 @@ export const CreateTest = () => {
     control,
     trigger,
     watch,
+    setValue,
     formState: { errors },
   } = useForm({
     defaultValues: {
+      departmentId: "",
       name: "",
       subTests: [{ name: "", price: "", unit: "", normalRange: "" }],
     },
   });
+
+  useEffect(() => {
+    const fetchDepts = async () => {
+      try {
+        const res = await departmentService.getAllDepartments();
+        setDepartments(res.departments || []);
+      } catch (err) {
+        setSubmitError("Failed to load departments.");
+      } finally {
+        setLoadingDepts(false);
+      }
+    };
+    fetchDepts();
+  }, []);
 
   const { fields, append, remove } = useFieldArray({
     control,
@@ -149,11 +171,32 @@ export const CreateTest = () => {
     }
   };
 
-  const handleNext = async () => {
-    const isStep1Valid = await trigger("name");
-    if (isStep1Valid) {
-      setStep(2);
+  const handleCreateDepartment = async () => {
+    if (!newDeptName.trim()) return;
+    setIsSavingDept(true);
+    setSubmitError("");
+    try {
+      const res = await departmentService.createDepartment({ name: newDeptName });
+      const newDept = res.department;
+      setDepartments(prev => [...prev, newDept].sort((a,b) => a.name.localeCompare(b.name)));
+      setValue("departmentId", newDept._id, { shouldValidate: true });
+      setIsCreatingDept(false);
+      setNewDeptName("");
+    } catch (err) {
+      setSubmitError(err.response?.data?.message || "Failed to create department");
+    } finally {
+      setIsSavingDept(false);
     }
+  };
+
+  const handleNextStep1 = async () => {
+    const isValid = await trigger("departmentId");
+    if (isValid) setStep(2);
+  };
+
+  const handleNextStep2 = async () => {
+    const isValid = await trigger("name");
+    if (isValid) setStep(3);
   };
 
   const onSubmit = async (data) => {
@@ -174,6 +217,7 @@ export const CreateTest = () => {
       );
 
       const payload = {
+        departmentId: data.departmentId,
         name: data.name,
         price: rootPrice,
         subTests: validSubTests.map((st) => ({
@@ -214,6 +258,10 @@ export const CreateTest = () => {
         <h1 className="font-martinaplantijn text-4xl text-ink-navy">
           {step === 1 ? (
             <>
+              Select <span className="italic font-light">Department</span>
+            </>
+          ) : step === 2 ? (
+            <>
               Create <span className="italic font-light">Laboratory Test</span>
             </>
           ) : (
@@ -224,6 +272,8 @@ export const CreateTest = () => {
         </h1>
         <p className="font-inter text-stone text-sm mt-1">
           {step === 1
+            ? "Choose a department to group this test under."
+            : step === 2
             ? "Add a test name to begin."
             : "Add test parameters, pricing, and configure reporting ranges."}
         </p>
@@ -238,8 +288,94 @@ export const CreateTest = () => {
 
       {/* Form Card */}
       <div className="bg-paper-white border border-cream-border rounded-cards p-6 md:p-8">
-        <form onSubmit={handleSubmit(handleNext)} className="space-y-6">
+        <form onSubmit={e => e.preventDefault()} className="space-y-6">
           {step === 1 && (
+            <div className="max-w-md space-y-5">
+              <div>
+                <label className="block text-xs font-bold text-charcoal uppercase tracking-wider mb-2 flex justify-between items-center">
+                  <span>Department</span>
+                  {!isCreatingDept && (
+                    <button 
+                      type="button" 
+                      onClick={() => setIsCreatingDept(true)}
+                      className="text-electric-cobalt text-xs font-semibold hover:underline"
+                    >
+                      + Create New
+                    </button>
+                  )}
+                </label>
+                
+                {isCreatingDept ? (
+                  <div className="flex space-x-2">
+                    <input
+                      type="text"
+                      placeholder="New department name..."
+                      className="w-full border border-cream-border rounded-inputs px-3 py-2 text-sm focus:outline-none focus:border-electric-cobalt"
+                      value={newDeptName}
+                      onChange={e => setNewDeptName(e.target.value)}
+                      disabled={isSavingDept}
+                      autoFocus
+                    />
+                    <button
+                      type="button"
+                      onClick={handleCreateDepartment}
+                      disabled={isSavingDept || !newDeptName.trim()}
+                      className="bg-electric-cobalt text-paper-white px-4 py-2 rounded-buttons text-sm font-medium disabled:opacity-50"
+                    >
+                      Save
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setIsCreatingDept(false); setNewDeptName(""); }}
+                      disabled={isSavingDept}
+                      className="bg-warm-canvas border border-cream-border text-charcoal px-4 py-2 rounded-buttons text-sm font-medium"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <select
+                      className={`w-full border border-cream-border rounded-inputs px-3 py-2 text-sm focus:outline-none ${errors.departmentId ? "border-red-500" : ""}`}
+                      {...register("departmentId", {
+                        required: "Please select a department",
+                      })}
+                      disabled={loadingDepts}
+                    >
+                      <option value="">-- Select a Department --</option>
+                      {departments.map((d) => (
+                        <option key={d._id} value={d._id}>
+                          {d.name}
+                        </option>
+                      ))}
+                    </select>
+                    {errors.departmentId && (
+                      <p className="text-xs text-red-500 mt-1">
+                        {errors.departmentId.message}
+                      </p>
+                    )}
+                  </>
+                )}
+              </div>
+
+              <div className="flex items-center space-x-3 pt-4">
+                <button
+                  type="button"
+                  onClick={handleNextStep1}
+                  className="bg-electric-cobalt text-paper-white font-medium py-2.5 px-6 rounded-buttons hover:bg-opacity-95 transition duration-200 text-sm cursor-pointer"
+                >
+                  Next
+                </button>
+                <Link
+                  to="/tests"
+                  className="bg-paper-white border border-cream-border text-graphite font-medium py-2.5 px-6 rounded-buttons hover:bg-warm-canvas transition duration-200 text-sm"
+                >
+                  Cancel
+                </Link>
+              </div>
+            </div>
+          )}
+          {step === 2 && (
             <div className="max-w-md space-y-5">
               <div>
                 <label className="block text-xs font-bold text-charcoal uppercase tracking-wider mb-2">
@@ -248,7 +384,7 @@ export const CreateTest = () => {
                 <input
                   type="text"
                   placeholder="e.g. Complete Blood Count (CBC)"
-                  className={`w-full ${errors.name ? "border-red-500" : ""}`}
+                  className={`w-full border border-cream-border rounded-inputs px-3 py-2 text-sm focus:outline-none ${errors.name ? "border-red-500" : ""}`}
                   {...register("name", {
                     required: "Test name is required",
                     maxLength: {
@@ -267,22 +403,23 @@ export const CreateTest = () => {
               <div className="flex items-center space-x-3 pt-4">
                 <button
                   type="button"
-                  onClick={handleNext}
+                  onClick={handleNextStep2}
                   className="bg-electric-cobalt text-paper-white font-medium py-2.5 px-6 rounded-buttons hover:bg-opacity-95 transition duration-200 text-sm cursor-pointer"
                 >
                   Next
                 </button>
-                <Link
-                  to="/tests"
-                  className="bg-paper-white border border-cream-border text-graphite font-medium py-2.5 px-6 rounded-buttons hover:bg-warm-canvas transition duration-200 text-sm"
+                <button
+                  type="button"
+                  onClick={() => setStep(1)}
+                  className="bg-paper-white border border-cream-border text-graphite font-medium py-2.5 px-6 rounded-buttons hover:bg-warm-canvas transition duration-200 text-sm cursor-pointer"
                 >
-                  Cancel
-                </Link>
+                  Back
+                </button>
               </div>
             </div>
           )}
         </form>
-        {step === 2 && (
+        {step === 3 && (
           <form onSubmit={handleSubmit(onSubmit)}>
             <div className="space-y-5">
               <div className="overflow-x-auto border border-cream-border rounded-lg">
@@ -441,7 +578,7 @@ export const CreateTest = () => {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setStep(1)}
+                  onClick={() => setStep(2)}
                   className="bg-paper-white border border-cream-border text-graphite font-medium py-2.5 px-6 rounded-buttons hover:bg-warm-canvas transition duration-200 text-sm"
                 >
                   Back

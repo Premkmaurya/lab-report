@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { testService } from "../../services/testService";
+import { departmentService } from "../../services/departmentService";
 import { ArrowLeft, ShieldAlert, Trash2, Search, ChevronDown } from "lucide-react";
 
 export const EditTest = () => {
@@ -17,6 +18,8 @@ export const EditTest = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTestId, setSelectedTestId] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [departments, setDepartments] = useState([]);
+  const [loadingDepts, setLoadingDepts] = useState(true);
   const dropdownRef = useRef(null);
 
   const {
@@ -28,6 +31,7 @@ export const EditTest = () => {
     formState: { errors },
   } = useForm({
     defaultValues: {
+      departmentId: "",
       name: "",
       subTests: []
     }
@@ -149,7 +153,6 @@ export const EditTest = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Fetch all tests for Step 1
   useEffect(() => {
     if (step === 1) {
       const fetchTests = async () => {
@@ -165,6 +168,20 @@ export const EditTest = () => {
       fetchTests();
     }
   }, [step]);
+
+  useEffect(() => {
+    const fetchDepts = async () => {
+      try {
+        const res = await departmentService.getAllDepartments();
+        setDepartments(res.departments || []);
+      } catch (err) {
+        setSubmitError("Failed to load departments.");
+      } finally {
+        setLoadingDepts(false);
+      }
+    };
+    fetchDepts();
+  }, []);
 
   // Fetch specific test details for Step 2
   useEffect(() => {
@@ -184,6 +201,7 @@ export const EditTest = () => {
           }
 
           reset({
+            departmentId: t.departmentId?._id || t.departmentId || "",
             name: t.name,
             subTests: tests
           });
@@ -222,6 +240,7 @@ export const EditTest = () => {
       const rootPrice = validSubTests.reduce((acc, curr) => acc + (parseFloat(curr.price) || 0), 0);
       
       const payload = {
+        departmentId: data.departmentId,
         name: data.name,
         price: rootPrice,
         subTests: validSubTests.map(st => ({
@@ -371,25 +390,52 @@ export const EditTest = () => {
 
         {step === 2 && (
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            <div>
-              <label className="block text-xs font-bold text-charcoal uppercase tracking-wider mb-2">
-                Test Name
-              </label>
-              <input
-                type="text"
-                placeholder="e.g. Complete Blood Count (CBC)"
-                className={`w-full max-w-md ${errors.name ? "border-red-500" : ""}`}
-                {...register("name", {
-                  required: "Test name is required",
-                  maxLength: {
-                    value: 100,
-                    message: "Test name cannot exceed 100 characters",
-                  },
-                })}
-              />
-              {errors.name && (
-                <p className="text-xs text-red-500 mt-1">{errors.name.message}</p>
-              )}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-xs font-bold text-charcoal uppercase tracking-wider mb-2">
+                  Department
+                </label>
+                <select
+                  className={`w-full border border-cream-border rounded-inputs px-3 py-2 text-sm focus:outline-none ${errors.departmentId ? "border-red-500" : ""}`}
+                  {...register("departmentId", {
+                    required: "Please select a department",
+                  })}
+                  disabled={loadingDepts}
+                >
+                  <option value="">-- Select a Department --</option>
+                  {departments.map((d) => (
+                    <option key={d._id} value={d._id}>
+                      {d.name}
+                    </option>
+                  ))}
+                </select>
+                {errors.departmentId && (
+                  <p className="text-xs text-red-500 mt-1">
+                    {errors.departmentId.message}
+                  </p>
+                )}
+              </div>
+              
+              <div>
+                <label className="block text-xs font-bold text-charcoal uppercase tracking-wider mb-2">
+                  Test Name
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Complete Blood Count (CBC)"
+                  className={`w-full ${errors.name ? "border-red-500" : ""}`}
+                  {...register("name", {
+                    required: "Test name is required",
+                    maxLength: {
+                      value: 100,
+                      message: "Test name cannot exceed 100 characters",
+                    },
+                  })}
+                />
+                {errors.name && (
+                  <p className="text-xs text-red-500 mt-1">{errors.name.message}</p>
+                )}
+              </div>
             </div>
             
             <div className="pt-4 border-t border-cream-border">
