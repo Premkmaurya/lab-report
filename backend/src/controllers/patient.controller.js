@@ -157,7 +157,7 @@ const getPatientsSummary = async (req, res) => {
     const { start, end } = getRange(period, timezoneOffset);
 
     const patients = await Patient.find({
-      createdAt: { $gte: start, $lte: end },
+      date: { $gte: start, $lte: end },
     })
       .populate("createdBy", "username email")
       .sort({ createdAt: -1 });
@@ -167,13 +167,13 @@ const getPatientsSummary = async (req, res) => {
     const monthRange = getRange("month", timezoneOffset);
 
     const todayCount = await Patient.countDocuments({
-      createdAt: { $gte: todayRange.start, $lte: todayRange.end },
+      date: { $gte: todayRange.start, $lte: todayRange.end },
     });
     const weekCount = await Patient.countDocuments({
-      createdAt: { $gte: weekRange.start, $lte: weekRange.end },
+      date: { $gte: weekRange.start, $lte: weekRange.end },
     });
     const monthCount = await Patient.countDocuments({
-      createdAt: { $gte: monthRange.start, $lte: monthRange.end },
+      date: { $gte: monthRange.start, $lte: monthRange.end },
     });
 
     res.status(200).json({
@@ -205,7 +205,7 @@ const exportPatientsSummary = async (req, res) => {
     const { start, end } = getRange(period, timezoneOffset);
 
     const patients = await Patient.find({
-      createdAt: { $gte: start, $lte: end },
+      date: { $gte: start, $lte: end },
     }).sort({ createdAt: -1 });
 
     const todayRange = getRange("today", timezoneOffset);
@@ -213,13 +213,13 @@ const exportPatientsSummary = async (req, res) => {
     const monthRange = getRange("month", timezoneOffset);
 
     const todayCount = await Patient.countDocuments({
-      createdAt: { $gte: todayRange.start, $lte: todayRange.end },
+      date: { $gte: todayRange.start, $lte: todayRange.end },
     });
     const weekCount = await Patient.countDocuments({
-      createdAt: { $gte: weekRange.start, $lte: weekRange.end },
+      date: { $gte: weekRange.start, $lte: weekRange.end },
     });
     const monthCount = await Patient.countDocuments({
-      createdAt: { $gte: monthRange.start, $lte: monthRange.end },
+      date: { $gte: monthRange.start, $lte: monthRange.end },
     });
 
     // Generate CSV data

@@ -18,7 +18,7 @@ const getReportAndTestTemplate = async (req, res) => {
       // Fallback: If the test was deleted and recreated, the ID may be stale.
       // Lookup the template by the testName stored in the patient's report.
       const reportTest = patientTest.tests.find(
-        (t) => t.testId.toString() === testId
+        (t) => t.testId.toString() === testId,
       );
       if (reportTest && reportTest.testName) {
         testTemplate = await Test.findOne({ name: reportTest.testName });
@@ -41,7 +41,12 @@ const getReportAndTestTemplate = async (req, res) => {
   }
 };
 
-const getRange = (period, timezoneOffsetMinutes = 0, customStart = null, customEnd = null) => {
+const getRange = (
+  period,
+  timezoneOffsetMinutes = 0,
+  customStart = null,
+  customEnd = null,
+) => {
   const tzOffset = parseInt(timezoneOffsetMinutes, 10) || 0;
 
   const now = new Date();
@@ -87,14 +92,20 @@ const getRange = (period, timezoneOffsetMinutes = 0, customStart = null, customE
 const getPatientTests = async (req, res) => {
   try {
     const { date, startDate, endDate, timezoneOffset } = req.query;
+    console.log("Received query parameters:", {
+      date,
+      startDate,
+      endDate,
+      timezoneOffset,
+    });
     let query = {};
-    
+
     // Only apply date filtering if explicitly requested or if it's the default workflow
     if (date) {
       const { start, end } = getRange(date, timezoneOffset, startDate, endDate);
       query.createdAt = { $gte: start, $lte: end };
     }
-
+    console.log("Constructed query:", query);
     const patientTests = await PatientTest.find(query)
       .populate("patientId", "name age gender referredDoctor")
       .populate("createdBy", "username email")
