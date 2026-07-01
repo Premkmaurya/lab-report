@@ -92,12 +92,6 @@ const getRange = (
 const getPatientTests = async (req, res) => {
   try {
     const { date, startDate, endDate, timezoneOffset } = req.query;
-    console.log("Received query parameters:", {
-      date,
-      startDate,
-      endDate,
-      timezoneOffset,
-    });
     let query = {};
 
     // Only apply date filtering if explicitly requested or if it's the default workflow
@@ -105,7 +99,6 @@ const getPatientTests = async (req, res) => {
       const { start, end } = getRange(date, timezoneOffset, startDate, endDate);
       query.createdAt = { $gte: start, $lte: end };
     }
-    console.log("Constructed query:", query);
     const patientTests = await PatientTest.find(query)
       .populate("patientId", "name age gender referredDoctor")
       .populate("createdBy", "username email")
@@ -151,6 +144,7 @@ const getTestsByPatientId = async (req, res) => {
       patientId: req.params.patientId,
     })
       .populate("patientId", "name age")
+      .populate("tests.testId", "name departmentId")
       .populate("createdBy", "username email")
       .sort({ createdAt: -1 });
 
@@ -167,7 +161,7 @@ const getTestsByPatientId = async (req, res) => {
 
 const createPatientTest = async (req, res) => {
   try {
-    const { patientId, tests, date } = req.body;
+    const { patientId, tests } = req.body;
 
     if (!patientId || !tests || tests.length === 0) {
       return res.status(400).json({
@@ -179,7 +173,7 @@ const createPatientTest = async (req, res) => {
       patientId,
       tests,
       createdBy: req.user._id,
-      date: date || new Date(),
+      date: new Date(),
     });
 
     res.status(201).json({

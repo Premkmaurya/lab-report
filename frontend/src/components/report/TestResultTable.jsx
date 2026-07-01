@@ -18,13 +18,18 @@ const isAbnormal = (value, rangeStr) => {
 export const TestResultTable = ({ test }) => {
   return (
     <div className="mb-8">
-      <div className="text-left my-4 border-b border-slate-300 pb-2">
-        <h2 className="text-[16px] font-bold text-[#0F172A] uppercase tracking-wider">
+      <div className="text-left my-4 pb-2">
+        <h1 className="text-heading font-bold text-center text-[#0F172A] uppercase underline tracking-wider">
+          {test.departmentName || test.departmentId}
+        </h1>
+      </div>
+      <div className="text-left my-4 pb-2">
+        <h2 className="text-body font-bold text-[#0F172A] uppercase underline decoration-1 underline-offset-2 tracking-wider">
           {test.testName}
         </h2>
       </div>
       
-      <table className="w-full text-[12px] text-slate-900 border-collapse">
+      <table className="w-full text-caption text-slate-900 border-collapse">
         <thead className="bg-[#F8FAFC]">
           <tr>
             <th className="py-2 px-3 text-left font-semibold w-1/3">Parameter</th>

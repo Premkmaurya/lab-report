@@ -46,11 +46,6 @@ const patientTestSchema = new mongoose.Schema(
       ref: "Patient",
       required: true,
     },
-    department:{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Department",
-      required: true,
-    },
     tests: [patientTestItemSchema],
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,

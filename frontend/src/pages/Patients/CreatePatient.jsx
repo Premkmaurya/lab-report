@@ -11,7 +11,7 @@ export const CreatePatient = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [doctors, setDoctors] = useState([]);
-  
+
   const [step, setStep] = useState(1);
   const [tests, setTests] = useState([]);
   const [selectedTestIds, setSelectedTestIds] = useState([]);
@@ -37,7 +37,7 @@ export const CreatePatient = () => {
       } catch (err) {
         console.warn("Could not load doctor listings for dropdown", err);
       }
-      
+
       try {
         const testData = await testService.getAllTests();
         setTests(testData.tests || []);
@@ -64,15 +64,21 @@ export const CreatePatient = () => {
         ...data,
         age: parseInt(data.age, 10),
       };
-      
+
       // Create patient first
       const response = await patientService.createPatient(payload);
-      
       if (response.success && response.patient) {
         // Create patient tests if tests were selected
         if (selectedTestIds.length > 0) {
           try {
-            await patientService.createPatientTests(response.patient._id, selectedTestIds);
+            const tests = selectedTestIds.map((t) => ({
+              testId: t.testId,
+              testName: t.testName,
+            }));
+            const result = await patientService.createPatientTests(
+              response.patient._id,
+              tests,
+            );
           } catch (testErr) {
             console.warn("Failed to assign tests to patient", testErr);
             // Don't fail the entire flow if test assignment fails
@@ -84,7 +90,8 @@ export const CreatePatient = () => {
       }
     } catch (err) {
       setSubmitError(
-        err.response?.data?.message || "Failed to create patient. Please try again."
+        err.response?.data?.message ||
+          "Failed to create patient. Please try again.",
       );
     } finally {
       setIsSubmitting(false);
@@ -113,7 +120,9 @@ export const CreatePatient = () => {
           Add New <span className="italic font-light">Patient</span>
         </h1>
         <p className="font-inter text-stone text-sm mt-1">
-          {step === 1 ? "Record details, birth age, and select referring doctor." : "Select the tests to assign to this patient."}
+          {step === 1
+            ? "Record details, birth age, and select referring doctor."
+            : "Select the tests to assign to this patient."}
         </p>
       </div>
 
@@ -127,7 +136,6 @@ export const CreatePatient = () => {
       {/* Form Card */}
       <div className="bg-paper-white border border-cream-border rounded-cards p-6 md:p-8">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-          
           <div className={step === 1 ? "block space-y-5" : "hidden"}>
             <div>
               <label className="block text-xs font-bold text-charcoal uppercase tracking-wider mb-2">
@@ -150,7 +158,9 @@ export const CreatePatient = () => {
                 })}
               />
               {errors.name && (
-                <p className="text-xs text-red-500 mt-1">{errors.name.message}</p>
+                <p className="text-xs text-red-500 mt-1">
+                  {errors.name.message}
+                </p>
               )}
             </div>
 
@@ -176,7 +186,9 @@ export const CreatePatient = () => {
                   })}
                 />
                 {errors.age && (
-                  <p className="text-xs text-red-500 mt-1">{errors.age.message}</p>
+                  <p className="text-xs text-red-500 mt-1">
+                    {errors.age.message}
+                  </p>
                 )}
               </div>
 
@@ -247,7 +259,9 @@ export const CreatePatient = () => {
                   {...register("date")}
                 />
                 {errors.date && (
-                  <p className="text-xs text-red-500 mt-1">{errors.date.message}</p>
+                  <p className="text-xs text-red-500 mt-1">
+                    {errors.date.message}
+                  </p>
                 )}
               </div>
             </div>
@@ -275,24 +289,40 @@ export const CreatePatient = () => {
                 Available Tests
               </label>
               {tests.length === 0 ? (
-                <p className="text-sm text-stone">No tests available. Please configure tests in the system.</p>
+                <p className="text-sm text-stone">
+                  No tests available. Please configure tests in the system.
+                </p>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                  {tests.map(test => (
-                    <label key={test._id} className="flex items-center space-x-3 p-3 border border-cream-border rounded-lg cursor-pointer hover:bg-warm-canvas transition-colors">
-                      <input 
-                        type="checkbox" 
+                  {tests.map((test) => (
+                    <label
+                      key={test._id}
+                      className="flex items-center space-x-3 p-3 border border-cream-border rounded-lg cursor-pointer hover:bg-warm-canvas transition-colors"
+                    >
+                      <input
+                        type="checkbox"
                         className="form-checkbox h-4 w-4 text-electric-cobalt rounded border-cream-border focus:ring-electric-cobalt"
-                        checked={selectedTestIds.some(t => t.testId === test._id)}
+                        checked={selectedTestIds.some(
+                          (t) => t.testId === test._id,
+                        )}
                         onChange={(e) => {
                           if (e.target.checked) {
-                            setSelectedTestIds([...selectedTestIds, { testId: test._id, testName: test.name }]);
+                            setSelectedTestIds([
+                              ...selectedTestIds,
+                              { testId: test._id, testName: test.name },
+                            ]);
                           } else {
-                            setSelectedTestIds(selectedTestIds.filter(t => t.testId !== test._id));
+                            setSelectedTestIds(
+                              selectedTestIds.filter(
+                                (t) => t.testId !== test._id,
+                              ),
+                            );
                           }
                         }}
                       />
-                      <span className="text-sm font-medium text-charcoal">{test.name}</span>
+                      <span className="text-sm font-medium text-charcoal">
+                        {test.name}
+                      </span>
                     </label>
                   ))}
                 </div>
@@ -316,7 +346,6 @@ export const CreatePatient = () => {
               </button>
             </div>
           </div>
-
         </form>
       </div>
     </div>
