@@ -137,7 +137,7 @@ export const TestList = () => {
               ) : filteredTests.length === 0 ? (
                 <div className="p-12 text-center text-stone text-sm">No tests found in the catalog.</div>
               ) : (
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto w-full block">
                   <table className="w-full text-left border-collapse">
                     <thead>
                       <tr className="bg-warm-canvas border-b border-cream-border">

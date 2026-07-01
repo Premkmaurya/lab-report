@@ -265,7 +265,7 @@ export const PatientDetails = () => {
                     key={report._id}
                     className="bg-paper-white border border-cream-border rounded-cards p-6"
                   >
-                    <div className="flex items-center justify-between mb-4 pb-4 border-b border-cream-border">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-4 border-b border-cream-border">
                       <div>
                         <div className="flex items-center space-x-2">
                           <span className="text-sm font-semibold text-charcoal">

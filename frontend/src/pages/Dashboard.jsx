@@ -186,7 +186,7 @@ export const Dashboard = () => {
         <span className="font-abcfavoritvariable text-xs font-bold text-electric-cobalt uppercase tracking-widest block mb-2">
           OVERVIEW
         </span>
-        <h1 className="font-martinaplantijn text-4xl md:text-5xl text-ink-navy leading-none">
+        <h1 className="font-martinaplantijn text-3xl sm:text-4xl md:text-5xl text-ink-navy leading-none">
           Welcome back, <span className="italic font-light">{user?.username}</span>
         </h1>
         <p className="font-inter text-stone text-sm mt-2">
@@ -370,7 +370,7 @@ export const Dashboard = () => {
             </div>
 
             {activeFilter === "custom" && (
-              <div className="flex items-center gap-3 pt-3 border-t border-cream-border mt-3">
+              <div className="flex items-center flex-wrap gap-3 pt-3 border-t border-cream-border mt-3">
                 <Calendar className="h-4 w-4 text-stone shrink-0" />
                 <span className="text-[11px] font-medium text-stone">Range:</span>
                 <input
@@ -396,7 +396,7 @@ export const Dashboard = () => {
                 <div className="h-6 w-6 animate-spin rounded-full border-4 border-cream-border border-t-electric-cobalt"></div>
               </div>
             ) : (
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto w-full block">
                 <table className="w-full text-left border-collapse">
                   <thead>
                     <tr className="bg-warm-canvas border-b border-cream-border">

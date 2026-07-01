@@ -83,7 +83,7 @@ export const UserList = () => {
 
       {/* Users Table */}
       <div className="bg-paper-white border border-cream-border rounded-cards overflow-hidden">
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto w-full block">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-warm-canvas border-b border-cream-border">
