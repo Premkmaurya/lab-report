@@ -102,6 +102,13 @@ const getPatientTests = async (req, res) => {
     const patientTests = await PatientTest.find(query)
       .populate("patientId", "name age gender referredDoctor")
       .populate("createdBy", "username email")
+      .populate({
+        path: "tests.testId",
+        populate: {
+          path: "departmentId",
+          select: "name"
+        }
+      })
       .sort({ createdAt: -1 });
 
     res.status(200).json({
@@ -119,7 +126,14 @@ const getPatientTestById = async (req, res) => {
   try {
     const patientTest = await PatientTest.findById(req.params.id)
       .populate("patientId", "name age")
-      .populate("createdBy", "username email");
+      .populate("createdBy", "username email")
+      .populate({
+        path: "tests.testId",
+        populate: {
+          path: "departmentId",
+          select: "name"
+        }
+      });
 
     if (!patientTest) {
       return res.status(404).json({
@@ -144,9 +158,17 @@ const getTestsByPatientId = async (req, res) => {
       patientId: req.params.patientId,
     })
       .populate("patientId", "name age")
-      .populate("tests.testId", "name departmentId")
       .populate("createdBy", "username email")
+      .populate({
+        path: "tests.testId",
+        populate: {
+          path: "departmentId",
+          select: "name"
+        }
+      })
       .sort({ createdAt: -1 });
+
+    console.log(patientTests[0].tests);
 
     res.status(200).json({
       success: true,
@@ -214,7 +236,14 @@ const updatePatientTest = async (req, res) => {
       },
     )
       .populate("patientId", "name age")
-      .populate("createdBy", "username email");
+      .populate("createdBy", "username email")
+      .populate({
+        path: "tests.testId",
+        populate: {
+          path: "departmentId",
+          select: "name"
+        }
+      });
 
     if (!patientTest) {
       return res.status(404).json({
@@ -277,7 +306,14 @@ const addTestToReport = async (req, res) => {
 
     const updatedTest = await PatientTest.findById(req.params.id)
       .populate("patientId", "name age")
-      .populate("createdBy", "username email");
+      .populate("createdBy", "username email")
+      .populate({
+        path: "tests.testId",
+        populate: {
+          path: "departmentId",
+          select: "name"
+        }
+      });
 
     res.status(200).json({
       success: true,
