@@ -168,7 +168,6 @@ const getTestsByPatientId = async (req, res) => {
       })
       .sort({ createdAt: -1 });
 
-    console.log(patientTests[0].tests);
 
     res.status(200).json({
       success: true,

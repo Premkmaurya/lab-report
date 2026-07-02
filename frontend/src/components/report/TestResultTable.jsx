@@ -15,14 +15,9 @@ const isAbnormal = (value, rangeStr) => {
   return null;
 };
 
-export const TestResultTable = ({ test }) => {
+export const TestResultTable = ({ test, rowSpacing = 4 }) => {
   return (
-    <div className="mb-8">
-      <div className="text-left my-4 pb-2">
-        <h1 className="text-xl font-bold text-center text-[#0F172A] underline decoration-1 underline-offset-2 uppercase tracking-wider">
-          {test.testId.departmentId?.name || "GENERAL"}
-        </h1>
-      </div>
+    <div>
       <div className="text-left my-2 pb-2">
         <h2 className="text-lg font-bold text-[#0F172A] uppercase underline decoration-1 underline-offset-2 tracking-wider">
           {test.testName}
@@ -32,12 +27,12 @@ export const TestResultTable = ({ test }) => {
       <table className="w-full text-caption text-slate-900 border-collapse">
         <thead className="bg-[#F8FAFC]">
           <tr>
-            <th className="py-2 px-3 text-left font-semibold w-1/3">
+            <th className="px-3 text-left font-semibold w-1/3" style={{ paddingTop: `${rowSpacing}px`, paddingBottom: `${rowSpacing}px` }}>
               Parameter
             </th>
-            <th className="py-2 px-3 text-left font-semibold w-1/6">Result</th>
-            <th className="py-2 px-3 text-left font-semibold w-1/6">Unit</th>
-            <th className="py-2 px-3 text-left font-semibold w-1/3">
+            <th className="px-3 text-left font-semibold w-1/6" style={{ paddingTop: `${rowSpacing}px`, paddingBottom: `${rowSpacing}px` }}>Result</th>
+            <th className="px-3 text-left font-semibold w-1/6" style={{ paddingTop: `${rowSpacing}px`, paddingBottom: `${rowSpacing}px` }}>Unit</th>
+            <th className="px-3 text-left font-semibold w-1/3" style={{ paddingTop: `${rowSpacing}px`, paddingBottom: `${rowSpacing}px` }}>
               Normal Range
             </th>
           </tr>
@@ -47,10 +42,10 @@ export const TestResultTable = ({ test }) => {
             test.result.map((res, index) => {
               return (
                 <tr key={index} className="bg-white">
-                  <td className="py-2 px-3 ">{res.parameter || "N/A"}</td>
-                  <td className={`py-2 px-3`}>{res.value}</td>
-                  <td className="py-2 px-3 text-[#475569]">{res.unit}</td>
-                  <td className="py-2 px-3 text-[#475569]">
+                  <td className="px-3" style={{ paddingTop: `${rowSpacing}px`, paddingBottom: `${rowSpacing}px` }}>{res.parameter || "N/A"}</td>
+                  <td className="px-3" style={{ paddingTop: `${rowSpacing}px`, paddingBottom: `${rowSpacing}px` }}>{res.value}</td>
+                  <td className="px-3 text-[#475569]" style={{ paddingTop: `${rowSpacing}px`, paddingBottom: `${rowSpacing}px` }}>{res.unit}</td>
+                  <td className="px-3 text-[#475569]" style={{ paddingTop: `${rowSpacing}px`, paddingBottom: `${rowSpacing}px` }}>
                     {res.normalRange}
                   </td>
                 </tr>
