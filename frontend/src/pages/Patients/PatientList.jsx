@@ -3,51 +3,35 @@ import { Link, useNavigate } from "react-router-dom";
 import { reportService } from "../../services/reportService";
 import { Plus, Search, FileText, Calendar, Filter } from "lucide-react";
 
+import { useQuery } from "@tanstack/react-query";
+
 export const PatientList = () => {
-  const [reports, setReports] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [errorMsg, setErrorMsg] = useState("");
   const [activeFilter, setActiveFilter] = useState("today");
   const [customStartDate, setCustomStartDate] = useState("");
   const [customEndDate, setCustomEndDate] = useState("");
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchReports = async () => {
-      setLoading(true);
-      setErrorMsg("");
-      try {
-        const tzOffset = new Date().getTimezoneOffset();
-        const params = {
-          date: activeFilter,
-          timezoneOffset: tzOffset,
-        };
+  const tzOffset = new Date().getTimezoneOffset();
+  const queryParams = {
+    date: activeFilter,
+    timezoneOffset: tzOffset,
+    ...(activeFilter === "custom" && customStartDate && customEndDate
+      ? { startDate: customStartDate, endDate: customEndDate }
+      : {})
+  };
 
-        if (activeFilter === "custom") {
-          if (!customStartDate || !customEndDate) {
-            setLoading(false);
-            return;
-          }
-          params.startDate = customStartDate;
-          params.endDate = customEndDate;
-        }
+  const isCustomValid = activeFilter !== "custom" || (customStartDate && customEndDate);
 
-        const data = await reportService.getAllReports(params);
-        setReports(data.patientTests || []);
-      } catch (err) {
-        setErrorMsg("Failed to load laboratory reports.");
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchReports();
-    
-    // Set up auto-refresh every minute to handle day rolling over without manual refresh
-    const interval = setInterval(fetchReports, 60000);
-    return () => clearInterval(interval);
-  }, [activeFilter, customStartDate, customEndDate]);
+  const { data, isLoading: loading, error } = useQuery({
+    queryKey: ['reports', queryParams],
+    queryFn: () => reportService.getAllReports(queryParams),
+    enabled: isCustomValid,
+    refetchInterval: 60000,
+  });
+
+  const reports = data?.patientTests || [];
+  const errorMsg = error ? "Failed to load laboratory reports." : "";
 
   const filteredReports = reports.filter((report) => {
     const patientName = report.patientId?.name || "";

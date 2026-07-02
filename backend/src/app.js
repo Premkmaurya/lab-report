@@ -8,6 +8,7 @@ const patientRoutes = require('./routes/patient.routes');
 const testRoutes = require('./routes/test.routes');
 const patientTestRoutes = require('./routes/patientTest.routes');
 const departmentRoutes = require('./routes/department.routes');
+const { apiLimiter } = require('./middlewares/rateLimit');
 
 const app = express();
 
@@ -21,11 +22,11 @@ app.use(morgan('dev'));
 
 
 
-app.use('/api/auth', authRoutes);
-app.use('/api/doctors', doctorRoutes);
-app.use('/api/patients', patientRoutes);
-app.use('/api/departments', departmentRoutes);
-app.use('/api/tests', testRoutes);
-app.use('/api/patient-tests', patientTestRoutes);
+app.use('/api/auth', authRoutes); // Auth routes have their own limiters
+app.use('/api/doctors', apiLimiter, doctorRoutes);
+app.use('/api/patients', apiLimiter, patientRoutes);
+app.use('/api/departments', apiLimiter, departmentRoutes);
+app.use('/api/tests', apiLimiter, testRoutes);
+app.use('/api/patient-tests', apiLimiter, patientTestRoutes);
 
 module.exports = app;

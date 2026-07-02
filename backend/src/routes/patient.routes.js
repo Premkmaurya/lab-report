@@ -1,4 +1,5 @@
 const express = require("express");
+const { reportLimiter } = require("../middlewares/rateLimit");
 
 const {
   getPatients,
@@ -51,6 +52,7 @@ router.get(
 // Create patient
 router.post(
   "/",
+  reportLimiter,
   validateCreatePatient,
   validateRequest,
   createPatient
@@ -59,6 +61,7 @@ router.post(
 // Update patient
 router.patch(
   "/:id",
+  reportLimiter,
   validateUpdatePatient,
   validateRequest,
   updatePatient

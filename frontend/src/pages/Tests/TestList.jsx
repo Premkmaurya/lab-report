@@ -3,14 +3,12 @@ import { Link, useNavigate } from "react-router-dom";
 import { Plus, Edit2, Search, ChevronDown, ChevronRight } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { testService } from "../../services/testService";
+import { useQuery } from "@tanstack/react-query";
 
 export const TestList = () => {
   const { user } = useAuth();
   const isAdmin = user?.role === "admin";
   const navigate = useNavigate();
-  const [tests, setTests] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedDepts, setExpandedDepts] = useState({});
 
@@ -21,21 +19,14 @@ export const TestList = () => {
     }));
   };
 
-  useEffect(() => {
-    fetchTests();
-  }, []);
+  const { data, isLoading: loading, error: fetchError } = useQuery({
+    queryKey: ['tests'],
+    queryFn: () => testService.getAllTests(),
+    staleTime: 5 * 60 * 1000,
+  });
 
-  const fetchTests = async () => {
-    try {
-      setLoading(true);
-      const data = await testService.getAllTests();
-      setTests(data.tests || []);
-    } catch (err) {
-      setError("Failed to load test catalog.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  const tests = data?.tests || [];
+  const error = fetchError ? "Failed to load test catalog." : "";
 
   const filteredTests = tests.filter((test) => {
     const searchLower = searchQuery.toLowerCase();

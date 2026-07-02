@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "../hooks/useAuth";
 import { patientService } from "../services/patientService";
 import { doctorService } from "../services/doctorService";
@@ -29,7 +30,6 @@ export const Dashboard = () => {
     reports: 0,
   });
   const [recentReports, setRecentReports] = useState([]);
-  const [loading, setLoading] = useState(true);
   
   // Feed state
   const [feedReports, setFeedReports] = useState([]);
@@ -41,62 +41,40 @@ export const Dashboard = () => {
 
   // Summary card state (admin only)
   const [summaryStats, setSummaryStats] = useState({ today: 0, week: 0, month: 0 });
-  const [summaryLoading, setSummaryLoading] = useState(false);
   const [summaryError, setSummaryError] = useState("");
   const [downloadingPeriod, setDownloadingPeriod] = useState("");
   const [downloadSuccess, setDownloadSuccess] = useState("");
 
   const isAdmin = user?.role === "admin";
 
+  const { data: patientsData } = useQuery({ queryKey: ['patients'], queryFn: () => patientService.getAllPatients() });
+  const { data: testsData } = useQuery({ queryKey: ['tests'], queryFn: () => testService.getAllTests() });
+  const { data: reportsData } = useQuery({ queryKey: ['reports'], queryFn: () => reportService.getAllReports() });
+  const { data: doctorsData } = useQuery({ queryKey: ['doctors'], queryFn: () => doctorService.getAllDoctors() });
+
+  const { data: summaryDataObj, isLoading: isSummaryLoading } = useQuery({
+    queryKey: ['summary', 'today'],
+    queryFn: () => patientService.getSummary("today", new Date().getTimezoneOffset()),
+    enabled: user?.role === "admin",
+  });
+
   useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        const patientsData = await patientService.getAllPatients();
-        const testsData = await testService.getAllTests();
-        const reportsData = await reportService.getAllReports();
+    let doctorsCount = doctorsData?.doctors?.length || 0;
+    setStats({
+      patients: patientsData?.patients?.length || 0,
+      doctors: doctorsCount,
+      tests: testsData?.tests?.length || 0,
+      reports: reportsData?.patientTests?.length || 0,
+    });
+    setRecentReports((reportsData?.patientTests || []).slice(0, 5));
 
-        let doctorsCount = 0;
-        try {
-          const doctorsData = await doctorService.getAllDoctors();
-          doctorsCount = doctorsData.doctors?.length || 0;
-        } catch (e) {
-          console.warn("Could not load doctors count", e);
-        }
+    if (summaryDataObj?.success && summaryDataObj?.summary) {
+      setSummaryStats(summaryDataObj.summary);
+    }
+  }, [patientsData, testsData, reportsData, doctorsData, summaryDataObj]);
 
-        setStats({
-          patients: patientsData.patients?.length || 0,
-          doctors: doctorsCount,
-          tests: testsData.tests?.length || 0,
-          reports: reportsData.patientTests?.length || 0,
-        });
-
-        // Set recent logs
-        setRecentReports((reportsData.patientTests || []).slice(0, 5));
-
-        // Fetch patient summaries if admin
-        if (user?.role === "admin") {
-          setSummaryLoading(true);
-          try {
-            const timezoneOffset = new Date().getTimezoneOffset();
-            const summaryData = await patientService.getSummary("today", timezoneOffset);
-            if (summaryData.success && summaryData.summary) {
-              setSummaryStats(summaryData.summary);
-            }
-          } catch (e) {
-            console.error("Failed to load patient summaries", e);
-          } finally {
-            setSummaryLoading(false);
-          }
-        }
-      } catch (error) {
-        console.error("Error loading dashboard stats:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchDashboardData();
-  }, [user]);
+  const loading = !patientsData || !testsData || !reportsData;
+  const summaryLoading = isSummaryLoading;
 
   // Feed fetcher
   useEffect(() => {

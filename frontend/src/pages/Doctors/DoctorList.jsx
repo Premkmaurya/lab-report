@@ -3,30 +3,30 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { doctorService } from "../../services/doctorService";
 import { Plus, Edit2, Trash2, ShieldAlert } from "lucide-react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 export const DoctorList = () => {
   const { user } = useAuth();
-  const [doctors, setDoctors] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
+  const queryClient = useQueryClient();
 
   const isAdmin = user?.role === "admin";
 
-  const fetchDoctors = async () => {
-    try {
-      const data = await doctorService.getAllDoctors();
-      setDoctors(data.doctors || []);
-    } catch (err) {
-      setErrorMsg("Failed to load doctor listings.");
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { data, isLoading: loading, error: fetchError } = useQuery({
+    queryKey: ['doctors'],
+    queryFn: () => doctorService.getAllDoctors(),
+    staleTime: 5 * 60 * 1000,
+  });
 
+  const doctors = data?.doctors || [];
+  
   useEffect(() => {
-    fetchDoctors();
-  }, []);
+    if (fetchError) {
+      setErrorMsg("Failed to load doctor listings.");
+    } else {
+      setErrorMsg("");
+    }
+  }, [fetchError]);
 
   const handleDeleteDoctor = async (id) => {
     if (!window.confirm("Are you sure you want to delete this doctor?")) {
@@ -35,7 +35,13 @@ export const DoctorList = () => {
     try {
       setErrorMsg("");
       await doctorService.deleteDoctor(id);
-      setDoctors((prev) => prev.filter((d) => d._id !== id));
+      queryClient.setQueryData(['doctors'], (old) => {
+        if (!old) return old;
+        return {
+          ...old,
+          doctors: old.doctors.filter((d) => d._id !== id)
+        };
+      });
     } catch (err) {
       setErrorMsg(
         err.response?.data?.message || "Failed to delete doctor entry."
