@@ -130,7 +130,7 @@ export const TestList = () => {
             <div className="bg-paper-white border border-cream-border rounded-cards overflow-hidden shadow-sm">
               {loading ? (
                 <div className="p-12 flex justify-center">
-                  <div className="h-8 w-8 animate-spin rounded-full border-4 border-cream-border border-t-electric-cobalt"></div>
+                  <div className="h-12 w-12 animate-spin rounded-full border-4 border-cream-border border-t-electric-cobalt"></div>
                 </div>
               ) : error ? (
                 <div className="p-8 text-center text-red-500 text-sm">{error}</div>

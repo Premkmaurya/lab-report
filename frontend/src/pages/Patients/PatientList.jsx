@@ -150,7 +150,7 @@ export const PatientList = () => {
       <div className="bg-paper-white border border-cream-border rounded-cards overflow-hidden min-h-[400px]">
         {loading && reports.length === 0 ? (
           <div className="flex items-center justify-center min-h-[400px]">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-cream-border border-t-electric-cobalt"></div>
+            <div className="h-12 w-12 animate-spin rounded-full border-4 border-cream-border border-t-electric-cobalt"></div>
           </div>
         ) : (
           <div className="overflow-x-auto w-full block">

@@ -12,8 +12,24 @@ export const ReportLayout = ({ patient, report }) => {
         <PatientInfo patient={patient} report={report} />
         
         {report.tests && report.tests.length > 0 ? (
-          report.tests.map((test, index) => (
-            <TestResultTable key={index} test={test} />
+          Object.entries(
+            report.tests.reduce((acc, test) => {
+              const dept = test.testId?.departmentId?.name || "GENERAL";
+              if (!acc[dept]) acc[dept] = [];
+              acc[dept].push(test);
+              return acc;
+            }, {})
+          ).map(([department, tests]) => (
+            <React.Fragment key={department}>
+              <div className="text-left my-4 pb-2">
+                <h1 className="text-xl font-bold text-center text-[#0F172A] underline decoration-1 underline-offset-2 uppercase tracking-wider">
+                  {department}
+                </h1>
+              </div>
+              {tests.map((test, index) => (
+                <TestResultTable key={`${department}-${index}`} test={test} />
+              ))}
+            </React.Fragment>
           ))
         ) : (
           <p className="text-center text-[#475569] italic py-10">No tests available in this report.</p>

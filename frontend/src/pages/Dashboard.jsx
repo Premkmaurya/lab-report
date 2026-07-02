@@ -174,7 +174,7 @@ export const Dashboard = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[500px]">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-cream-border border-t-electric-cobalt"></div>
+        <div className="h-12 w-12 animate-spin rounded-full border-4 border-cream-border border-t-electric-cobalt"></div>
       </div>
     );
   }
@@ -182,16 +182,27 @@ export const Dashboard = () => {
   return (
     <div className="space-y-10">
       {/* Editorial Header */}
-      <div>
-        <span className="font-abcfavoritvariable text-xs font-bold text-electric-cobalt uppercase tracking-widest block mb-2">
-          OVERVIEW
-        </span>
-        <h1 className="font-martinaplantijn text-3xl sm:text-4xl md:text-5xl text-ink-navy leading-none">
-          Welcome back, <span className="italic font-light">{user?.username}</span>
-        </h1>
-        <p className="font-inter text-stone text-sm mt-2">
-          Here is what's happening at Balaji Labs today.
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div>
+          <span className="font-abcfavoritvariable text-xs font-bold text-electric-cobalt uppercase tracking-widest block mb-2">
+            OVERVIEW
+          </span>
+          <h1 className="font-martinaplantijn text-3xl sm:text-4xl md:text-5xl text-ink-navy leading-none">
+            Welcome back, <span className="italic font-light">{user?.username}</span>
+          </h1>
+          <p className="font-inter text-stone text-sm mt-2">
+            Here is what's happening at Balaji Labs today.
+          </p>
+        </div>
+        <div>
+          <Link
+            to="/patients/create"
+            className="inline-flex items-center space-x-2 bg-electric-cobalt text-paper-white font-medium py-2.5 px-6 rounded-buttons hover:bg-opacity-95 transition duration-200 text-sm shadow-sm"
+          >
+            <Plus className="h-4 w-4" />
+            <span>New Patient</span>
+          </Link>
+        </div>
       </div>
 
       {/* Patient Summary Card (Admin Only) */}
@@ -393,7 +404,7 @@ export const Dashboard = () => {
           <div className="border border-cream-border rounded-xl overflow-hidden min-h-[300px]">
             {feedLoading && feedReports.length === 0 ? (
               <div className="flex items-center justify-center min-h-[300px]">
-                <div className="h-6 w-6 animate-spin rounded-full border-4 border-cream-border border-t-electric-cobalt"></div>
+                <div className="h-10 w-10 animate-spin rounded-full border-4 border-cream-border border-t-electric-cobalt"></div>
               </div>
             ) : (
               <div className="overflow-x-auto w-full block">

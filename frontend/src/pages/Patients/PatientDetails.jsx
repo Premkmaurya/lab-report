@@ -61,7 +61,10 @@ export const PatientDetails = () => {
     
     try {
       const testsData = await testService.getAllTests();
-      const existingTestIds = report.tests.map(t => t.testId?.toString() || "");
+      const existingTestIds = report.tests.map(t => {
+        const id = t.testId?._id || t.testId;
+        return id?.toString() || "";
+      });
       const filtered = testsData.tests.filter(t => !existingTestIds.includes(t._id?.toString()));
       setAvailableTests(filtered);
     } catch (err) {
@@ -132,7 +135,7 @@ export const PatientDetails = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-125">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-cream-border border-t-electric-cobalt"></div>
+        <div className="h-12 w-12 animate-spin rounded-full border-4 border-cream-border border-t-electric-cobalt"></div>
       </div>
     );
   }
