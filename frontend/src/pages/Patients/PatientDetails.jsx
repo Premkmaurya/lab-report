@@ -300,7 +300,7 @@ export const PatientDetails = () => {
                         report.tests.map((test, idx) => (
                           <div
                             onClick={()=>{
-                              navigate(`/reports/${report._id}/edit-test/${test.testId}`);
+                              navigate(`/reports/${report._id}/edit-test/${test.testId._id}`);
                             }}
                             key={idx}
                             className="flex cursor-pointer items-center justify-between px-4 py-3 bg-warm-canvas hover:bg-gray-300 transition-colors"

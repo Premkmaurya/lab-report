@@ -68,6 +68,7 @@ export const AppRoutes = () => {
           <Route path="/reports/:reportId/edit-test/:testId" element={<EditTestResult />} />
 
           <Route path="/tests" element={<TestList />} />
+          <Route path="/tests/view/:id" element={<EditTest />} />
           {/* Admin Only Views */}
           <Route element={<RoleGuard allowedRoles={["admin"]} />}>
             <Route path="/users" element={<UserList />} />

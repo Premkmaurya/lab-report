@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
-import { useNavigate, useParams, Link } from "react-router-dom";
+import { useNavigate, useParams, Link, useLocation } from "react-router-dom";
 import { testService } from "../../services/testService";
 import { departmentService } from "../../services/departmentService";
 import { ArrowLeft, ShieldAlert, Trash2, Search, ChevronDown } from "lucide-react";
@@ -8,6 +8,8 @@ import { ArrowLeft, ShieldAlert, Trash2, Search, ChevronDown } from "lucide-reac
 export const EditTest = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const isReadOnly = pathname.includes('/view');
   const [loading, setLoading] = useState(true);
   const [step, setStep] = useState(id ? 2 : 1);
   const [submitError, setSubmitError] = useState("");
@@ -58,6 +60,7 @@ export const EditTest = () => {
   };
 
   const handleKeyDown = (e, index, fieldName) => {
+    if (isReadOnly) return;
     const fieldsOrder = ["name", "price", "unit", "normalRange"];
     const fieldIndex = fieldsOrder.indexOf(fieldName);
     
@@ -132,6 +135,7 @@ export const EditTest = () => {
   };
 
   const handleBlur = (index, fieldName) => {
+    if (isReadOnly) return;
     if (index === fields.length - 1 && fieldName === "normalRange") {
       setTimeout(() => {
         const currentValues = watch("subTests");
@@ -295,6 +299,8 @@ export const EditTest = () => {
         <h1 className="font-martinaplantijn text-4xl text-ink-navy">
           {step === 1 ? (
             <>Select <span className="italic font-light">Test</span></>
+          ) : isReadOnly ? (
+            <>View <span className="italic font-light">{testName || "Test"}</span></>
           ) : (
             <>Edit <span className="italic font-light">{testName || "Test"}</span></>
           )}
@@ -302,7 +308,9 @@ export const EditTest = () => {
         <p className="font-inter text-stone text-sm mt-1">
           {step === 1
             ? "Choose an existing test from the catalog to edit."
-            : "Modify the test catalog entry, parameters, or service fees."}
+            : isReadOnly 
+              ? "Reference catalog view of test parameters."
+              : "Modify the test catalog entry, parameters, or service fees."}
         </p>
       </div>
 
@@ -400,7 +408,7 @@ export const EditTest = () => {
                   {...register("departmentId", {
                     required: "Please select a department",
                   })}
-                  disabled={loadingDepts}
+                  disabled={loadingDepts || isReadOnly}
                 >
                   <option value="">-- Select a Department --</option>
                   {departments.map((d) => (
@@ -423,7 +431,8 @@ export const EditTest = () => {
                 <input
                   type="text"
                   placeholder="e.g. Complete Blood Count (CBC)"
-                  className={`w-full ${errors.name ? "border-red-500" : ""}`}
+                  className={`w-full ${errors.name ? "border-red-500" : ""} ${isReadOnly ? "bg-warm-canvas text-stone" : ""}`}
+                  disabled={isReadOnly}
                   {...register("name", {
                     required: "Test name is required",
                     maxLength: {
@@ -459,9 +468,11 @@ export const EditTest = () => {
                       <th className="px-4 py-3 font-abcfavoritvariable text-xs font-bold text-graphite uppercase tracking-wider">
                         Normal Range
                       </th>
-                      <th className="px-4 py-3 font-abcfavoritvariable text-xs font-bold text-graphite uppercase tracking-wider text-right">
-                        Actions
-                      </th>
+                      {!isReadOnly && (
+                        <th className="px-4 py-3 font-abcfavoritvariable text-xs font-bold text-graphite uppercase tracking-wider text-right">
+                          Actions
+                        </th>
+                      )}
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-cream-border">
@@ -473,7 +484,8 @@ export const EditTest = () => {
                           <input
                             type="text"
                             placeholder="e.g. Hemoglobin"
-                            className={`w-full min-w-[150px] text-sm ${errors?.subTests?.[index]?.name ? "border-red-500" : ""}`}
+                            className={`w-full min-w-[150px] text-sm ${errors?.subTests?.[index]?.name ? "border-red-500" : ""} ${isReadOnly ? "bg-transparent text-stone border-transparent" : ""}`}
+                            disabled={isReadOnly}
                             {...register(`subTests.${index}.name`, { 
                               validate: (val, formValues) => isEmptyRow(formValues.subTests[index]) ? true : (!!val || "Required")
                             })}
@@ -489,7 +501,8 @@ export const EditTest = () => {
                             type="number"
                             step="0.01"
                             placeholder="0.00"
-                            className={`w-full min-w-[80px] text-sm ${errors?.subTests?.[index]?.price ? "border-red-500" : ""}`}
+                            className={`w-full min-w-[80px] text-sm ${errors?.subTests?.[index]?.price ? "border-red-500" : ""} ${isReadOnly ? "bg-transparent text-stone border-transparent" : ""}`}
+                            disabled={isReadOnly}
                             {...register(`subTests.${index}.price`, { 
                               validate: (val, formValues) => {
                                 if (isEmptyRow(formValues.subTests[index])) return true;
@@ -509,7 +522,8 @@ export const EditTest = () => {
                           <input
                             type="text"
                             placeholder="e.g. g/dL"
-                            className={`w-full min-w-[80px] text-sm ${errors?.subTests?.[index]?.unit ? "border-red-500" : ""}`}
+                            className={`w-full min-w-[80px] text-sm ${errors?.subTests?.[index]?.unit ? "border-red-500" : ""} ${isReadOnly ? "bg-transparent text-stone border-transparent" : ""}`}
+                            disabled={isReadOnly}
                             {...register(`subTests.${index}.unit`, { 
                               validate: (val, formValues) => isEmptyRow(formValues.subTests[index]) ? true : (!!val || "Required")
                             })}
@@ -524,7 +538,8 @@ export const EditTest = () => {
                           <input
                             type="text"
                             placeholder="e.g. 13-17"
-                            className={`w-full min-w-[100px] text-sm ${errors?.subTests?.[index]?.normalRange ? "border-red-500" : ""}`}
+                            className={`w-full min-w-[100px] text-sm ${errors?.subTests?.[index]?.normalRange ? "border-red-500" : ""} ${isReadOnly ? "bg-transparent text-stone border-transparent" : ""}`}
+                            disabled={isReadOnly}
                             {...register(`subTests.${index}.normalRange`, { 
                               validate: (val, formValues) => isEmptyRow(formValues.subTests[index]) ? true : (!!val || "Required")
                             })}
@@ -536,24 +551,26 @@ export const EditTest = () => {
                             }}
                           />
                         </td>
-                        <td className="px-4 py-3 align-top text-right">
-                          {index !== fields.length - 1 && (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                remove(index);
-                                const currentValues = watch("subTests");
-                                if (currentValues.length <= 1) {
-                                  append({ name: "", price: "", unit: "", normalRange: "" });
-                                }
-                              }}
-                              className="text-red-600 hover:text-red-800 p-2 rounded-full hover:bg-red-50 transition-colors"
-                              title="Delete Parameter"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </button>
-                          )}
-                        </td>
+                        {!isReadOnly && (
+                          <td className="px-4 py-3 align-top text-right">
+                            {index !== fields.length - 1 && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  remove(index);
+                                  const currentValues = watch("subTests");
+                                  if (currentValues.length <= 1) {
+                                    append({ name: "", price: "", unit: "", normalRange: "" });
+                                  }
+                                }}
+                                className="text-red-600 hover:text-red-800 p-2 rounded-full hover:bg-red-50 transition-colors"
+                                title="Delete Parameter"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            )}
+                          </td>
+                        )}
                       </tr>
                     )})}
                   </tbody>
@@ -562,13 +579,15 @@ export const EditTest = () => {
             </div>
 
             <div className="flex items-center space-x-3 pt-6 border-t border-cream-border mt-8">
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="bg-electric-cobalt text-paper-white font-medium py-2.5 px-6 rounded-buttons hover:bg-opacity-95 transition duration-200 disabled:opacity-50 text-sm cursor-pointer"
-              >
-                {isSubmitting ? "Saving..." : "Save Changes"}
-              </button>
+              {!isReadOnly && (
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="bg-electric-cobalt text-paper-white font-medium py-2.5 px-6 rounded-buttons hover:bg-opacity-95 transition duration-200 disabled:opacity-50 text-sm cursor-pointer"
+                >
+                  {isSubmitting ? "Saving..." : "Save Changes"}
+                </button>
+              )}
               <button
                 type="button"
                 onClick={() => {

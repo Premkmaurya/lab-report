@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Plus, Edit2, Search, ChevronDown, ChevronRight } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { testService } from "../../services/testService";
@@ -7,6 +7,7 @@ import { testService } from "../../services/testService";
 export const TestList = () => {
   const { user } = useAuth();
   const isAdmin = user?.role === "admin";
+  const navigate = useNavigate();
   const [tests, setTests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -21,12 +22,8 @@ export const TestList = () => {
   };
 
   useEffect(() => {
-    if (isAdmin) {
-      fetchTests();
-    } else {
-      setLoading(false);
-    }
-  }, [isAdmin]);
+    fetchTests();
+  }, []);
 
   const fetchTests = async () => {
     try {
@@ -77,8 +74,7 @@ export const TestList = () => {
         </p>
       </div>
 
-      {isAdmin ? (
-        <>
+      {isAdmin && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-10">
             <Link
               to="/tests/create"
@@ -106,14 +102,18 @@ export const TestList = () => {
               </div>
             </Link>
           </div>
+      )}
 
           <div className="mt-16 space-y-6 pt-10 border-t border-cream-border">
             <div className="flex flex-col md:flex-row justify-between items-end gap-4">
               <div className="flex-1">
                 <h2 className="font-martinaplantijn text-3xl text-ink-navy">
                   Test <span className="italic font-light">Catalog</span>
+                  {!isAdmin && <span className="text-base text-stone font-sans ml-3 px-3 py-1 bg-warm-canvas rounded-full border border-cream-border">Viewing Reference Catalog</span>}
                 </h2>
-                <p className="text-sm text-stone mt-1">View all configured laboratory tests.</p>
+                <p className="text-sm text-stone mt-2">
+                  {isAdmin ? "View and manage all configured laboratory tests." : "Browse available tests, parameters, and normal ranges."}
+                </p>
               </div>
               <div className="relative w-full md:w-72 shrink-0">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-stone" />
@@ -171,8 +171,8 @@ export const TestList = () => {
                             {isExpanded && deptTests.map(test => {
                               const totalPrice = test.subTests?.reduce((sum, st) => sum + (st.price || 0), 0) || 0;
                               return (
-                                <tr key={test._id} className="hover:bg-warm-canvas/50 transition-colors group bg-paper-white/50">
-                                  <td className="px-6 py-3 text-sm font-medium text-charcoal pl-12">
+                              <tr key={test._id} className="hover:bg-warm-canvas/50 transition-colors group bg-paper-white/50 cursor-pointer" onClick={() => navigate(isAdmin ? `/tests/edit/${test._id}` : `/tests/view/${test._id}`)}>
+                                  <td className="px-6 py-3 text-sm font-medium text-charcoal pl-12 group-hover:text-electric-cobalt transition-colors">
                                     {test.name}
                                   </td>
                                   <td className="px-6 py-3 text-sm text-stone text-center">
@@ -195,12 +195,6 @@ export const TestList = () => {
               )}
             </div>
           </div>
-        </>
-      ) : (
-        <div className="text-center mt-10 p-8 bg-warm-canvas rounded-cards border border-cream-border text-stone">
-          <p>You do not have permission to manage the test catalog.</p>
-        </div>
-      )}
     </div>
   );
 };
