@@ -2,6 +2,8 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const User = require("../models/user.model");
 const config = require("../config/config");
+const asyncHandler = require("../utils/asyncHandler");
+const { BadRequestError, NotFoundError, UnauthorizedError, ForbiddenError } = require("../utils/errors");
 
 const generateToken = (user) => {
   return jwt.sign(
@@ -39,76 +41,56 @@ const sendTokenResponse = (user, statusCode, res) => {
   });
 };
 
-const signup = async (req, res) => {
-  try {
-    const { username, email, password } = req.body;
+const signup = asyncHandler(async (req, res) => {
+  const { username, email, password } = req.body;
 
-    if (!username || !email || !password) {
-      return res
-        .status(400)
-        .json({ message: "Please provide username, email and password" });
-    }
-
-    const existingUser = await User.findOne({
-      $or: [{ email }, { username }],
-    });
-
-    if (existingUser) {
-      return res.status(400).json({
-        message: "User already exists",
-      });
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const user = await User.create({
-      username,
-      email,
-      password: hashedPassword,
-    });
-
-    sendTokenResponse(user, 201, res);
-  } catch (error) {
-    res.status(500).json({ message: error.message || "Signup failed" });
+  if (!username || !email || !password) {
+    throw new BadRequestError("Please provide username, email and password");
   }
-};
 
-const login = async (req, res) => {
-  try {
-    const { username, email, password } = req.body;
+  const existingUser = await User.findOne({
+    $or: [{ email }, { username }],
+  });
 
-    if (!username && !email) {
-      return res
-        .status(400)
-        .json({ message: "Please provide username or email" });
-    }
-
-    if (!password) {
-      return res.status(400).json({
-        message: "Please provide password",
-      });
-    }
-
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(404).json({
-        message: "User not found",
-      });
-    }
-
-    const isMatch = await bcrypt.compare(password, user.password);
-
-    if (!isMatch) {
-      return res.status(401).json({
-        message: "Invalid credentials",
-      });
-    }
-
-    sendTokenResponse(user, 200, res);
-  } catch (error) {
-    res.status(500).json({ message: error.message || "Login failed" });
+  if (existingUser) {
+    throw new BadRequestError("User already exists");
   }
-};
+
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  const user = await User.create({
+    username,
+    email,
+    password: hashedPassword,
+  });
+
+  sendTokenResponse(user, 201, res);
+});
+
+const login = asyncHandler(async (req, res) => {
+  const { username, email, password } = req.body;
+
+  if (!username && !email) {
+    throw new BadRequestError("Please provide username or email");
+  }
+
+  if (!password) {
+    throw new BadRequestError("Please provide password");
+  }
+
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw new NotFoundError("User not found");
+  }
+
+  const isMatch = await bcrypt.compare(password, user.password);
+
+  if (!isMatch) {
+    throw new UnauthorizedError("Invalid credentials");
+  }
+
+  sendTokenResponse(user, 200, res);
+});
 
 const logout = (req, res) => {
   res.cookie("token", "", {
@@ -119,7 +101,7 @@ const logout = (req, res) => {
   res.status(200).json({ success: true, message: "Logged out successfully" });
 };
 
-const getMe = async (req, res) => {
+const getMe = asyncHandler(async (req, res) => {
   const user = req.user;
 
   res.status(200).json({
@@ -132,152 +114,120 @@ const getMe = async (req, res) => {
       isAuthorized: user.isAuthorized,
     },
   });
-};
+});
 
 // admin functions
 
-const createUser = async (req, res) => {
-  try {
-    const { username, email, password } = req.body;
+const createUser = asyncHandler(async (req, res) => {
+  const { username, email, password } = req.body;
 
-    if (!username || !email || !password) {
-      return res.status(400).json({
-        message: "Please provide username, email, password and role",
-      });
-    }
-
-    const existingUser = await User.findOne({
-      $or: [{ email }, { username }],
-    });
-
-    if (existingUser) {
-      return res.status(400).json({
-        message: "User already exists",
-      });
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const user = await User.create({
-      username,
-      email,
-      password: hashedPassword,
-      isAuthorized: true,
-    });
-
-    res.status(201).json({
-      success: true,
-      user: {
-        id: user._id,
-        username: user.username,
-        email: user.email,
-        role: user.role,
-        isAuthorized: user.isAuthorized,
-      },
-    });
-  } catch (error) {
-    res.status(500).json({ message: error.message || "User creation failed" });
+  if (!username || !email || !password) {
+    throw new BadRequestError("Please provide username, email, password and role");
   }
-};
 
-const getAllUsers = async (req, res) => {
-  try {
-    const users = await User.find({
-      _id: { $ne: req.user._id },
-    });
+  const existingUser = await User.findOne({
+    $or: [{ email }, { username }],
+  });
 
-    res.status(200).json({
-      success: true,
-      users: users.map((user) => ({
-        id: user._id,
-        username: user.username,
-        email: user.email,
-        role: user.role,
-        isAuthorized: user.isAuthorized,
-      })),
-    });
-  } catch (error) {
-    res.status(500).json({ message: error.message || "Failed to fetch users" });
+  if (existingUser) {
+    throw new BadRequestError("User already exists");
   }
-};
 
-const getUserById = async (req, res) => {
-  try {
-    if (req.params.id === req.user._id.toString()) {
-      return res.status(403).json({
-        message: "You cannot access your own account here",
-      });
-    }
+  const hashedPassword = await bcrypt.hash(password, 10);
 
-    const user = await User.findById(req.params.id);
-    if (!user) {
-      return res.status(404).json({
-        message: "User not found",
-      });
-    }
+  const user = await User.create({
+    username,
+    email,
+    password: hashedPassword,
+    isAuthorized: true,
+  });
 
-    res.status(200).json({
-      success: true,
-      user: {
-        id: user._id,
-        username: user.username,
-        email: user.email,
-        role: user.role,
-        isAuthorized: user.isAuthorized,
-      },
-    });
-  } catch (error) {
-    res.status(500).json({ message: error.message || "Failed to fetch user" });
+  res.status(201).json({
+    success: true,
+    user: {
+      id: user._id,
+      username: user.username,
+      email: user.email,
+      role: user.role,
+      isAuthorized: user.isAuthorized,
+    },
+  });
+});
+
+const getAllUsers = asyncHandler(async (req, res) => {
+  const users = await User.find({
+    _id: { $ne: req.user._id },
+  });
+
+  res.status(200).json({
+    success: true,
+    users: users.map((user) => ({
+      id: user._id,
+      username: user.username,
+      email: user.email,
+      role: user.role,
+      isAuthorized: user.isAuthorized,
+    })),
+  });
+});
+
+const getUserById = asyncHandler(async (req, res) => {
+  if (req.params.id === req.user._id.toString()) {
+    throw new ForbiddenError("You cannot access your own account here");
   }
-};
 
-const updateUserStatus = async (req, res) => {
-  try {
-    if (req.params.id === req.user._id.toString()) {
-      return res.status(403).json({
-        message: "You cannot update your own account status",
-      });
-    }
-
-    const { status } = req.body;
-
-    if (typeof status !== "boolean") {
-      return res.status(400).json({
-        message: "Please provide a valid status (true or false)",
-      });
-    }
-
-    const user = await User.findByIdAndUpdate(
-      req.params.id,
-      {
-        isAuthorized: status,
-      },
-      { new: true },
-    );
-
-    if (!user) {
-      return res.status(404).json({
-        message: "User not found",
-      });
-    }
-
-    res.status(200).json({
-      success: true,
-      message: `User status updated successfully`,
-      user: {
-        id: user._id,
-        username: user.username,
-        email: user.email,
-        role: user.role,
-        isAuthorized: user.isAuthorized,
-      },
-    });
-  } catch (error) {
-    res
-      .status(500)
-      .json({ message: error.message || "Failed to update user status" });
+  const user = await User.findById(req.params.id);
+  if (!user) {
+    throw new NotFoundError("User not found");
   }
-};
+
+  res.status(200).json({
+    success: true,
+    user: {
+      id: user._id,
+      username: user.username,
+      email: user.email,
+      role: user.role,
+      isAuthorized: user.isAuthorized,
+    },
+  });
+});
+
+const updateUserStatus = asyncHandler(async (req, res) => {
+  if (req.params.id === req.user._id.toString()) {
+    throw new ForbiddenError("You cannot update your own account status");
+  }
+
+  const { status } = req.body;
+
+  if (typeof status !== "boolean") {
+    throw new BadRequestError("Please provide a valid status (true or false)");
+  }
+
+  const user = await User.findByIdAndUpdate(
+    req.params.id,
+    {
+      isAuthorized: status,
+    },
+    { new: true },
+  );
+
+  if (!user) {
+    throw new NotFoundError("User not found");
+  }
+
+  res.status(200).json({
+    success: true,
+    message: `User status updated successfully`,
+    user: {
+      id: user._id,
+      username: user.username,
+      email: user.email,
+      role: user.role,
+      isAuthorized: user.isAuthorized,
+    },
+  });
+});
 
 module.exports = {
   login,

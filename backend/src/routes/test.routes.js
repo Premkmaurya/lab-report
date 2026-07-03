@@ -1,4 +1,5 @@
 const express = require("express");
+const auditMiddleware = require("../middlewares/audit.middleware");
 const {
   getTests,
   getTestById,
@@ -37,6 +38,7 @@ router.post(
   authMiddleware.authorizeRoles("admin"),
   validateCreateTest,
   validateRequest,
+  auditMiddleware("CREATED", "Test"),
   createTest
 );
 
@@ -46,6 +48,7 @@ router.patch(
   authMiddleware.authorizeRoles("admin"),
   validateUpdateTest,
   validateRequest,
+  auditMiddleware("UPDATED", "Test"),
   updateTest
 );
 
@@ -55,6 +58,7 @@ router.delete(
   authMiddleware.authorizeRoles("admin"),
   validateDeleteTest,
   validateRequest,
+  auditMiddleware("DELETED", "Test"),
   deleteTest
 );
 

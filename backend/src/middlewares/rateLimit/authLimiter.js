@@ -1,4 +1,5 @@
 const rateLimit = require("express-rate-limit");
+const logger = require("../../utils/logger");
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -11,10 +12,7 @@ const authLimiter = rateLimit({
     const user = req.user ? req.user.id : "Unauthenticated";
     const role = req.user ? req.user.role : "None";
     
-    // TODO: Integrate Winston logger here
-    console.warn(
-      `[RATE LIMIT EXCEEDED] Auth Limiter | Timestamp: ${new Date().toISOString()} | IP: ${ip} | User: ${user} | Role: ${role} | Method: ${req.method} | Route: ${req.originalUrl} | Reason: Exceeded 5 failed attempts in 15m`
-    );
+    logger.warn(`Auth Rate Limit Exceeded - IP: ${req.ip || req.connection.remoteAddress}, Route: ${req.originalUrl}`);
 
     res.status(429).json({
       success: false,

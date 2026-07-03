@@ -1,5 +1,6 @@
 const ImageKit = require("imagekit");
 const _config = require("../config/config");
+const logger = require("../utils/logger");
 
 const client = new ImageKit({
   privateKey: _config.IMAGEKIT_PRIVATE_KEY,
@@ -17,7 +18,7 @@ const uploadFile = async (file, fileName) => {
 
     return result;
   } catch (error) {
-    console.error("Error uploading file:", error);
+    logger.error("Error uploading file:", error);
     throw error;
   }
 };
@@ -27,7 +28,7 @@ const deleteFile = async (fileId) => {
     const result = await client.deleteFile(fileId);
     return result;
   } catch (error) {
-    console.error("Error deleting file:", error);
+    logger.error("Error deleting file:", error);
     throw error;
   }
 };

@@ -1,4 +1,5 @@
 const express = require("express");
+const auditMiddleware = require("../middlewares/audit.middleware");
 const multer = require("multer");
 const path = require("path");
 const {
@@ -37,6 +38,7 @@ router.post(
   upload.single("signature"),
   validateCreateDoctor,
   validateRequest,
+  auditMiddleware("CREATED", "Doctor"),
   createDoctor,
 );
 router.patch(
@@ -45,6 +47,7 @@ router.patch(
   upload.single("signature"),
   validateUpdateDoctor,
   validateRequest,
+  auditMiddleware("UPDATED", "Doctor"),
   updateDoctor,
 );
 router.delete(
@@ -52,6 +55,7 @@ router.delete(
   authMiddleware.authorizeRoles("admin"),
   validateDeleteDoctor,
   validateRequest,
+  auditMiddleware("DELETED", "Doctor"),
   deleteDoctor,
 );
 

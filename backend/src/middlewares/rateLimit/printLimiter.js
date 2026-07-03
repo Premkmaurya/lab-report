@@ -1,4 +1,5 @@
 const rateLimit = require("express-rate-limit");
+const logger = require("../../utils/logger");
 
 const printLimiter = rateLimit({
   windowMs: 60 * 1000, // 1 minute
@@ -15,19 +16,12 @@ const printLimiter = rateLimit({
     if (req.user && req.user.id) {
       return req.user.id;
     }
-    return req.ip || req.connection.remoteAddress;
+    return req["ip"] || req.connection.remoteAddress;
   },
   standardHeaders: true,
   legacyHeaders: false,
   handler: (req, res, next, options) => {
-    const ip = req.ip || req.connection.remoteAddress;
-    const user = req.user ? req.user.id : "Unauthenticated";
-    const role = req.user ? req.user.role : "None";
-    
-    // TODO: Integrate Winston logger here
-    console.warn(
-      `[RATE LIMIT EXCEEDED] Print Limiter | Timestamp: ${new Date().toISOString()} | IP: ${ip} | User: ${user} | Role: ${role} | Method: ${req.method} | Route: ${req.originalUrl} | Reason: Exceeded ${options.limit} print fetches in 1m`
-    );
+    logger.warn(`Print Rate Limit Exceeded - IP: ${req.ip}, User ID: ${req.user ? req.user.id : "Unauthenticated"}, Route: ${req.originalUrl}`);
 
     res.status(429).json({
       success: false,

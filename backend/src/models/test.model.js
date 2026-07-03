@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const mongooseDelete = require("mongoose-delete");
 
 const subTestSchema = new mongoose.Schema(
   {
@@ -48,6 +49,10 @@ const testSchema = new mongoose.Schema(
     timestamps: true,
   },
 );
+
+testSchema.plugin(mongooseDelete, { overrideMethods: "all", deletedAt: true });
+testSchema.index({ departmentId: 1 });
+testSchema.index({ createdAt: -1 });
 
 const testModel = mongoose.model("Test", testSchema);
 

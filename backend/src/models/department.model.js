@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const mongooseDelete = require("mongoose-delete");
 
 const departmentSchema = new mongoose.Schema(
   {
@@ -17,6 +18,9 @@ const departmentSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+departmentSchema.plugin(mongooseDelete, { overrideMethods: "all", deletedAt: true });
+departmentSchema.index({ isActive: 1, name: 1 });
 
 const Department = mongoose.model("Department", departmentSchema);
 module.exports = Department;

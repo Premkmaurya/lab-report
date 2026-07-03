@@ -1,130 +1,94 @@
 const Test = require("../models/test.model");
+const asyncHandler = require("../utils/asyncHandler");
+const { BadRequestError, NotFoundError } = require("../utils/errors");
 
-const getTests = async (req, res) => {
-  try {
-    const tests = await Test.find().populate('departmentId').sort({ createdAt: -1 });
+const getTests = asyncHandler(async (req, res) => {
+  const tests = await Test.find().populate('departmentId').sort({ createdAt: -1 });
 
-    res.status(200).json({
-      success: true,
-      tests,
-    });
-  } catch (error) {
-    res.status(500).json({
-      message: error.message || "Failed to fetch tests",
-    });
+  res.status(200).json({
+    success: true,
+    tests,
+  });
+});
+
+const getTestById = asyncHandler(async (req, res) => {
+  const test = await Test.findById(req.params.id).populate('departmentId');
+
+  if (!test) {
+    throw new NotFoundError("Test not found");
   }
-};
 
-const getTestById = async (req, res) => {
-  try {
-    const test = await Test.findById(req.params.id).populate('departmentId');
+  res.status(200).json({
+    success: true,
+    test,
+  });
+});
 
-    if (!test) {
-      return res.status(404).json({
-        message: "Test not found",
-      });
-    }
+const createTest = asyncHandler(async (req, res) => {
+  const { name, departmentId, price, subTests } = req.body;
 
-    res.status(200).json({
-      success: true,
-      test,
-    });
-  } catch (error) {
-    res.status(500).json({
-      message: error.message || "Failed to fetch test",
-    });
+  if (!name || price === undefined || !departmentId) {
+    throw new BadRequestError("Please provide name, departmentId, and price");
   }
-};
 
-const createTest = async (req, res) => {
-  try {
-    const { name, departmentId, price, subTests } = req.body;
+  const test = await Test.create({
+    name,
+    departmentId,
+    price,
+    subTests,
+  });
 
-    if (!name || price === undefined || !departmentId) {
-      return res.status(400).json({
-        message: "Please provide name, departmentId, and price",
-      });
+  res.status(201).json({
+    success: true,
+    test,
+  });
+});
+
+const updateTest = asyncHandler(async (req, res) => {
+  const allowedFields = ["name", "price", "subTests", "departmentId"];
+  const updates = {};
+
+  for (const field of allowedFields) {
+    if (req.body[field] !== undefined) {
+      updates[field] = req.body[field];
     }
-
-    const test = await Test.create({
-      name,
-      departmentId,
-      price,
-      subTests,
-    });
-
-    res.status(201).json({
-      success: true,
-      test,
-    });
-  } catch (error) {
-    res.status(500).json({
-      message: error.message || "Failed to create test",
-    });
   }
-};
 
-const updateTest = async (req, res) => {
-  try {
-    const allowedFields = ["name", "price", "subTests", "departmentId"];
-    const updates = {};
-
-    for (const field of allowedFields) {
-      if (req.body[field] !== undefined) {
-        updates[field] = req.body[field];
-      }
-    }
-
-    if (Object.keys(updates).length === 0) {
-      return res.status(400).json({
-        message: "Please provide at least one valid field to update",
-      });
-    }
-
-    const test = await Test.findByIdAndUpdate(req.params.id, updates, {
-      new: true,
-      returnDocument: "after",
-      runValidators: true,
-    }).populate('departmentId');
-
-    if (!test) {
-      return res.status(404).json({
-        message: "Test not found",
-      });
-    }
-
-    res.status(200).json({
-      success: true,
-      test,
-    });
-  } catch (error) {
-    res.status(500).json({
-      message: error.message || "Failed to update test",
-    });
+  if (Object.keys(updates).length === 0) {
+    throw new BadRequestError("Please provide at least one valid field to update");
   }
-};
 
-const deleteTest = async (req, res) => {
-  try {
-    const test = await Test.findByIdAndDelete(req.params.id);
+  const test = await Test.findByIdAndUpdate(req.params.id, updates, {
+    new: true,
+    returnDocument: "after",
+    runValidators: true,
+  }).populate('departmentId');
 
-    if (!test) {
-      return res.status(404).json({
-        message: "Test not found",
-      });
-    }
-
-    res.status(200).json({
-      success: true,
-      message: "Test deleted successfully",
-      test,
-    });
-  } catch (error) {
-    res.status(500).json({
-      message: error.message || "Failed to delete test",
-    });
+  if (!test) {
+    throw new NotFoundError("Test not found");
   }
-};
+
+  res.status(200).json({
+    success: true,
+    test,
+  });
+});
+
+const deleteTest = asyncHandler(async (req, res) => {
+  const test = await Test.findById(req.params.id);
+
+  if (!test) {
+    throw new NotFoundError("Test not found");
+  }
+
+  await test.delete();
+
+  res.status(200).json({
+    success: true,
+    message: "Test deleted successfully",
+    test,
+  });
+});
 
 module.exports = {
   getTests,

@@ -1,5 +1,6 @@
 const express = require("express");
 const { authLimiter, apiLimiter } = require("../middlewares/rateLimit");
+const auditMiddleware = require("../middlewares/audit.middleware");
 const {
   signup,
   login,
@@ -21,9 +22,22 @@ const validateRequest = require("../validators/validationMiddleware");
 
 const router = express.Router();
 
-router.post("/signup", validateSignup, validateRequest, signup);
-router.post("/login", authLimiter, validateLogin, validateRequest, login);
-router.post("/logout", logout);
+router.post(
+  "/signup",
+  validateSignup,
+  validateRequest,
+  auditMiddleware("CREATED", "Auth"),
+  signup,
+);
+router.post(
+  "/login",
+  authLimiter,
+  validateLogin,
+  validateRequest,
+  auditMiddleware("LOGIN", "Auth"),
+  login,
+);
+router.post("/logout", auditMiddleware("LOGOUT", "Auth"), logout);
 router.get("/me", authMiddleware.userAuth, getMe);
 
 // Admin routes
@@ -34,6 +48,7 @@ router.post(
   authMiddleware.authorizeRoles("admin"),
   validateCreateUser,
   validateRequest,
+  auditMiddleware("CREATED", "User"),
   createUser,
 );
 router.get(
@@ -57,6 +72,7 @@ router.patch(
   authMiddleware.authorizeRoles("admin"),
   validateUpdateUserStatus,
   validateRequest,
+  auditMiddleware("UPDATED", "User"),
   updateUserStatus,
 );
 

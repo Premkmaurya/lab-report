@@ -2,11 +2,12 @@ require("dotenv").config();
 const mongoose = require("mongoose");
 const Department = require("./src/models/department.model");
 const Test = require("./src/models/test.model");
+const config = require("./src/config/config");
 
 const migrate = async () => {
   try {
     console.log("Connecting to MongoDB...");
-    await mongoose.connect(process.env.MONGO_URI);
+    await mongoose.connect(config.MONGO_URI);
     console.log("Connected to MongoDB");
 
     // Create default General department if it doesn't exist

@@ -1,5 +1,6 @@
 const express = require("express");
 const { reportLimiter, printLimiter } = require("../middlewares/rateLimit");
+const auditMiddleware = require("../middlewares/audit.middleware");
 const {
   getPatientTests,
   getPatientTestById,
@@ -44,6 +45,7 @@ router.get(
   printLimiter,
   validateGetPatientTestById,
   validateRequest,
+  auditMiddleware("VIEWED", "Report"),
   getPatientTestById,
 );
 
@@ -53,6 +55,7 @@ router.get(
   printLimiter,
   validateGetReportAndTestTemplate,
   validateRequest,
+  auditMiddleware("VIEWED", "Report"),
   getReportAndTestTemplate,
 );
 
@@ -62,6 +65,7 @@ router.post(
   reportLimiter,
   validateCreatePatientTest,
   validateRequest,
+  auditMiddleware("CREATED", "Report"),
   createPatientTest
 );
 
@@ -71,6 +75,7 @@ router.patch(
   reportLimiter,
   validateUpdatePatientTest,
   validateRequest,
+  auditMiddleware("UPDATED", "Report"),
   updatePatientTest
 );
 
@@ -80,6 +85,7 @@ router.delete(
   reportLimiter,
   validateDeletePatientTest,
   validateRequest,
+  auditMiddleware("DELETED", "Report"),
   deletePatientTest
 );
 
@@ -89,6 +95,7 @@ router.patch(
   reportLimiter,
   validateAddTestToReport,
   validateRequest,
+  auditMiddleware("UPDATED", "Report"),
   addTestToReport
 );
 

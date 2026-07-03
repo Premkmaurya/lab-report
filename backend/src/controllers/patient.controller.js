@@ -1,115 +1,102 @@
 const Patient = require("../models/patient.model");
+const PatientTest = require("../models/patientTest.model");
+const asyncHandler = require("../utils/asyncHandler");
+const { BadRequestError, NotFoundError } = require("../utils/errors");
 
-const getPatients = async (req, res) => {
-  try {
-    const patients = await Patient.find()
-      .populate("createdBy", "username email")
-      .sort({ createdAt: -1 });
+const getPatients = asyncHandler(async (req, res) => {
+  const patients = await Patient.find()
+    .populate("createdBy", "username email")
+    .sort({ createdAt: -1 });
 
-    res.status(200).json({
-      success: true,
-      patients,
-    });
-  } catch (error) {
-    res.status(500).json({
-      message: error.message || "Failed to fetch patients",
-    });
+  res.status(200).json({
+    success: true,
+    patients,
+  });
+});
+
+const getPatientById = asyncHandler(async (req, res) => {
+  const patient = await Patient.findById(req.params.id).populate(
+    "createdBy",
+    "username email",
+  );
+
+  if (!patient) {
+    throw new NotFoundError("Patient not found");
   }
-};
 
-const getPatientById = async (req, res) => {
-  try {
-    const patient = await Patient.findById(req.params.id).populate(
-      "createdBy",
-      "username email",
-    );
+  res.status(200).json({
+    success: true,
+    patient,
+  });
+});
 
-    if (!patient) {
-      return res.status(404).json({
-        message: "Patient not found",
-      });
-    }
+const deletePatient = asyncHandler(async (req, res) => {
+  const patient = await Patient.findById(req.params.id);
 
-    res.status(200).json({
-      success: true,
-      patient,
-    });
-  } catch (error) {
-    res.status(500).json({
-      message: error.message || "Failed to fetch patient",
-    });
+  if (!patient) {
+    throw new NotFoundError("Patient not found");
   }
-};
 
-const createPatient = async (req, res) => {
-  try {
-    const { name, age, gender, date, referredDoctor } = req.body;
+  await patient.delete();
 
-    if (!name || !age || !gender || !referredDoctor) {
-      return res.status(400).json({
-        message: "Please provide name, age, gender, and referred doctor",
-      });
-    }
+  res.status(200).json({
+    success: true,
+    message: "Patient deleted successfully",
+    patient,
+  });
+});
 
-    const patient = await Patient.create({
-      name,
-      age,
-      gender,
-      date: date || new Date(),
-      referredDoctor,
-      createdBy: req.user.id,
-    });
+const createPatient = asyncHandler(async (req, res) => {
+  const { name, age, gender, date, referredDoctor } = req.body;
 
-    res.status(201).json({
-      success: true,
-      patient,
-    });
-  } catch (error) {
-    res.status(500).json({
-      message: error.message || "Failed to create patient",
-    });
+  if (!name || !age || !gender || !referredDoctor) {
+    throw new BadRequestError("Please provide name, age, gender, and referred doctor");
   }
-};
 
-const updatePatient = async (req, res) => {
-  try {
-    const allowedFields = ["name", "age", "gender", "date", "referredDoctor"];
-    const updates = {};
+  const patient = await Patient.create({
+    name,
+    age,
+    gender,
+    date: date || new Date(),
+    referredDoctor,
+    createdBy: req.user.id,
+  });
 
-    for (const field of allowedFields) {
-      if (req.body[field] !== undefined) {
-        updates[field] = req.body[field];
-      }
+  res.status(201).json({
+    success: true,
+    patient,
+  });
+});
+
+const updatePatient = asyncHandler(async (req, res) => {
+  const allowedFields = ["name", "age", "gender", "date", "referredDoctor"];
+  const updates = {};
+
+  for (const field of allowedFields) {
+    if (req.body[field] !== undefined) {
+      updates[field] = req.body[field];
     }
-
-    if (Object.keys(updates).length === 0) {
-      return res.status(400).json({
-        message: "Please provide at least one valid field to update",
-      });
-    }
-
-    const patient = await Patient.findByIdAndUpdate(req.params.id, updates, {
-      new: true,
-      returnDocument: "after",
-      runValidators: true,
-    }).populate("createdBy", "name email");
-
-    if (!patient) {
-      return res.status(404).json({
-        message: "Patient not found",
-      });
-    }
-
-    res.status(200).json({
-      success: true,
-      patient,
-    });
-  } catch (error) {
-    res.status(500).json({
-      message: error.message || "Failed to update patient",
-    });
   }
-};
+
+  if (Object.keys(updates).length === 0) {
+    throw new BadRequestError("Please provide at least one valid field to update");
+  }
+
+  const patient = await Patient.findByIdAndUpdate(req.params.id, updates, {
+    new: true,
+    returnDocument: "after",
+    runValidators: true,
+  }).populate("createdBy", "name email");
+
+  if (!patient) {
+    throw new NotFoundError("Patient not found");
+  }
+
+  res.status(200).json({
+    success: true,
+    patient,
+  });
+});
 
 const getRange = (period, timezoneOffsetMinutes = 0) => {
   const tzOffset = parseInt(timezoneOffsetMinutes, 10) || 0;
@@ -133,9 +120,7 @@ const getRange = (period, timezoneOffsetMinutes = 0) => {
     start.setUTCDate(1);
     start.setUTCHours(0, 0, 0, 0);
   } else {
-    throw new Error(
-      "Invalid period type. Supported periods: today, week, month",
-    );
+    throw new BadRequestError("Invalid period type. Supported periods: today, week, month");
   }
 
   // Convert back to UTC to query the database
@@ -145,150 +130,136 @@ const getRange = (period, timezoneOffsetMinutes = 0) => {
   return { start: utcStart, end: utcEnd };
 };
 
-const getPatientsSummary = async (req, res) => {
-  try {
-    const { period } = req.params;
-    const { timezoneOffset } = req.query;
+const getPatientsSummary = asyncHandler(async (req, res) => {
+  const { period } = req.params;
+  const { timezoneOffset } = req.query;
 
-    if (!["today", "week", "month"].includes(period)) {
-      return res.status(400).json({ message: "Invalid period format" });
-    }
-
-    const { start, end } = getRange(period, timezoneOffset);
-
-    const patients = await Patient.find({
-      date: { $gte: start, $lte: end },
-    })
-      .populate("createdBy", "username email")
-      .sort({ createdAt: -1 });
-
-    const todayRange = getRange("today", timezoneOffset);
-    const weekRange = getRange("week", timezoneOffset);
-    const monthRange = getRange("month", timezoneOffset);
-
-    const todayCount = await Patient.countDocuments({
-      date: { $gte: todayRange.start, $lte: todayRange.end },
-    });
-    const weekCount = await Patient.countDocuments({
-      date: { $gte: weekRange.start, $lte: weekRange.end },
-    });
-    const monthCount = await Patient.countDocuments({
-      date: { $gte: monthRange.start, $lte: monthRange.end },
-    });
-
-    res.status(200).json({
-      success: true,
-      count: patients.length,
-      patients,
-      summary: {
-        today: todayCount,
-        week: weekCount,
-        month: monthCount,
-      },
-    });
-  } catch (error) {
-    res.status(500).json({
-      message: error.message || "Failed to fetch patient summary",
-    });
+  if (!["today", "week", "month"].includes(period)) {
+    throw new BadRequestError("Invalid period format");
   }
-};
 
-const exportPatientsSummary = async (req, res) => {
-  try {
-    const { period } = req.params;
-    const { timezoneOffset } = req.query;
+  const { start, end } = getRange(period, timezoneOffset);
 
-    if (!["today", "week", "month"].includes(period)) {
-      return res.status(400).json({ message: "Invalid period format" });
-    }
+  const patients = await Patient.find({
+    date: { $gte: start, $lte: end },
+  })
+    .populate("createdBy", "username email")
+    .sort({ createdAt: -1 });
 
-    const { start, end } = getRange(period, timezoneOffset);
+  const todayRange = getRange("today", timezoneOffset);
+  const weekRange = getRange("week", timezoneOffset);
+  const monthRange = getRange("month", timezoneOffset);
 
-    const patients = await Patient.find({
-      date: { $gte: start, $lte: end },
-    }).sort({ createdAt: -1 });
+  const todayCount = await Patient.countDocuments({
+    date: { $gte: todayRange.start, $lte: todayRange.end },
+  });
+  const weekCount = await Patient.countDocuments({
+    date: { $gte: weekRange.start, $lte: weekRange.end },
+  });
+  const monthCount = await Patient.countDocuments({
+    date: { $gte: monthRange.start, $lte: monthRange.end },
+  });
 
-    const todayRange = getRange("today", timezoneOffset);
-    const weekRange = getRange("week", timezoneOffset);
-    const monthRange = getRange("month", timezoneOffset);
+  res.status(200).json({
+    success: true,
+    count: patients.length,
+    patients,
+    summary: {
+      today: todayCount,
+      week: weekCount,
+      month: monthCount,
+    },
+  });
+});
 
-    const todayCount = await Patient.countDocuments({
-      date: { $gte: todayRange.start, $lte: todayRange.end },
-    });
-    const weekCount = await Patient.countDocuments({
-      date: { $gte: weekRange.start, $lte: weekRange.end },
-    });
-    const monthCount = await Patient.countDocuments({
-      date: { $gte: monthRange.start, $lte: monthRange.end },
-    });
+const exportPatientsSummary = asyncHandler(async (req, res) => {
+  const { period } = req.params;
+  const { timezoneOffset } = req.query;
 
-    // Generate CSV data
-    let csv = "";
-    if (period === "today") {
-      csv += "Patient Registration Summary (Today)\n";
-      csv += "Period,Count\n";
-      csv += `Today,${todayCount}\n\n`;
-    } else if (period === "week") {
-      csv += "Patient Registration Summary (This Week)\n";
-      csv += "Period,Count\n";
-      csv += `This Week,${weekCount}\n\n`;
-    } else if (period === "month") {
-      csv += "Patient Registration Summary (This Month)\n";
-      csv += "Period,Count\n";
-      csv += `This Month,${monthCount}\n\n`;
-    }
-
-    csv +=
-      "Patient ID,Patient Name,Age,Gender,Phone,Referred Doctor,Registration Date,Reports\n";
-
-    const PatientTest = require("../models/patientTest.model");
-
-    for (const patient of patients) {
-      // Find reports for the patient
-      const reports = await PatientTest.find({ patientId: patient._id });
-      const reportsString = reports
-        .map((r) => {
-          return r.tests
-            .map((t) => {
-              const results = t.result
-                .map((res) => `${res.parameter || "Value"}: ${res.value}`)
-                .join("; ");
-              return `${t.testName} (${results})`;
-            })
-            .join("; ");
-        })
-        .join(" | ");
-
-      const clean = (val) => {
-        if (val === undefined || val === null) return "";
-        const str = String(val).replace(/"/g, '""');
-        return str.includes(",") || str.includes("\n") || str.includes('"')
-          ? `"${str}"`
-          : str;
-      };
-
-      csv += `${clean(patient._id)},${clean(patient.name)},${clean(patient.age)},${clean(
-        patient.gender,
-      )},"N/A",${clean(patient.referredDoctor)},${clean(
-        patient.createdAt.toISOString(),
-      )},${clean(reportsString)}\n`;
-    }
-
-    res.setHeader("Content-Type", "text/csv");
-    res.setHeader(
-      "Content-Disposition",
-      `attachment; filename=patient_summary_${period}_${
-        new Date().toISOString().split("T")[0]
-      }.csv`,
-    );
-
-    res.status(200).send(csv);
-  } catch (error) {
-    res.status(500).json({
-      message: error.message || "Failed to export patient summary",
-    });
+  if (!["today", "week", "month"].includes(period)) {
+    throw new BadRequestError("Invalid period format");
   }
-};
+
+  const { start, end } = getRange(period, timezoneOffset);
+
+  const patients = await Patient.find({
+    date: { $gte: start, $lte: end },
+  }).sort({ createdAt: -1 });
+
+  const todayRange = getRange("today", timezoneOffset);
+  const weekRange = getRange("week", timezoneOffset);
+  const monthRange = getRange("month", timezoneOffset);
+
+  const todayCount = await Patient.countDocuments({
+    date: { $gte: todayRange.start, $lte: todayRange.end },
+  });
+  const weekCount = await Patient.countDocuments({
+    date: { $gte: weekRange.start, $lte: weekRange.end },
+  });
+  const monthCount = await Patient.countDocuments({
+    date: { $gte: monthRange.start, $lte: monthRange.end },
+  });
+
+  // Generate CSV data
+  let csv = "";
+  if (period === "today") {
+    csv += "Patient Registration Summary (Today)\n";
+    csv += "Period,Count\n";
+    csv += `Today,${todayCount}\n\n`;
+  } else if (period === "week") {
+    csv += "Patient Registration Summary (This Week)\n";
+    csv += "Period,Count\n";
+    csv += `This Week,${weekCount}\n\n`;
+  } else if (period === "month") {
+    csv += "Patient Registration Summary (This Month)\n";
+    csv += "Period,Count\n";
+    csv += `This Month,${monthCount}\n\n`;
+  }
+
+  csv +=
+    "Patient ID,Patient Name,Age,Gender,Phone,Referred Doctor,Registration Date,Reports\n";
+
+  for (const patient of patients) {
+    // Find reports for the patient
+    const reports = await PatientTest.find({ patientId: patient._id });
+    const reportsString = reports
+      .map((r) => {
+        return r.tests
+          .map((t) => {
+            const results = t.result
+              .map((res) => `${res.parameter || "Value"}: ${res.value}`)
+              .join("; ");
+            return `${t.testName} (${results})`;
+          })
+          .join("; ");
+      })
+      .join(" | ");
+
+    const clean = (val) => {
+      if (val === undefined || val === null) return "";
+      const str = String(val).replace(/"/g, '""');
+      return str.includes(",") || str.includes("\n") || str.includes('"')
+        ? `"${str}"`
+        : str;
+    };
+
+    csv += `${clean(patient._id)},${clean(patient.name)},${clean(patient.age)},${clean(
+      patient.gender,
+    )},"N/A",${clean(patient.referredDoctor)},${clean(
+      patient.createdAt.toISOString(),
+    )},${clean(reportsString)}\n`;
+  }
+
+  res.setHeader("Content-Type", "text/csv");
+  res.setHeader(
+    "Content-Disposition",
+    `attachment; filename=patient_summary_${period}_${
+      new Date().toISOString().split("T")[0]
+    }.csv`,
+  );
+
+  res.status(200).send(csv);
+});
 
 module.exports = {
   getPatients,
