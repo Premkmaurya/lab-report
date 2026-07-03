@@ -3,11 +3,13 @@ import { useForm } from "react-hook-form";
 import { useNavigate, Link } from "react-router-dom";
 import { patientService } from "../../services/patientService";
 import { doctorService } from "../../services/doctorService";
+import { useQueryClient } from "@tanstack/react-query";
 import { testService } from "../../services/testService";
 import { ArrowLeft, ShieldAlert } from "lucide-react";
 
 export const CreatePatient = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [doctors, setDoctors] = useState([]);
@@ -84,6 +86,12 @@ export const CreatePatient = () => {
             // Don't fail the entire flow if test assignment fails
           }
         }
+        
+        // Invalidate queries to refresh dashboard and lists
+        queryClient.invalidateQueries({ queryKey: ['patients'] });
+        queryClient.invalidateQueries({ queryKey: ['reports'] });
+        queryClient.invalidateQueries({ queryKey: ['summary'] });
+        
         navigate(`/`);
       } else {
         navigate("/patients");
