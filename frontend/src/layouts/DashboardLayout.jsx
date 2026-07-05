@@ -116,7 +116,7 @@ export const DashboardLayout = () => {
         <div className="p-6 border-b border-cream-border flex items-center justify-between">
           <div className="flex items-center space-x-3 overflow-hidden">
             <div className="h-9 w-9 bg-ink-navy text-paper-white rounded-2xl flex items-center justify-center font-bold text-lg shrink-0">
-              B
+              <img src="/logo.png" alt="something" />
             </div>
             <span className="font-martinaplantijn text-xl font-bold text-ink-navy truncate">
               Balaji <span className="italic font-light text-electric-cobalt">Labs</span>
