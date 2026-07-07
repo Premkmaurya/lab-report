@@ -15,6 +15,7 @@ export const CreateReport = () => {
   const [loading, setLoading] = useState(true);
   const [submitError, setSubmitError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -56,6 +57,16 @@ export const CreateReport = () => {
       test?.name && test.name.trim().length > 0
     );
   }, [allTests]);
+
+  const filteredTests = useMemo(() => {
+    if (!searchQuery.trim()) return availableTests;
+    const q = searchQuery.toLowerCase();
+    return availableTests.filter((test) => {
+      const nameMatch = test.name?.toLowerCase().includes(q);
+      const deptMatch = test.departmentId?.name?.toLowerCase().includes(q);
+      return nameMatch || deptMatch;
+    });
+  }, [availableTests, searchQuery]);
 
   const toggleTest = (test) => {
     setSelectedTests((current) =>
@@ -142,36 +153,49 @@ export const CreateReport = () => {
             <label className="block text-xs font-bold text-charcoal uppercase tracking-wider mb-3">
               Select Tests
             </label>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {availableTests.map((test) => {
-                const isSelected = selectedTests.some((item) => item._id === test._id);
-
-                return (
-                  <button
-                    type="button"
-                    key={test._id}
-                    onClick={() => toggleTest(test)}
-                    className={`border rounded-cards p-4 text-left transition duration-200 ${
-                      isSelected
-                        ? "border-electric-cobalt bg-electric-cobalt/5"
-                        : "border-cream-border hover:bg-warm-canvas"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-semibold text-charcoal">{test.name}</p>
-                        <p className="text-xs text-stone">₹{test.price || 0}</p>
-                      </div>
-                      {isSelected ? (
-                        <CheckCircle className="h-5 w-5 text-electric-cobalt" />
-                      ) : (
-                        <Plus className="h-5 w-5 text-stone" />
-                      )}
-                    </div>
-                  </button>
-                );
-              })}
+            <div className="mb-4">
+              <input
+                type="text"
+                placeholder="Search tests by name or department..."
+                className="w-full bg-paper-white border border-cream-border rounded-inputs px-4 py-3 outline-none text-sm"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
             </div>
+            {filteredTests.length === 0 && availableTests.length > 0 ? (
+              <p className="text-sm text-stone">No matching tests.</p>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {filteredTests.map((test) => {
+                  const isSelected = selectedTests.some((item) => item._id === test._id);
+
+                  return (
+                    <button
+                      type="button"
+                      key={test._id}
+                      onClick={() => toggleTest(test)}
+                      className={`border rounded-cards p-4 text-left transition duration-200 ${
+                        isSelected
+                          ? "border-electric-cobalt bg-electric-cobalt/5"
+                          : "border-cream-border hover:bg-warm-canvas"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-semibold text-charcoal">{test.name}</p>
+                          <p className="text-xs text-stone">₹{test.price || 0}</p>
+                        </div>
+                        {isSelected ? (
+                          <CheckCircle className="h-5 w-5 text-electric-cobalt" />
+                        ) : (
+                          <Plus className="h-5 w-5 text-stone" />
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           <div className="flex items-center space-x-3 pt-4 border-t border-cream-border">

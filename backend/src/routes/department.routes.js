@@ -13,8 +13,8 @@ const router = express.Router();
 router.use(authMiddleware.userAuth);
 
 router.get("/", getDepartments);
-router.post("/", authMiddleware.authorizeRoles("admin"), auditMiddleware("CREATED", "Department"), createDepartment);
-router.patch("/:id", authMiddleware.authorizeRoles("admin"), auditMiddleware("UPDATED", "Department"), updateDepartment);
+router.post("/", authMiddleware.authorizePermissions("manage_tests"), auditMiddleware("CREATED", "Department"), createDepartment);
+router.patch("/:id", authMiddleware.authorizePermissions("manage_tests"), auditMiddleware("UPDATED", "Department"), updateDepartment);
 router.delete("/:id", authMiddleware.authorizeRoles("admin"), auditMiddleware("DELETED", "Department"), deleteDepartment);
 
 module.exports = router;

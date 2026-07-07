@@ -4,14 +4,21 @@ import { useNavigate, Link } from "react-router-dom";
 import { userService } from "../../services/userService";
 import { ArrowLeft, ShieldAlert } from "lucide-react";
 
+const AVAILABLE_PERMISSIONS = [
+  { key: 'manage_doctors', label: 'Manage Doctors' },
+  { key: 'manage_tests', label: 'Manage Tests' },
+];
+
 export const CreateUser = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  const [selectedPermissions, setSelectedPermissions] = useState([]);
 
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm({
     defaultValues: {
@@ -19,11 +26,13 @@ export const CreateUser = () => {
     },
   });
 
+  const watchedRole = watch('role', 'user');
+
   const onSubmit = async (data) => {
     setIsSubmitting(true);
     setSubmitError("");
     try {
-      await userService.createUser(data);
+      await userService.createUser({ ...data, permissions: selectedPermissions });
       navigate("/users");
     } catch (err) {
       setSubmitError(
@@ -166,6 +175,41 @@ export const CreateUser = () => {
               </p>
             )}
           </div>
+
+          {watchedRole !== 'admin' && (
+            <div className="border-t border-cream-border pt-5">
+              <label className="block text-xs font-bold text-charcoal uppercase tracking-wider mb-3">
+                Permissions
+              </label>
+              <p className="text-xs text-stone mb-4">Select the permissions to assign to this user.</p>
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {AVAILABLE_PERMISSIONS.map(perm => (
+                    <label key={perm.key} className="flex items-center space-x-3 p-3 border border-cream-border rounded-lg cursor-pointer hover:bg-warm-canvas transition-colors">
+                      <input
+                        type="checkbox"
+                        className="form-checkbox h-5 w-5 text-electric-cobalt rounded border-cream-border"
+                        checked={selectedPermissions.includes(perm.key)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedPermissions([...selectedPermissions, perm.key]);
+                          } else {
+                            setSelectedPermissions(selectedPermissions.filter(p => p !== perm.key));
+                          }
+                        }}
+                      />
+                      <span className="text-sm font-medium text-charcoal">{perm.label}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+          {watchedRole === 'admin' && (
+            <div className="border-t border-cream-border pt-5">
+              <p className="text-xs text-stone italic">Administrators have all permissions by default.</p>
+            </div>
+          )}
 
           <div className="flex items-center space-x-3 pt-4 border-t border-cream-border">
             <button

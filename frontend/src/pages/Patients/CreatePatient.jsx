@@ -6,6 +6,7 @@ import { doctorService } from "../../services/doctorService";
 import { useQueryClient } from "@tanstack/react-query";
 import { testService } from "../../services/testService";
 import { ArrowLeft, ShieldAlert } from "lucide-react";
+import DoctorAutocomplete from "../../components/DoctorAutocomplete";
 
 export const CreatePatient = () => {
   const navigate = useNavigate();
@@ -22,6 +23,8 @@ export const CreatePatient = () => {
     register,
     handleSubmit,
     trigger,
+    watch,
+    setValue,
     formState: { errors },
   } = useForm({
     defaultValues: {
@@ -29,6 +32,8 @@ export const CreatePatient = () => {
       date: new Date().toISOString().substring(0, 10), // Defaults to today's date
     },
   });
+
+  const watchedDoctor = watch('referredDoctor', '');
 
   useEffect(() => {
     const fetchInitialData = async () => {
@@ -225,31 +230,13 @@ export const CreatePatient = () => {
                 <label className="block text-xs font-bold text-charcoal uppercase tracking-wider mb-2">
                   Referred Doctor
                 </label>
-                {doctors.length > 0 ? (
-                  <select
-                    className="w-full bg-paper-white border border-cream-border rounded-inputs px-4 py-3 outline-none"
-                    {...register("referredDoctor", {
-                      required: "Please select referred doctor",
-                    })}
-                  >
-                    <option value="">-- Select Doctor --</option>
-                    {doctors.map((d) => (
-                      <option key={d._id} value={d.name}>
-                        Dr. {d.name} ({d.qualification})
-                      </option>
-                    ))}
-                    <option value="Self Referral">Self Referral</option>
-                  </select>
-                ) : (
-                  <input
-                    type="text"
-                    placeholder="Doctor's name"
-                    className={`w-full ${errors.referredDoctor ? "border-red-500" : ""}`}
-                    {...register("referredDoctor", {
-                      required: "Referred doctor is required",
-                    })}
-                  />
-                )}
+                <DoctorAutocomplete
+                  value={watchedDoctor}
+                  onChange={(val) => setValue('referredDoctor', val, { shouldValidate: true })}
+                  doctors={doctors}
+                  error={!!errors.referredDoctor}
+                />
+                <input type="hidden" {...register('referredDoctor', { required: 'Please select referred doctor' })} />
                 {errors.referredDoctor && (
                   <p className="text-xs text-red-500 mt-1">
                     {errors.referredDoctor.message}

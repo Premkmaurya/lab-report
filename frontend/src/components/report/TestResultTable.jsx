@@ -35,7 +35,7 @@ export const TestResultTable = ({ test, rowSpacing = 4 }) => {
                 paddingBottom: `${rowSpacing}px`,
               }}
             >
-              Parameter
+              Test Name
             </th>
             <th
               className="px-3 text-left font-semibold w-1/6"

@@ -34,7 +34,7 @@ router.get(
 
 router.post(
   "/",
-  authMiddleware.authorizeRoles("admin"),
+  authMiddleware.authorizePermissions("manage_doctors"),
   upload.single("signature"),
   validateCreateDoctor,
   validateRequest,
@@ -43,7 +43,7 @@ router.post(
 );
 router.patch(
   "/:id",
-  authMiddleware.authorizeRoles("admin"),
+  authMiddleware.authorizePermissions("manage_doctors"),
   upload.single("signature"),
   validateUpdateDoctor,
   validateRequest,
@@ -52,7 +52,7 @@ router.patch(
 );
 router.delete(
   "/:id",
-  authMiddleware.authorizeRoles("admin"),
+  authMiddleware.authorizeRoles("admin"), // only admin can delete doctor
   validateDeleteDoctor,
   validateRequest,
   auditMiddleware("DELETED", "Doctor"),

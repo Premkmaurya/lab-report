@@ -16,11 +16,12 @@ export const userService = {
     return response.data;
   },
 
-  updateUserStatus: async (id, status) => {
+  updateUserStatus: async (id, status, permissions) => {
     // Send both parameter names to satisfy validator (isAuthorized) and controller (status)
     const response = await API.patch(`/auth/users/${id}/status`, {
       isAuthorized: status,
       status: status,
+      permissions: permissions,
     });
     return response.data;
   },

@@ -68,8 +68,6 @@ export const CreateTest = () => {
     if (!st) return false;
     return (
       !!st.name &&
-      !!st.unit &&
-      !!st.normalRange &&
       st.price !== "" &&
       st.price !== null &&
       st.price !== undefined
@@ -505,7 +503,7 @@ export const CreateTest = () => {
                                 validate: (val, formValues) =>
                                   isEmptyRow(formValues.subTests[index])
                                     ? true
-                                    : !!val || "Required",
+                                    : true,
                               })}
                               onKeyDown={(e) => handleKeyDown(e, index, "unit")}
                               ref={(el) => {
@@ -523,7 +521,7 @@ export const CreateTest = () => {
                                 validate: (val, formValues) =>
                                   isEmptyRow(formValues.subTests[index])
                                     ? true
-                                    : !!val || "Required",
+                                    : true,
                               })}
                               onKeyDown={(e) =>
                                 handleKeyDown(e, index, "normalRange")

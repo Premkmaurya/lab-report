@@ -3,6 +3,11 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { userService } from "../../services/userService";
 import { ArrowLeft, ShieldAlert, CheckCircle, XCircle } from "lucide-react";
 
+const AVAILABLE_PERMISSIONS = [
+  { key: 'manage_doctors', label: 'Manage Doctors' },
+  { key: 'manage_tests', label: 'Manage Tests' },
+];
+
 export const EditUser = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -11,12 +16,14 @@ export const EditUser = () => {
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [selectedPermissions, setSelectedPermissions] = useState([]);
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
         const data = await userService.getUserById(id);
         setUserItem(data.user);
+        setSelectedPermissions(data.user.permissions || []);
       } catch (err) {
         setErrorMsg(
           err.response?.data?.message || "Failed to load user information."
@@ -33,8 +40,8 @@ export const EditUser = () => {
     setErrorMsg("");
     setSuccessMsg("");
     try {
-      await userService.updateUserStatus(id, newStatus);
-      setUserItem((prev) => ({ ...prev, isAuthorized: newStatus }));
+      await userService.updateUserStatus(id, newStatus, selectedPermissions);
+      setUserItem((prev) => ({ ...prev, isAuthorized: newStatus, permissions: selectedPermissions }));
       setSuccessMsg(
         `User status has been successfully updated to ${
           newStatus ? "Authorized" : "Suspended"
@@ -148,6 +155,53 @@ export const EditUser = () => {
               </div>
             </div>
           </div>
+
+          {userItem.role !== 'admin' && (
+            <div className="border-t border-cream-border pt-6 pb-2">
+              <h3 className="font-abcfavoritvariable text-base font-medium text-charcoal mb-1">
+                Permissions
+              </h3>
+              <p className="text-sm text-stone leading-relaxed mb-4">
+                Select the permissions to assign to this user. You must click "Update Permissions" below to save these changes.
+              </p>
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {AVAILABLE_PERMISSIONS.map(perm => (
+                    <label key={perm.key} className="flex items-center space-x-3 p-3 border border-cream-border rounded-lg cursor-pointer hover:bg-warm-canvas transition-colors">
+                      <input
+                        type="checkbox"
+                        className="form-checkbox h-5 w-5 text-electric-cobalt rounded border-cream-border"
+                        checked={selectedPermissions.includes(perm.key)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedPermissions([...selectedPermissions, perm.key]);
+                          } else {
+                            setSelectedPermissions(selectedPermissions.filter(p => p !== perm.key));
+                          }
+                        }}
+                      />
+                      <span className="text-sm font-medium text-charcoal">{perm.label}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div className="mt-4 flex justify-end">
+                <button
+                  onClick={() => handleStatusChange(userItem.isAuthorized)}
+                  disabled={isSaving}
+                  className="bg-electric-cobalt text-paper-white font-medium py-2 px-5 rounded-buttons hover:bg-opacity-95 transition duration-200 disabled:opacity-50 text-sm cursor-pointer"
+                >
+                  {isSaving ? "Saving..." : "Update Permissions"}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {userItem.role === 'admin' && (
+            <div className="border-t border-cream-border pt-6 pb-2">
+              <p className="text-sm text-stone italic">Administrators have all permissions by default.</p>
+            </div>
+          )}
 
           {/* Action Trigger Card */}
           <div className="space-y-4">

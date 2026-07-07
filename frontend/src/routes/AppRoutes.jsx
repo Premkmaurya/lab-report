@@ -38,7 +38,6 @@ const CreateTest = lazy(() => import("../pages/Tests/CreateTest").then((m) => ({
 const EditTest = lazy(() => import("../pages/Tests/EditTest").then((m) => ({ default: m.EditTest })));
 
 const CreateReport = lazy(() => import("../pages/Reports/CreateReport").then((m) => ({ default: m.CreateReport })));
-const EditTestResult = lazy(() => import("../pages/Reports/EditTestResult").then((m) => ({ default: m.EditTestResult })));
 
 const Settings = lazy(() => import("../pages/Settings").then((m) => ({ default: m.Settings })));
 
@@ -67,7 +66,6 @@ export const AppRoutes = () => {
             <Route path="/patients/:id" element={<PatientDetails />} />
             <Route path="/patients/edit/:id" element={<EditPatient />} />
             <Route path="/reports/create/:id" element={<CreateReport />} />
-            <Route path="/reports/:reportId/edit-test/:testId" element={<EditTestResult />} />
 
             <Route path="/tests" element={<TestList />} />
             <Route path="/tests/view/:id" element={<EditTest />} />

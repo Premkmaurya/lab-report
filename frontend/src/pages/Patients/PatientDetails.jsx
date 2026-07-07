@@ -8,6 +8,7 @@ import { handlePrint } from "../../utils/printUtils";
 import { ArrowLeft, ShieldAlert, Plus, FileText, ChevronRight, Edit, X, Printer } from "lucide-react";
 import { ReportLayout } from "../../components/report/ReportLayout";
 import { PrintWarningModal } from "../../components/report/PrintWarningModal";
+import { InlineTestEditor } from "../../components/report/InlineTestEditor";
 
 export const PatientDetails = () => {
   const { id } = useParams();
@@ -24,6 +25,8 @@ export const PatientDetails = () => {
   const [availableTests, setAvailableTests] = useState([]);
   const [selectedTestIdToAdd, setSelectedTestIdToAdd] = useState("");
   const [isAddingTest, setIsAddingTest] = useState(false);
+  const [expandedTestId, setExpandedTestId] = useState(null);
+  const [editingTestId, setEditingTestId] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -187,7 +190,7 @@ export const PatientDetails = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 pt-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 pt-6">
               <div>
                 <p className="text-xs font-bold text-stone uppercase tracking-wider mb-1">
                   Age
@@ -218,6 +221,14 @@ export const PatientDetails = () => {
                 </p>
                 <p className="text-base font-semibold text-charcoal font-mono">
                   {new Date(patient.createdAt || patient.date).toLocaleDateString()}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs font-bold text-stone uppercase tracking-wider mb-1">
+                  Visit ID
+                </p>
+                <p className="text-base font-semibold text-charcoal font-mono">
+                  {patient.visitId || 'N/A'}
                 </p>
               </div>
             </div>
@@ -298,30 +309,37 @@ export const PatientDetails = () => {
                     </div>
 
                     {/* Tests List */}
-                    <div className="space-y-2">
+                    <div className="space-y-0 border border-cream-border rounded-md overflow-hidden bg-warm-canvas">
                       {report.tests && report.tests.length > 0 ? (
-                        report.tests.map((test, idx) => (
-                          <div
-                            onClick={()=>{
-                              navigate(`/reports/${report._id}/edit-test/${test.testId._id}`);
-                            }}
-                            key={idx}
-                            className="flex cursor-pointer items-center justify-between px-4 py-3 bg-warm-canvas hover:bg-gray-300 transition-colors"
-                          >
-                            <span className="text-sm font-medium text-charcoal">
-                              {test.testName}
-                            </span>
-                            <Link
-                              to={`/reports/${report._id}/edit-test/${test.testId}`}
-                              className="text-xs font-semibold text-electric-cobalt hover:text-opacity-80 transition-colors inline-flex items-center space-x-1"
-                            >
-                              <Edit className="h-3.5 w-3.5" />
-                              <span>Edit</span>
-                            </Link>
-                          </div>
-                        ))
+                        report.tests.map((test) => {
+                          const testIdStr = (test.testId?._id || test.testId).toString();
+                          const reportTestIdStr = `${report._id}-${testIdStr}`;
+                          return (
+                            <InlineTestEditor
+                              key={testIdStr}
+                              reportId={report._id}
+                              test={test}
+                              isExpanded={expandedTestId === reportTestIdStr}
+                              isEditing={editingTestId === reportTestIdStr}
+                              onToggleExpand={() => {
+                                setExpandedTestId(expandedTestId === reportTestIdStr ? null : reportTestIdStr);
+                                if (editingTestId === reportTestIdStr) setEditingTestId(null);
+                              }}
+                              onSetEditing={() => {
+                                setExpandedTestId(reportTestIdStr);
+                                setEditingTestId(reportTestIdStr);
+                              }}
+                              onCancelEditing={() => {
+                                setEditingTestId(null);
+                              }}
+                              onSaveSuccess={(updatedReport) => {
+                                setReports(reports.map(r => r._id === updatedReport._id ? updatedReport : r));
+                              }}
+                            />
+                          );
+                        })
                       ) : (
-                        <p className="text-xs text-stone py-2">No tests assigned</p>
+                        <p className="text-xs text-stone py-3 px-4 bg-paper-white">No tests assigned</p>
                       )}
                     </div>
                   </div>

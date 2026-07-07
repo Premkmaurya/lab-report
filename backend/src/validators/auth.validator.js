@@ -79,6 +79,17 @@ const validateCreateUser = [
     .optional()
     .isIn(["user", "admin"])
     .withMessage("Role must be either 'user' or 'admin'"),
+    
+  body("permissions")
+    .optional()
+    .isArray()
+    .withMessage("Permissions must be an array")
+    .custom((value) => {
+      if (value && value.includes('create_user')) {
+        throw new Error("'create_user' permission cannot be assigned");
+      }
+      return true;
+    }),
 ];
 
 /**

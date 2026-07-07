@@ -14,11 +14,11 @@ const subTestSchema = new mongoose.Schema(
     },
     normalRange: {
       type: String,
-      required: true,
+      // optional: normal range may be omitted
     },
     unit: {
       type: String,
-      required: true,
+      // optional: unit may be omitted
     },
   },
   {

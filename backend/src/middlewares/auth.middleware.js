@@ -45,7 +45,25 @@ const authorizeRoles = (...roles) => {
   };
 };  
 
+const authorizePermissions = (...requiredPermissions) => {
+  return (req, res, next) => {
+    // Admin always has full access
+    if (req.user.role === "admin") {
+      return next();
+    }
+    
+    const userPermissions = req.user.permissions || [];
+    const hasPermission = requiredPermissions.some(perm => userPermissions.includes(perm));
+    
+    if (!hasPermission) {
+      return res.status(403).json({ message: "Forbidden: You do not have the required permission" });
+    }
+    next();
+  };
+};
+
 module.exports = {
   userAuth,
   authorizeRoles,
+  authorizePermissions,
 };

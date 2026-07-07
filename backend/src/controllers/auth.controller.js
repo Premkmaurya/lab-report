@@ -37,6 +37,7 @@ const sendTokenResponse = (user, statusCode, res) => {
       email: user.email,
       role: user.role,
       isAuthorized: user.isAuthorized,
+      permissions: user.permissions || [],
     },
   });
 };
@@ -112,6 +113,7 @@ const getMe = asyncHandler(async (req, res) => {
       email: user.email,
       role: user.role,
       isAuthorized: user.isAuthorized,
+      permissions: user.permissions || [],
     },
   });
 });
@@ -119,7 +121,7 @@ const getMe = asyncHandler(async (req, res) => {
 // admin functions
 
 const createUser = asyncHandler(async (req, res) => {
-  const { username, email, password } = req.body;
+  const { username, email, password, permissions } = req.body;
 
   if (!username || !email || !password) {
     throw new BadRequestError("Please provide username, email, password and role");
@@ -135,11 +137,14 @@ const createUser = asyncHandler(async (req, res) => {
 
   const hashedPassword = await bcrypt.hash(password, 10);
 
+  const sanitizedPermissions = (permissions || []).filter(p => p !== 'create_user');
+
   const user = await User.create({
     username,
     email,
     password: hashedPassword,
     isAuthorized: true,
+    permissions: sanitizedPermissions,
   });
 
   res.status(201).json({
@@ -150,6 +155,7 @@ const createUser = asyncHandler(async (req, res) => {
       email: user.email,
       role: user.role,
       isAuthorized: user.isAuthorized,
+      permissions: user.permissions || [],
     },
   });
 });
@@ -167,6 +173,7 @@ const getAllUsers = asyncHandler(async (req, res) => {
       email: user.email,
       role: user.role,
       isAuthorized: user.isAuthorized,
+      permissions: user.permissions || [],
     })),
   });
 });
@@ -189,6 +196,7 @@ const getUserById = asyncHandler(async (req, res) => {
       email: user.email,
       role: user.role,
       isAuthorized: user.isAuthorized,
+      permissions: user.permissions || [],
     },
   });
 });
@@ -198,17 +206,20 @@ const updateUserStatus = asyncHandler(async (req, res) => {
     throw new ForbiddenError("You cannot update your own account status");
   }
 
-  const { status } = req.body;
+  const { status, permissions } = req.body;
 
   if (typeof status !== "boolean") {
     throw new BadRequestError("Please provide a valid status (true or false)");
   }
 
+  const updateData = { isAuthorized: status };
+  if (permissions !== undefined) {
+    updateData.permissions = (permissions || []).filter(p => p !== 'create_user');
+  }
+
   const user = await User.findByIdAndUpdate(
     req.params.id,
-    {
-      isAuthorized: status,
-    },
+    updateData,
     { new: true },
   );
 
@@ -225,6 +236,7 @@ const updateUserStatus = asyncHandler(async (req, res) => {
       email: user.email,
       role: user.role,
       isAuthorized: user.isAuthorized,
+      permissions: user.permissions || [],
     },
   });
 });

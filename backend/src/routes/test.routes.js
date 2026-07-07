@@ -35,7 +35,7 @@ router.get(
 // Create test
 router.post(
   "/",
-  authMiddleware.authorizeRoles("admin"),
+  authMiddleware.authorizePermissions("manage_tests"),
   validateCreateTest,
   validateRequest,
   auditMiddleware("CREATED", "Test"),
@@ -45,7 +45,7 @@ router.post(
 // Update test
 router.patch(
   "/:id",
-  authMiddleware.authorizeRoles("admin"),
+  authMiddleware.authorizePermissions("manage_tests"),
   validateUpdateTest,
   validateRequest,
   auditMiddleware("UPDATED", "Test"),
@@ -55,7 +55,7 @@ router.patch(
 // Delete test
 router.delete(
   "/:id",
-  authMiddleware.authorizeRoles("admin"),
+  authMiddleware.authorizePermissions("manage_tests"),
   validateDeleteTest,
   validateRequest,
   auditMiddleware("DELETED", "Test"),

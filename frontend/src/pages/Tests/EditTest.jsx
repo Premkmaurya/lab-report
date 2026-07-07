@@ -56,8 +56,14 @@ export const EditTest = () => {
 
   const isRowComplete = (st) => {
     if (!st) return false;
-    return !!st.name && !!st.unit && !!st.normalRange && st.price !== "" && st.price !== null && st.price !== undefined;
+    return (
+      !!st.name &&
+      st.price !== "" &&
+      st.price !== null &&
+      st.price !== undefined
+    );
   };
+
 
   const handleKeyDown = (e, index, fieldName) => {
     if (isReadOnly) return;
@@ -525,7 +531,7 @@ export const EditTest = () => {
                             className={`w-full min-w-[80px] text-sm ${errors?.subTests?.[index]?.unit ? "border-red-500" : ""} ${isReadOnly ? "bg-transparent text-stone border-transparent" : ""}`}
                             disabled={isReadOnly}
                             {...register(`subTests.${index}.unit`, { 
-                              validate: (val, formValues) => isEmptyRow(formValues.subTests[index]) ? true : (!!val || "Required")
+                              validate: (val, formValues) => isEmptyRow(formValues.subTests[index]) ? true : true
                             })}
                             onKeyDown={(e) => handleKeyDown(e, index, "unit")}
                             ref={(el) => {
@@ -541,7 +547,7 @@ export const EditTest = () => {
                             className={`w-full min-w-[100px] text-sm ${errors?.subTests?.[index]?.normalRange ? "border-red-500" : ""} ${isReadOnly ? "bg-transparent text-stone border-transparent" : ""}`}
                             disabled={isReadOnly}
                             {...register(`subTests.${index}.normalRange`, { 
-                              validate: (val, formValues) => isEmptyRow(formValues.subTests[index]) ? true : (!!val || "Required")
+                              validate: (val, formValues) => isEmptyRow(formValues.subTests[index]) ? true : true
                             })}
                             onKeyDown={(e) => handleKeyDown(e, index, "normalRange")}
                             onBlur={() => handleBlur(index, "normalRange")}

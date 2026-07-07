@@ -112,6 +112,12 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const hasPermission = (permName) => {
+    if (!user) return false;
+    if (user.role === "admin") return true;
+    return (user.permissions || []).includes(permName);
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -123,6 +129,7 @@ export const AuthProvider = ({ children }) => {
         signup,
         logout,
         checkAuth,
+        hasPermission,
       }}
     >
       {children}
