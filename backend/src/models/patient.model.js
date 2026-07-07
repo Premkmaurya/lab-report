@@ -43,7 +43,7 @@ const patientSchema = new mongoose.Schema(
   },
 );
 
-patientSchema.pre("validate", async function (next) {
+patientSchema.pre("validate", async function () {
   if (!this.visitId) {
     let unique = false;
     let attempts = 0;
@@ -61,13 +61,11 @@ patientSchema.pre("validate", async function (next) {
       this.visitId = String(Date.now()).slice(-5);
     }
   }
-  next();
 });
 
 patientSchema.plugin(mongooseDelete, { overrideMethods: "all", deletedAt: true });
 patientSchema.index({ date: -1 });
 patientSchema.index({ createdAt: -1 });
-patientSchema.index({ visitId: 1 });
 
 const patientModel = mongoose.model("Patient", patientSchema);
 

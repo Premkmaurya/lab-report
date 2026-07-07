@@ -395,6 +395,9 @@ export const Dashboard = () => {
                       <th className="px-4 py-3 font-abcfavoritvariable text-[10px] font-bold text-graphite uppercase tracking-wider">
                         Age/Gender
                       </th>
+                      <th className="px-4 py-3 font-abcfavoritvariable text-[10px] font-bold text-graphite uppercase tracking-wider">
+                        Total Price
+                      </th>
                       <th className="px-4 py-3 font-abcfavoritvariable text-[10px] font-bold text-graphite uppercase tracking-wider text-right">
                         Actions
                       </th>
@@ -403,7 +406,7 @@ export const Dashboard = () => {
                   <tbody className="divide-y divide-cream-border">
                     {filteredFeed.length === 0 ? (
                       <tr>
-                        <td colSpan="3" className="px-4 py-12 text-center">
+                        <td colSpan="4" className="px-4 py-12 text-center">
                           <div className="flex flex-col items-center">
                             <FileText className="h-6 w-6 text-stone/40 mb-2" />
                             <p className="text-xs font-semibold text-charcoal">
@@ -426,6 +429,9 @@ export const Dashboard = () => {
                             </td>
                             <td className="px-4 py-3 whitespace-nowrap text-[11px] text-stone">
                               {patient.age ? `${patient.age}y • ` : ''}<span className="capitalize">{patient.gender || '-'}</span>
+                            </td>
+                            <td className="px-4 py-3 whitespace-nowrap text-[11px] text-charcoal font-semibold">
+                              ₹{report.totalPrice || 0}
                             </td>
                             <td className="px-4 py-3 whitespace-nowrap text-right">
                               <Link

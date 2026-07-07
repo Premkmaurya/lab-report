@@ -4,7 +4,9 @@ const asyncHandler = require("../utils/asyncHandler");
 const { BadRequestError, NotFoundError } = require("../utils/errors");
 
 const getAllDoctors = asyncHandler(async (req, res) => {
-  const doctors = await Doctor.find();
+  const doctors = await Doctor.find()
+    .populate('createdBy', 'username _id')
+    .populate('updatedBy', 'username _id');
   res.status(200).json({
     success: true,
     doctors,
@@ -12,7 +14,9 @@ const getAllDoctors = asyncHandler(async (req, res) => {
 });
 
 const getDoctorById = asyncHandler(async (req, res) => {
-  const doctor = await Doctor.findById(req.params.id);
+  const doctor = await Doctor.findById(req.params.id)
+    .populate('createdBy', 'username _id')
+    .populate('updatedBy', 'username _id');
 
   if (!doctor) {
     throw new NotFoundError("Doctor not found");
@@ -38,11 +42,17 @@ const createDoctor = asyncHandler(async (req, res) => {
     throw new BadRequestError("Please provide name, qualification and signature file or signature");
   }
 
-  const doctor = await Doctor.create({
+  let doctor = await Doctor.create({
     name,
     qualification,
     signUrl: signature,
+    createdBy: req.user._id,
+    updatedBy: req.user._id,
   });
+
+  doctor = await Doctor.findById(doctor._id)
+    .populate('createdBy', 'username _id')
+    .populate('updatedBy', 'username _id');
 
   res.status(201).json({
     success: true,
@@ -72,10 +82,14 @@ const updateDoctor = asyncHandler(async (req, res) => {
     throw new BadRequestError("Please provide at least one valid field to update");
   }
 
+  updates.updatedBy = req.user._id;
+
   const doctor = await Doctor.findByIdAndUpdate(req.params.id, updates, {
     returnDocument: "after",
     runValidators: true,
-  });
+  })
+    .populate('createdBy', 'username _id')
+    .populate('updatedBy', 'username _id');
 
   if (!doctor) {
     throw new NotFoundError("Doctor not found");

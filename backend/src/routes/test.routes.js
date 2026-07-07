@@ -1,4 +1,5 @@
 const express = require("express");
+const Test = require("../models/test.model");
 const auditMiddleware = require("../middlewares/audit.middleware");
 const {
   getTests,
@@ -46,6 +47,7 @@ router.post(
 router.patch(
   "/:id",
   authMiddleware.authorizePermissions("manage_tests"),
+  authMiddleware.authorizeOwnership(Test),
   validateUpdateTest,
   validateRequest,
   auditMiddleware("UPDATED", "Test"),
@@ -56,6 +58,7 @@ router.patch(
 router.delete(
   "/:id",
   authMiddleware.authorizePermissions("manage_tests"),
+  authMiddleware.authorizeOwnership(Test),
   validateDeleteTest,
   validateRequest,
   auditMiddleware("DELETED", "Test"),

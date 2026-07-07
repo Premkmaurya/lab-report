@@ -7,6 +7,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { testService } from "../../services/testService";
 import { ArrowLeft, ShieldAlert } from "lucide-react";
 import DoctorAutocomplete from "../../components/DoctorAutocomplete";
+import TestMultiSelect from "../../components/TestMultiSelect";
 
 export const CreatePatient = () => {
   const navigate = useNavigate();
@@ -288,39 +289,11 @@ export const CreatePatient = () => {
                   No tests available. Please configure tests in the system.
                 </p>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                  {tests.map((test) => (
-                    <label
-                      key={test._id}
-                      className="flex items-center space-x-3 p-3 border border-cream-border rounded-lg cursor-pointer hover:bg-warm-canvas transition-colors"
-                    >
-                      <input
-                        type="checkbox"
-                        className="form-checkbox h-4 w-4 text-electric-cobalt rounded border-cream-border focus:ring-electric-cobalt"
-                        checked={selectedTestIds.some(
-                          (t) => t.testId === test._id,
-                        )}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setSelectedTestIds([
-                              ...selectedTestIds,
-                              { testId: test._id, testName: test.name },
-                            ]);
-                          } else {
-                            setSelectedTestIds(
-                              selectedTestIds.filter(
-                                (t) => t.testId !== test._id,
-                              ),
-                            );
-                          }
-                        }}
-                      />
-                      <span className="text-sm font-medium text-charcoal">
-                        {test.name}
-                      </span>
-                    </label>
-                  ))}
-                </div>
+                <TestMultiSelect
+                  tests={tests}
+                  selectedTests={selectedTestIds}
+                  onChange={setSelectedTestIds}
+                />
               )}
             </div>
 

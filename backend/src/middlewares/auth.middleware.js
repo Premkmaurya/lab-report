@@ -62,8 +62,35 @@ const authorizePermissions = (...requiredPermissions) => {
   };
 };
 
+const authorizeOwnership = (Model) => {
+  return async (req, res, next) => {
+    try {
+      if (req.user.role === "admin") {
+        return next();
+      }
+
+      const resource = await Model.findById(req.params.id).select("createdBy");
+      if (!resource) {
+        return res.status(404).json({ message: "Resource not found" });
+      }
+
+      if (!resource.createdBy || resource.createdBy.toString() !== req.user._id.toString()) {
+        return res.status(403).json({
+          success: false,
+          message: "You are not authorized to modify this resource."
+        });
+      }
+
+      next();
+    } catch (error) {
+      return res.status(500).json({ message: "Server error during authorization" });
+    }
+  };
+};
+
 module.exports = {
   userAuth,
   authorizeRoles,
   authorizePermissions,
+  authorizeOwnership,
 };

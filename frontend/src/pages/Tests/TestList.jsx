@@ -2,12 +2,13 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Plus, Edit2, Search, ChevronDown, ChevronRight } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
+import { canManageTests } from "../../config/permissions";
 import { testService } from "../../services/testService";
 import { useQuery } from "@tanstack/react-query";
 
 export const TestList = () => {
   const { user } = useAuth();
-  const isAdmin = user?.role === "admin";
+  const canManage = canManageTests(user);
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedDepts, setExpandedDepts] = useState({});
@@ -65,7 +66,7 @@ export const TestList = () => {
         </p>
       </div>
 
-      {isAdmin && (
+      {canManage && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-10">
             <Link
               to="/tests/create"
@@ -100,10 +101,10 @@ export const TestList = () => {
               <div className="flex-1">
                 <h2 className="font-martinaplantijn text-3xl text-ink-navy">
                   Test <span className="italic font-light">Catalog</span>
-                  {!isAdmin && <span className="text-base text-stone font-sans ml-3 px-3 py-1 bg-warm-canvas rounded-full border border-cream-border">Viewing Reference Catalog</span>}
+                  {!canManage && <span className="text-base text-stone font-sans ml-3 px-3 py-1 bg-warm-canvas rounded-full border border-cream-border">Viewing Reference Catalog</span>}
                 </h2>
                 <p className="text-sm text-stone mt-2">
-                  {isAdmin ? "View and manage all configured laboratory tests." : "Browse available tests, parameters, and normal ranges."}
+                  {canManage ? "View and manage all configured laboratory tests." : "Browse available tests, parameters, and normal ranges."}
                 </p>
               </div>
               <div className="relative w-full md:w-72 shrink-0">
@@ -158,13 +159,18 @@ export const TestList = () => {
                               </td>
                             </tr>
                             
-                            {/* Test Rows */}
                             {isExpanded && deptTests.map(test => {
                               const totalPrice = test.subTests?.reduce((sum, st) => sum + (st.price || 0), 0) || 0;
+                              const isOwner = user?.role === 'admin' || (user?._id && test.createdBy?._id && user._id === test.createdBy._id) || (user?.id && test.createdBy?._id && user.id === test.createdBy._id);
+                              
                               return (
-                              <tr key={test._id} className="hover:bg-warm-canvas/50 transition-colors group bg-paper-white/50 cursor-pointer" onClick={() => navigate(isAdmin ? `/tests/edit/${test._id}` : `/tests/view/${test._id}`)}>
+                              <tr key={test._id} className="hover:bg-warm-canvas/50 transition-colors group bg-paper-white/50 cursor-pointer" onClick={() => navigate(isOwner ? `/tests/edit/${test._id}` : `/tests/view/${test._id}`)}>
                                   <td className="px-6 py-3 text-sm font-medium text-charcoal pl-12 group-hover:text-electric-cobalt transition-colors">
                                     {test.name}
+                                    <div className="text-[10px] text-stone mt-0.5 font-normal">
+                                      {test.createdBy && <span>Owner: {test.createdBy.username}</span>}
+                                      {test.updatedBy && test.updatedBy._id !== test.createdBy?._id && <span className="ml-2">• Last Updated by: {test.updatedBy.username}</span>}
+                                    </div>
                                   </td>
                                   <td className="px-6 py-3 text-sm text-stone text-center">
                                     <span className="bg-cream-border/30 px-2 py-1 rounded text-xs">

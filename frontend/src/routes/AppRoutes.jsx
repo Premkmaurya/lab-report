@@ -2,6 +2,7 @@ import React, { Suspense, lazy } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { RoleGuard } from "./RoleGuard";
+import { PermissionGuard } from "./PermissionGuard";
 
 // Layouts (Keep Eager)
 import { AuthLayout } from "../layouts/AuthLayout";
@@ -69,19 +70,25 @@ export const AppRoutes = () => {
 
             <Route path="/tests" element={<TestList />} />
             <Route path="/tests/view/:id" element={<EditTest />} />
+            {/* Test Access Control */}
+            <Route element={<PermissionGuard requiredPermission="manage_tests" />}>
+              <Route path="/tests/create" element={<CreateTest />} />
+              <Route path="/tests/edit" element={<EditTest />} />
+              <Route path="/tests/edit/:id" element={<EditTest />} />
+            </Route>
+
+            {/* Doctor Access Control */}
+            <Route element={<PermissionGuard requiredPermission="manage_doctors" />}>
+              <Route path="/doctors" element={<DoctorList />} />
+              <Route path="/doctors/create" element={<CreateDoctor />} />
+              <Route path="/doctors/edit/:id" element={<EditDoctor />} />
+            </Route>
+
             {/* Admin Only Views */}
             <Route element={<RoleGuard allowedRoles={["admin"]} />}>
               <Route path="/users" element={<UserList />} />
               <Route path="/users/create" element={<CreateUser />} />
               <Route path="/users/edit/:id" element={<EditUser />} />
-
-              <Route path="/doctors" element={<DoctorList />} />
-              <Route path="/doctors/create" element={<CreateDoctor />} />
-              <Route path="/doctors/edit/:id" element={<EditDoctor />} />
-
-              <Route path="/tests/create" element={<CreateTest />} />
-              <Route path="/tests/edit" element={<EditTest />} />
-              <Route path="/tests/edit/:id" element={<EditTest />} />
 
               <Route path="/settings" element={<Settings />} />
             </Route>

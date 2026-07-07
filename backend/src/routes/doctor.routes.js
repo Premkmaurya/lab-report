@@ -1,4 +1,5 @@
 const express = require("express");
+const Doctor = require("../models/doctor.model");
 const auditMiddleware = require("../middlewares/audit.middleware");
 const multer = require("multer");
 const path = require("path");
@@ -44,6 +45,7 @@ router.post(
 router.patch(
   "/:id",
   authMiddleware.authorizePermissions("manage_doctors"),
+  authMiddleware.authorizeOwnership(Doctor),
   upload.single("signature"),
   validateUpdateDoctor,
   validateRequest,
@@ -52,7 +54,8 @@ router.patch(
 );
 router.delete(
   "/:id",
-  authMiddleware.authorizeRoles("admin"), // only admin can delete doctor
+  authMiddleware.authorizePermissions("manage_doctors"),
+  authMiddleware.authorizeOwnership(Doctor),
   validateDeleteDoctor,
   validateRequest,
   auditMiddleware("DELETED", "Doctor"),

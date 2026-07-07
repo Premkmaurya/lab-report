@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
+import { canManageDoctors } from "../../config/permissions";
 import { doctorService } from "../../services/doctorService";
 import { Plus, Edit2, Trash2, ShieldAlert } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -10,7 +11,7 @@ export const DoctorList = () => {
   const [errorMsg, setErrorMsg] = useState("");
   const queryClient = useQueryClient();
 
-  const isAdmin = user?.role === "admin";
+  const canManage = canManageDoctors(user);
 
   const { data, isLoading: loading, error: fetchError } = useQuery({
     queryKey: ['doctors'],
@@ -72,7 +73,7 @@ export const DoctorList = () => {
             Manage referring doctors and digital signatures for report printing.
           </p>
         </div>
-        {isAdmin && (
+        {canManage && (
           <div>
             <Link
               to="/doctors/create"
@@ -143,25 +144,49 @@ export const DoctorList = () => {
                 </div>
               </div>
 
-              {/* Admin Actions */}
-              {isAdmin && (
-                <div className="flex items-center justify-end space-x-2 mt-6 pt-4 border-t border-cream-border">
-                  <Link
-                    to={`/doctors/edit/${doc._id}`}
-                    className="inline-flex items-center space-x-1 border border-cream-border text-graphite bg-paper-white hover:bg-warm-canvas px-3 py-1.5 rounded-buttons text-xs transition duration-200 cursor-pointer"
-                  >
-                    <Edit2 className="h-3.5 w-3.5" />
-                    <span>Edit</span>
-                  </Link>
-                  <button
-                    onClick={() => handleDeleteDoctor(doc._id)}
-                    className="inline-flex items-center space-x-1 border border-red-200 text-red-700 bg-red-50/50 hover:bg-red-50 px-3 py-1.5 rounded-buttons text-xs transition duration-200 cursor-pointer"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                    <span>Delete</span>
-                  </button>
-                </div>
-              )}
+              {/* Admin/Owner Actions */}
+              {(() => {
+                const isOwner = user?.role === 'admin' || (user?._id && doc.createdBy?._id && user._id === doc.createdBy._id) || (user?.id && doc.createdBy?._id && user.id === doc.createdBy._id);
+                
+                if (isOwner) {
+                  return (
+                    <div className="flex flex-col mt-6 pt-4 border-t border-cream-border space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="text-[10px] text-stone">
+                          {doc.createdBy && <div>Created by: {doc.createdBy.username}</div>}
+                          {doc.updatedBy && doc.updatedBy._id !== doc.createdBy?._id && <div>Updated by: {doc.updatedBy.username}</div>}
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Link
+                            to={`/doctors/edit/${doc._id}`}
+                            className="inline-flex items-center space-x-1 border border-cream-border text-graphite bg-paper-white hover:bg-warm-canvas px-3 py-1.5 rounded-buttons text-xs transition duration-200 cursor-pointer"
+                          >
+                            <Edit2 className="h-3.5 w-3.5" />
+                            <span>Edit</span>
+                          </Link>
+                          <button
+                            onClick={() => handleDeleteDoctor(doc._id)}
+                            className="inline-flex items-center space-x-1 border border-red-200 text-red-700 bg-red-50/50 hover:bg-red-50 px-3 py-1.5 rounded-buttons text-xs transition duration-200 cursor-pointer"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                            <span>Delete</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
+
+                // Not the owner
+                return (
+                  <div className="flex items-center justify-between mt-6 pt-4 border-t border-cream-border">
+                    <div className="text-[10px] text-stone">
+                      {doc.createdBy && <div>Owner: {doc.createdBy.username}</div>}
+                      {doc.updatedBy && <div>Last Updated by: {doc.updatedBy.username}</div>}
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
           ))
         )}

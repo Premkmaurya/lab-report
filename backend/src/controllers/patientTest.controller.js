@@ -3,6 +3,20 @@ const Test = require("../models/test.model");
 const asyncHandler = require("../utils/asyncHandler");
 const { BadRequestError, NotFoundError } = require("../utils/errors");
 
+const computeTotalPrice = (report) => {
+  let total = 0;
+  if (report.tests && Array.isArray(report.tests)) {
+    report.tests.forEach((t) => {
+      if (t.testId && Array.isArray(t.testId.subTests)) {
+        t.testId.subTests.forEach((st) => {
+          total += st.price || 0;
+        });
+      }
+    });
+  }
+  return total;
+};
+
 const getReportAndTestTemplate = asyncHandler(async (req, res) => {
   const { id, testId } = req.params;
 
@@ -104,11 +118,17 @@ const getPatientTests = asyncHandler(async (req, res) => {
         select: "name"
       }
     })
-    .sort({ createdAt: -1 });
+    .sort({ createdAt: -1 })
+    .lean();
+
+  const formattedPatientTests = patientTests.map(report => ({
+    ...report,
+    totalPrice: computeTotalPrice(report),
+  }));
 
   res.status(200).json({
     success: true,
-    patientTests,
+    patientTests: formattedPatientTests,
   });
 });
 
@@ -128,9 +148,12 @@ const getPatientTestById = asyncHandler(async (req, res) => {
     throw new NotFoundError("Patient test not found");
   }
 
+  const reportObj = patientTest.toObject();
+  reportObj.totalPrice = computeTotalPrice(reportObj);
+
   res.status(200).json({
     success: true,
-    patientTest,
+    patientTest: reportObj,
   });
 });
 
@@ -147,12 +170,17 @@ const getTestsByPatientId = asyncHandler(async (req, res) => {
         select: "name"
       }
     })
-    .sort({ createdAt: -1 });
+    .sort({ createdAt: -1 })
+    .lean();
 
+  const formattedPatientTests = patientTests.map(report => ({
+    ...report,
+    totalPrice: computeTotalPrice(report),
+  }));
 
   res.status(200).json({
     success: true,
-    patientTests,
+    patientTests: formattedPatientTests,
   });
 });
 
@@ -170,9 +198,23 @@ const createPatientTest = asyncHandler(async (req, res) => {
     date: new Date(),
   });
 
+  const populatedPatientTest = await PatientTest.findById(patientTest._id)
+    .populate("patientId", "name age")
+    .populate("createdBy", "username email")
+    .populate({
+      path: "tests.testId",
+      populate: {
+        path: "departmentId",
+        select: "name"
+      }
+    });
+
+  const reportObj = populatedPatientTest.toObject();
+  reportObj.totalPrice = computeTotalPrice(reportObj);
+
   res.status(201).json({
     success: true,
-    patientTest,
+    patientTest: reportObj,
   });
 });
 
@@ -213,9 +255,12 @@ const updatePatientTest = asyncHandler(async (req, res) => {
     throw new NotFoundError("Patient test not found");
   }
 
+  const reportObj = patientTest.toObject();
+  reportObj.totalPrice = computeTotalPrice(reportObj);
+
   res.status(200).json({
     success: true,
-    patientTest,
+    patientTest: reportObj,
   });
 });
 
@@ -265,10 +310,13 @@ const addTestToReport = asyncHandler(async (req, res) => {
       }
     });
 
+  const reportObj = updatedTest.toObject();
+  reportObj.totalPrice = computeTotalPrice(reportObj);
+
   res.status(200).json({
     success: true,
     message: "Test added successfully",
-    patientTest: updatedTest,
+    patientTest: reportObj,
   });
 });
 

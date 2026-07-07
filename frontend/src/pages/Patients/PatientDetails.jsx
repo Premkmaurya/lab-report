@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
+import { canManagePatients, canManageReports, canPrintReports } from "../../config/permissions";
 import { patientService } from "../../services/patientService";
 import { reportService } from "../../services/reportService";
 import { testService } from "../../services/testService";
@@ -108,7 +109,9 @@ export const PatientDetails = () => {
     }
   };
 
-  const canCreateReport = user?.role === "admin" || user?.role === "user";
+  const _canManagePatients = canManagePatients(user);
+  const _canManageReports = canManageReports(user);
+  const _canPrintReports = canPrintReports(user);
 
   useEffect(() => {
     const fetchDetails = async () => {
@@ -181,12 +184,14 @@ export const PatientDetails = () => {
                 </p>
               </div>
               <div className="flex flex-wrap gap-3">
-                <Link
-                  to={`/patients/edit/${patient._id}`}
-                  className="bg-electric-cobalt border border-cream-border text-white font-medium py-2.5 px-6 rounded-buttons transition duration-200 text-sm text-center"
-                >
-                  Edit Profile
-                </Link>
+                {_canManagePatients && (
+                  <Link
+                    to={`/patients/edit/${patient._id}`}
+                    className="bg-electric-cobalt border border-cream-border text-white font-medium py-2.5 px-6 rounded-buttons transition duration-200 text-sm text-center"
+                  >
+                    Edit Profile
+                  </Link>
+                )}
               </div>
             </div>
 
@@ -263,7 +268,7 @@ export const PatientDetails = () => {
                   <p className="text-xs text-stone mt-1 mb-4">
                     Assigned reports and values will be shown here.
                   </p>
-                  {canCreateReport && (
+                  {_canManageReports && (
                     <Link
                       to={`/reports/create/${patient._id}`}
                       className="inline-flex items-center space-x-2 bg-electric-cobalt text-paper-white font-medium py-2 px-5 rounded-buttons hover:bg-opacity-95 transition duration-200 text-xs"
@@ -291,20 +296,24 @@ export const PatientDetails = () => {
                         </div>
                       </div>
                       <div className="flex items-center space-x-3">
-                        <button
-                          onClick={() => openAddTestModal(report)}
-                          className="text-xs font-semibold text-charcoal hover:underline flex items-center space-x-1"
-                        >
-                          <Plus className="h-3 w-3" />
-                          <span>Add Test</span>
-                        </button>
-                        <button
-                          onClick={() => triggerPrintRequest(report)}
-                          className="text-xs font-semibold text-electric-cobalt hover:underline flex items-center space-x-1"
-                        >
-                          <span>Print Report</span>
-                          <Printer className="h-3 w-3" />
-                        </button>
+                        {_canManageReports && (
+                          <button
+                            onClick={() => openAddTestModal(report)}
+                            className="text-xs font-semibold text-charcoal hover:underline flex items-center space-x-1"
+                          >
+                            <Plus className="h-3 w-3" />
+                            <span>Add Test</span>
+                          </button>
+                        )}
+                        {_canPrintReports && (
+                          <button
+                            onClick={() => triggerPrintRequest(report)}
+                            className="text-xs font-semibold text-electric-cobalt hover:underline flex items-center space-x-1"
+                          >
+                            <span>Print Report</span>
+                            <Printer className="h-3 w-3" />
+                          </button>
+                        )}
                       </div>
                     </div>
 

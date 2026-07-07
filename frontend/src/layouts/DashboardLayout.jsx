@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 
 export const DashboardLayout = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, hasPermission } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -76,13 +76,15 @@ export const DashboardLayout = () => {
       name: "Doctors",
       path: "/doctors",
       icon: Stethoscope,
-      roles: ["admin"],
+      roles: ["admin", "user"],
+      permission: "manage_doctors",
     },
     {
       name: "Tests",
       path: "/tests",
       icon: FlaskConical,
       roles: ["admin", "user"],
+      permission: "manage_tests",
     },
     {
       name: "Settings",
@@ -92,9 +94,11 @@ export const DashboardLayout = () => {
     },
   ];
 
-  const visibleNavItems = navItems.filter((item) =>
-    item.roles.includes(user?.role)
-  );
+  const visibleNavItems = navItems.filter((item) => {
+    if (!item.roles.includes(user?.role)) return false;
+    if (item.permission && !hasPermission(item.permission)) return false;
+    return true;
+  });
 
   return (
     <div className="flex h-screen overflow-hidden bg-warm-canvas">

@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { reportService } from "../../services/reportService";
 import { Plus, Search, FileText, Calendar, Filter } from "lucide-react";
+import { useAuth } from "../../hooks/useAuth";
+import { canManagePatients } from "../../config/permissions";
 
 import { useQuery } from "@tanstack/react-query";
 
@@ -10,6 +12,7 @@ export const PatientList = () => {
   const [activeFilter, setActiveFilter] = useState("today");
   const [customStartDate, setCustomStartDate] = useState("");
   const [customEndDate, setCustomEndDate] = useState("");
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   const tzOffset = new Date().getTimezoneOffset();
@@ -62,13 +65,15 @@ export const PatientList = () => {
           </p>
         </div>
         <div>
-          <Link
-            to="/patients/create"
-            className="inline-flex items-center space-x-2 bg-electric-cobalt text-paper-white font-medium py-2.5 px-6 rounded-buttons hover:bg-opacity-95 transition duration-200 text-sm"
-          >
-            <Plus className="h-4 w-4" />
-            <span>Add Patient & Report</span>
-          </Link>
+          {canManagePatients(user) && (
+            <Link
+              to="/patients/create"
+              className="inline-flex items-center space-x-2 bg-electric-cobalt text-paper-white font-medium py-2.5 px-6 rounded-buttons hover:bg-opacity-95 transition duration-200 text-sm"
+            >
+              <Plus className="h-4 w-4" />
+              <span>Add Patient & Report</span>
+            </Link>
+          )}
         </div>
       </div>
 
@@ -150,6 +155,9 @@ export const PatientList = () => {
                   <th className="px-6 py-4 font-abcfavoritvariable text-xs font-bold text-graphite uppercase tracking-wider">
                     Report Date
                   </th>
+                  <th className="px-6 py-4 font-abcfavoritvariable text-xs font-bold text-graphite uppercase tracking-wider">
+                    Total Price
+                  </th>
                   <th className="px-6 py-4 font-abcfavoritvariable text-xs font-bold text-graphite uppercase tracking-wider text-right">
                     Actions
                   </th>
@@ -158,7 +166,7 @@ export const PatientList = () => {
               <tbody className="divide-y divide-cream-border">
                 {filteredReports.length === 0 ? (
                   <tr>
-                    <td colSpan="4" className="px-6 py-16 text-center">
+                    <td colSpan="5" className="px-6 py-16 text-center">
                       <div className="flex flex-col items-center">
                         <div className="bg-warm-canvas p-4 rounded-full mb-3">
                           <FileText className="h-8 w-8 text-stone/50" />
@@ -189,6 +197,9 @@ export const PatientList = () => {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-stone font-mono">
                           {new Date(report.date || report.createdAt).toLocaleDateString()}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-charcoal font-semibold">
+                          ₹{report.totalPrice || 0}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-right">
                           <div className="flex items-center justify-end space-x-2">
