@@ -2,18 +2,18 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { userService } from "../../services/userService";
 import { Plus, Check, X, ShieldAlert } from "lucide-react";
+import { toast } from "../../lib/toast";
 
 export const UserList = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [actionError, setActionError] = useState("");
 
   const fetchUsers = async () => {
     try {
       const data = await userService.getAllUsers();
       setUsers(data.users || []);
     } catch (err) {
-      setActionError("Failed to fetch users list.");
+      toast.error("Failed to fetch users list.");
       console.error(err);
     } finally {
       setLoading(false);
@@ -25,19 +25,18 @@ export const UserList = () => {
   }, []);
 
   const handleToggleStatus = async (id, currentStatus) => {
-    try {
-      setActionError("");
-      const newStatus = !currentStatus;
-      await userService.updateUserStatus(id, newStatus);
-      // Update local state
-      setUsers((prev) =>
-        prev.map((u) => (u.id === id ? { ...u, isAuthorized: newStatus } : u))
-      );
-    } catch (err) {
-      setActionError(
-        err.response?.data?.message || "Failed to update user authorization status."
-      );
-    }
+    const newStatus = !currentStatus;
+    
+    toast.promise(userService.updateUserStatus(id, newStatus), {
+      loading: "Updating status...",
+      success: () => {
+        setUsers((prev) =>
+          prev.map((u) => (u.id === id ? { ...u, isAuthorized: newStatus } : u))
+        );
+        return "User status updated successfully";
+      },
+      error: (err) => err.response?.data?.message || "Failed to update user authorization status."
+    });
   };
 
   if (loading) {
@@ -74,12 +73,6 @@ export const UserList = () => {
         </div>
       </div>
 
-      {actionError && (
-        <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-cards flex items-center space-x-2">
-          <ShieldAlert className="h-4 w-4 shrink-0" />
-          <span>{actionError}</span>
-        </div>
-      )}
 
       {/* Users Table */}
       <div className="bg-paper-white border border-cream-border rounded-cards overflow-hidden">

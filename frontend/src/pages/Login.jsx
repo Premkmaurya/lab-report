@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
+import { toast } from "../lib/toast";
 
 export const Login = () => {
   const { login, authError } = useAuth();
@@ -17,16 +18,20 @@ export const Login = () => {
 
   const onSubmit = async (data) => {
     setIsSubmitting(true);
-    console.log(import.meta.env.VITE_BACKEND_URL)
     setLocalError("");
-    try {
-      await login(data.email, data.password);
-      navigate("/");
-    } catch (err) {
-      setLocalError(err.message || "Invalid credentials");
-    } finally {
-      setIsSubmitting(false);
-    }
+    
+    toast.promise(login(data.email, data.password), {
+      loading: "Signing in...",
+      success: () => {
+        navigate("/");
+        return "Logged in successfully";
+      },
+      error: (err) => {
+        setLocalError(err.message || "Invalid credentials");
+        return err.message || "Invalid credentials";
+      },
+      finally: () => setIsSubmitting(false)
+    });
   };
 
   return (

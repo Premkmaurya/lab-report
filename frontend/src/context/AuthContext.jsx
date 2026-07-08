@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect } from "react";
 import API from "../services/api";
+import { toast } from "../lib/toast";
 
 export const AuthContext = createContext(null);
 
@@ -102,8 +103,10 @@ export const AuthProvider = ({ children }) => {
     setLoading(true);
     try {
       await API.post("/auth/logout");
+      toast.success("Logged out successfully");
     } catch (error) {
       console.error("Logout error:", error);
+      toast.error("Failed to logout cleanly, but local session cleared.");
     } finally {
       setUser(null);
       setIsAuthorizedUser(false);

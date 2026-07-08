@@ -8,9 +8,15 @@ const subTestSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    type: {
+      type: String,
+      enum: ['parameter', 'section'],
+      default: 'parameter',
+    },
     price: {
       type: Number,
-      required: true,
+      required: function() { return this.type === 'parameter'; },
+      default: 0,
     },
     normalRange: {
       type: String,

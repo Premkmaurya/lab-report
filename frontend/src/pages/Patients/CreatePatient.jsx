@@ -8,12 +8,12 @@ import { testService } from "../../services/testService";
 import { ArrowLeft, ShieldAlert } from "lucide-react";
 import DoctorAutocomplete from "../../components/DoctorAutocomplete";
 import TestMultiSelect from "../../components/TestMultiSelect";
+import { toast } from "../../lib/toast";
 
 export const CreatePatient = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState("");
   const [doctors, setDoctors] = useState([]);
 
   const [step, setStep] = useState(1);
@@ -65,51 +65,42 @@ export const CreatePatient = () => {
 
   const onSubmit = async (data) => {
     setIsSubmitting(true);
-    setSubmitError("");
-    try {
-      // Cast age to number
-      const payload = {
-        ...data,
-        age: parseInt(data.age, 10),
-      };
+    
+    // Cast age to number
+    const payload = {
+      ...data,
+      age: parseInt(data.age, 10),
+    };
 
-      // Create patient first
-      const response = await patientService.createPatient(payload);
-      if (response.success && response.patient) {
-        // Create patient tests if tests were selected
-        if (selectedTestIds.length > 0) {
-          try {
+    toast.promise(patientService.createPatient(payload), {
+      loading: "Saving Patient...",
+      success: (response) => {
+        if (response.success && response.patient) {
+          if (selectedTestIds.length > 0) {
             const tests = selectedTestIds.map((t) => ({
               testId: t.testId,
               testName: t.testName,
             }));
-            const result = await patientService.createPatientTests(
-              response.patient._id,
-              tests,
-            );
-          } catch (testErr) {
-            console.warn("Failed to assign tests to patient", testErr);
-            // Don't fail the entire flow if test assignment fails
+            patientService.createPatientTests(response.patient._id, tests)
+              .catch((testErr) => {
+                console.warn("Failed to assign tests to patient", testErr);
+                toast.warning("Patient created, but failed to assign some tests.");
+              });
           }
+          queryClient.invalidateQueries({ queryKey: ['patients'] });
+          queryClient.invalidateQueries({ queryKey: ['reports'] });
+          queryClient.invalidateQueries({ queryKey: ['summary'] });
+          navigate(`/`);
+        } else {
+          navigate("/patients");
         }
-        
-        // Invalidate queries to refresh dashboard and lists
-        queryClient.invalidateQueries({ queryKey: ['patients'] });
-        queryClient.invalidateQueries({ queryKey: ['reports'] });
-        queryClient.invalidateQueries({ queryKey: ['summary'] });
-        
-        navigate(`/`);
-      } else {
-        navigate("/patients");
-      }
-    } catch (err) {
-      setSubmitError(
-        err.response?.data?.message ||
-          "Failed to create patient. Please try again.",
-      );
-    } finally {
-      setIsSubmitting(false);
-    }
+        return "Patient created successfully";
+      },
+      error: (err) => {
+        return err.response?.data?.message || "Failed to create patient";
+      },
+      finally: () => setIsSubmitting(false)
+    });
   };
 
   return (
@@ -139,13 +130,6 @@ export const CreatePatient = () => {
             : "Select the tests to assign to this patient."}
         </p>
       </div>
-
-      {submitError && (
-        <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-cards flex items-center space-x-2">
-          <ShieldAlert className="h-4 w-4 shrink-0" />
-          <span>{submitError}</span>
-        </div>
-      )}
 
       {/* Form Card */}
       <div className="bg-paper-white border border-cream-border rounded-cards p-6 md:p-8">

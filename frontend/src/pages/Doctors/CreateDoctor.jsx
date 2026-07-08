@@ -3,11 +3,11 @@ import { useForm } from "react-hook-form";
 import { useNavigate, Link } from "react-router-dom";
 import { doctorService } from "../../services/doctorService";
 import { ArrowLeft, ShieldAlert, Upload } from "lucide-react";
+import { toast } from "../../lib/toast";
 
 export const CreateDoctor = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState("");
   const [fileName, setFileName] = useState("");
 
   const {
@@ -24,29 +24,28 @@ export const CreateDoctor = () => {
 
   const onSubmit = async (data) => {
     setIsSubmitting(true);
-    setSubmitError("");
-    try {
-      const formData = new FormData();
-      formData.append("name", data.name);
-      formData.append("qualification", data.qualification);
+    
+    const formData = new FormData();
+    formData.append("name", data.name);
+    formData.append("qualification", data.qualification);
 
-      if (data.signature && data.signature[0]) {
-        formData.append("signature", data.signature[0]);
-      } else {
-        setSubmitError("Please upload a doctor's signature file.");
-        setIsSubmitting(false);
-        return;
-      }
-
-      await doctorService.createDoctor(formData);
-      navigate("/doctors");
-    } catch (err) {
-      setSubmitError(
-        err.response?.data?.message || "Failed to add doctor. Please try again."
-      );
-    } finally {
+    if (data.signature && data.signature[0]) {
+      formData.append("signature", data.signature[0]);
+    } else {
+      toast.error("Please upload a doctor's signature file.");
       setIsSubmitting(false);
+      return;
     }
+
+    toast.promise(doctorService.createDoctor(formData), {
+      loading: "Saving doctor profile...",
+      success: () => {
+        navigate("/doctors");
+        return "Doctor added successfully";
+      },
+      error: (err) => err.response?.data?.message || "Failed to add doctor. Please try again.",
+      finally: () => setIsSubmitting(false)
+    });
   };
 
   return (
@@ -75,12 +74,6 @@ export const CreateDoctor = () => {
         </p>
       </div>
 
-      {submitError && (
-        <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-cards flex items-center space-x-2">
-          <ShieldAlert className="h-4 w-4 shrink-0" />
-          <span>{submitError}</span>
-        </div>
-      )}
 
       {/* Form Card */}
       <div className="bg-paper-white border border-cream-border rounded-cards p-6 md:p-8">

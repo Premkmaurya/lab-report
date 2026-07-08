@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { useNavigate, Link } from "react-router-dom";
 import { userService } from "../../services/userService";
 import { ArrowLeft, ShieldAlert } from "lucide-react";
+import { toast } from "../../lib/toast";
 
 const AVAILABLE_PERMISSIONS = [
   { key: 'manage_doctors', label: 'Manage Doctors' },
@@ -12,7 +13,6 @@ const AVAILABLE_PERMISSIONS = [
 export const CreateUser = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState("");
   const [selectedPermissions, setSelectedPermissions] = useState([]);
 
   const {
@@ -30,17 +30,16 @@ export const CreateUser = () => {
 
   const onSubmit = async (data) => {
     setIsSubmitting(true);
-    setSubmitError("");
-    try {
-      await userService.createUser({ ...data, permissions: selectedPermissions });
-      navigate("/users");
-    } catch (err) {
-      setSubmitError(
-        err.response?.data?.message || "Failed to create user. Please try again."
-      );
-    } finally {
-      setIsSubmitting(false);
-    }
+    
+    toast.promise(userService.createUser({ ...data, permissions: selectedPermissions }), {
+      loading: "Creating user...",
+      success: () => {
+        navigate("/users");
+        return "User created successfully";
+      },
+      error: (err) => err.response?.data?.message || "Failed to create user. Please try again.",
+      finally: () => setIsSubmitting(false)
+    });
   };
 
   return (
@@ -69,12 +68,6 @@ export const CreateUser = () => {
         </p>
       </div>
 
-      {submitError && (
-        <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-cards flex items-center space-x-2">
-          <ShieldAlert className="h-4 w-4 shrink-0" />
-          <span>{submitError}</span>
-        </div>
-      )}
 
       {/* Form Card */}
       <div className="bg-paper-white border border-cream-border rounded-cards p-6 md:p-8">

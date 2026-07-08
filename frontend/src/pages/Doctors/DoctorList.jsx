@@ -4,11 +4,11 @@ import { useAuth } from "../../hooks/useAuth";
 import { canManageDoctors } from "../../config/permissions";
 import { doctorService } from "../../services/doctorService";
 import { Plus, Edit2, Trash2, ShieldAlert } from "lucide-react";
+import { toast } from "../../lib/toast";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 export const DoctorList = () => {
   const { user } = useAuth();
-  const [errorMsg, setErrorMsg] = useState("");
   const queryClient = useQueryClient();
 
   const canManage = canManageDoctors(user);
@@ -23,9 +23,7 @@ export const DoctorList = () => {
   
   useEffect(() => {
     if (fetchError) {
-      setErrorMsg("Failed to load doctor listings.");
-    } else {
-      setErrorMsg("");
+      toast.error("Failed to load doctor listings.");
     }
   }, [fetchError]);
 
@@ -33,21 +31,21 @@ export const DoctorList = () => {
     if (!window.confirm("Are you sure you want to delete this doctor?")) {
       return;
     }
-    try {
-      setErrorMsg("");
-      await doctorService.deleteDoctor(id);
-      queryClient.setQueryData(['doctors'], (old) => {
-        if (!old) return old;
-        return {
-          ...old,
-          doctors: old.doctors.filter((d) => d._id !== id)
-        };
-      });
-    } catch (err) {
-      setErrorMsg(
-        err.response?.data?.message || "Failed to delete doctor entry."
-      );
-    }
+    
+    toast.promise(doctorService.deleteDoctor(id), {
+      loading: "Deleting doctor...",
+      success: () => {
+        queryClient.setQueryData(['doctors'], (old) => {
+          if (!old) return old;
+          return {
+            ...old,
+            doctors: old.doctors.filter((d) => d._id !== id)
+          };
+        });
+        return "Doctor removed successfully.";
+      },
+      error: (err) => err.response?.data?.message || "Failed to delete doctor entry."
+    });
   };
 
   if (loading) {
@@ -86,12 +84,6 @@ export const DoctorList = () => {
         )}
       </div>
 
-      {errorMsg && (
-        <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-cards flex items-center space-x-2">
-          <ShieldAlert className="h-4 w-4 shrink-0" />
-          <span>{errorMsg}</span>
-        </div>
-      )}
 
       {/* Grid of Doctor Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

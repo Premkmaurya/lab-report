@@ -1,5 +1,5 @@
 const express = require("express");
-const { authLimiter, apiLimiter } = require("../middlewares/rateLimit");
+
 const auditMiddleware = require("../middlewares/audit.middleware");
 const {
   signup,
@@ -31,7 +31,6 @@ router.post(
 );
 router.post(
   "/login",
-  authLimiter,
   validateLogin,
   validateRequest,
   auditMiddleware("LOGIN", "Auth"),
@@ -43,7 +42,6 @@ router.get("/me", authMiddleware.userAuth, getMe);
 // Admin routes
 router.post(
   "/users",
-  apiLimiter,
   authMiddleware.userAuth,
   authMiddleware.authorizeRoles("admin"),
   validateCreateUser,
@@ -53,21 +51,18 @@ router.post(
 );
 router.get(
   "/users",
-  apiLimiter,
   authMiddleware.userAuth,
   authMiddleware.authorizeRoles("admin"),
   getAllUsers,
 );
 router.get(
   "/users/:id",
-  apiLimiter,
   authMiddleware.userAuth,
   authMiddleware.authorizeRoles("admin"),
   getUserById,
 );
 router.patch(
   "/users/:id/status",
-  apiLimiter,
   authMiddleware.userAuth,
   authMiddleware.authorizeRoles("admin"),
   validateUpdateUserStatus,

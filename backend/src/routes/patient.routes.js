@@ -1,5 +1,5 @@
 const express = require("express");
-const { reportLimiter } = require("../middlewares/rateLimit");
+
 const auditMiddleware = require("../middlewares/audit.middleware");
 
 const {
@@ -55,7 +55,6 @@ router.get(
 // Create patient
 router.post(
   "/",
-  reportLimiter,
   validateCreatePatient,
   validateRequest,
   auditMiddleware("CREATED", "Patient"),
@@ -65,7 +64,6 @@ router.post(
 // Update patient
 router.patch(
   "/:id",
-  reportLimiter,
   validateUpdatePatient,
   validateRequest,
   auditMiddleware("UPDATED", "Patient"),

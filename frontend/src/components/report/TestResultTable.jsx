@@ -27,9 +27,8 @@ export const TestResultTable = ({ test, rowSpacing = 4, template }) => {
     <>
       <tr className="bg-white">
         <td colSpan="4" className="pt-6 pb-2 px-3 text-left">
-          <span 
-            className="text-base font-bold text-[#0F172A] underline decoration-1 underline-offset-2"
-            style={profileStyles}
+          <span
+            className="text-lg font-bold text-[#0F172A] underline decoration-1 underline-offset-4"
           >
             {test.testName}
           </span>
@@ -37,6 +36,19 @@ export const TestResultTable = ({ test, rowSpacing = 4, template }) => {
       </tr>
       {test.result && test.result.length > 0 ? (
         test.result.map((res, index) => {
+          if (res.type === 'section') {
+            return (
+              <tr key={index} className="bg-white">
+                <td colSpan="4" className="pt-6 pb-2 border-y border-stone/20">
+                  <span
+                    className="text-sm font-extrabold text-left text-[#0F172A] uppercase tracking-wider block"
+                  >
+                    {res.parameter}
+                  </span>
+                </td>
+              </tr>
+            );
+          }
           return (
             <tr key={index} className="bg-white">
               <td
@@ -44,7 +56,7 @@ export const TestResultTable = ({ test, rowSpacing = 4, template }) => {
                 style={{
                   paddingTop: `${rowSpacing}px`,
                   paddingBottom: `${rowSpacing}px`,
-                  ...parameterStyles
+                  ...parameterStyles,
                 }}
               >
                 {res.parameter || "N/A"}
@@ -54,7 +66,7 @@ export const TestResultTable = ({ test, rowSpacing = 4, template }) => {
                 style={{
                   paddingTop: `${rowSpacing}px`,
                   paddingBottom: `${rowSpacing}px`,
-                  ...resultStyles
+                  ...resultStyles,
                 }}
               >
                 {res.value}
@@ -64,30 +76,27 @@ export const TestResultTable = ({ test, rowSpacing = 4, template }) => {
                 style={{
                   paddingTop: `${rowSpacing}px`,
                   paddingBottom: `${rowSpacing}px`,
-                  ...normalRangeStyles
+                  ...unitStyles,
                 }}
               >
-                {res.normalRange}
+                {res.unit}
               </td>
               <td
                 className="px-3 text-left text-[#475569]"
                 style={{
                   paddingTop: `${rowSpacing}px`,
                   paddingBottom: `${rowSpacing}px`,
-                  ...unitStyles
+                  ...normalRangeStyles,
                 }}
               >
-                {res.unit}
+                {res.normalRange}
               </td>
             </tr>
           );
         })
       ) : (
         <tr>
-          <td
-            colSpan="4"
-            className="py-4 text-center text-[#475569] italic"
-          >
+          <td colSpan="4" className="py-4 text-center text-[#475569] italic">
             No parameters recorded for this test.
           </td>
         </tr>

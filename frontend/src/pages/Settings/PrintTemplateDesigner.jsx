@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Save, RotateCcw } from "lucide-react";
 import { usePrintTemplate } from "../../context/PrintTemplateContext";
 import { ReportLayout } from "../../components/report/ReportLayout";
+import { toast } from "../../lib/toast";
 
 export const PrintTemplateDesigner = () => {
   const navigate = useNavigate();
@@ -47,22 +48,20 @@ export const PrintTemplateDesigner = () => {
   };
 
   const handleSave = async () => {
-    try {
-      await updateTemplate(template);
-      alert("Template saved successfully!");
-    } catch (error) {
-      alert("Failed to save template.");
-    }
+    toast.promise(updateTemplate(template), {
+      loading: "Saving template...",
+      success: "Template saved successfully!",
+      error: "Failed to save template."
+    });
   };
 
   const handleReset = async () => {
     if (window.confirm("Are you sure you want to restore the factory default layout? This cannot be undone.")) {
-      try {
-        await resetTemplate();
-        alert("Template reset to default!");
-      } catch (error) {
-        alert("Failed to reset template.");
-      }
+      toast.promise(resetTemplate(), {
+        loading: "Resetting template...",
+        success: "Template reset to default!",
+        error: "Failed to reset template."
+      });
     }
   };
 
@@ -107,16 +106,6 @@ export const PrintTemplateDesigner = () => {
     ]
   };
 
-  const elementOptions = [
-    { value: "patientName", label: "Patient Name" },
-    { value: "departmentHeading", label: "Department Heading" },
-    { value: "profileName", label: "Profile Name" },
-    { value: "tableHeader", label: "Table Header" },
-    { value: "parameter", label: "Parameter" },
-    { value: "result", label: "Result" },
-    { value: "unit", label: "Normal Range & Unit" },
-    { value: "footer", label: "Footer / Signatures" },
-  ];
 
   return (
     <div className="h-[calc(100vh-80px)] flex flex-col md:flex-row gap-6 -m-4 md:-m-6 lg:-m-8 p-4 md:p-6 lg:p-8 bg-warm-canvas">
@@ -210,64 +199,6 @@ export const PrintTemplateDesigner = () => {
             </div>
           )}
 
-          {activeTab === 'elements' && (
-            <div className="space-y-4">
-              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Element Styles</h3>
-              <div>
-                <label className="block text-xs font-medium text-slate-700 mb-1">Select Element to Edit</label>
-                <select className="w-full text-sm border-electric-cobalt text-electric-cobalt font-medium rounded bg-lavender-mist/30" value={selectedElement} onChange={(e) => setSelectedElement(e.target.value)}>
-                  {elementOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
-                </select>
-              </div>
-
-              <div className="p-4 bg-slate-50 border border-slate-200 rounded space-y-4 mt-4">
-                <div>
-                  <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">Font Size</label>
-                  <input type="text" className="w-full text-sm border-slate-300 rounded" value={template.elements[selectedElement]?.fontSize || ''} onChange={(e) => handleElementChange('fontSize', e.target.value)} placeholder="e.g. 14px" />
-                </div>
-                <div>
-                  <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">Font Weight</label>
-                  <select className="w-full text-sm border-slate-300 rounded" value={template.elements[selectedElement]?.fontWeight || ''} onChange={(e) => handleElementChange('fontWeight', e.target.value)}>
-                    <option value="">Inherit</option>
-                    <option value="400">Normal (400)</option>
-                    <option value="500">Medium (500)</option>
-                    <option value="600">Semibold (600)</option>
-                    <option value="700">Bold (700)</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">Text Color</label>
-                  <input type="text" className="w-full text-sm border-slate-300 rounded" value={template.elements[selectedElement]?.color || ''} onChange={(e) => handleElementChange('color', e.target.value)} placeholder="e.g. #0F172A" />
-                </div>
-                <div>
-                  <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">Text Alignment</label>
-                  <select className="w-full text-sm border-slate-300 rounded" value={template.elements[selectedElement]?.textAlign || ''} onChange={(e) => handleElementChange('textAlign', e.target.value)}>
-                    <option value="">Inherit</option>
-                    <option value="left">Left</option>
-                    <option value="center">Center</option>
-                    <option value="right">Right</option>
-                  </select>
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">Transform</label>
-                    <select className="w-full text-sm border-slate-300 rounded" value={template.elements[selectedElement]?.textTransform || ''} onChange={(e) => handleElementChange('textTransform', e.target.value)}>
-                      <option value="">None</option>
-                      <option value="uppercase">Uppercase</option>
-                      <option value="capitalize">Capitalize</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">Decoration</label>
-                    <select className="w-full text-sm border-slate-300 rounded" value={template.elements[selectedElement]?.textDecoration || ''} onChange={(e) => handleElementChange('textDecoration', e.target.value)}>
-                      <option value="">None</option>
-                      <option value="underline">Underline</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       </div>
 

@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { Filter, Calendar, Search, FileText } from "lucide-react";
+import { toast } from "../lib/toast";
 
 export const Dashboard = () => {
   const { user } = useAuth();
@@ -41,9 +42,7 @@ export const Dashboard = () => {
 
   // Summary card state (admin only)
   const [summaryStats, setSummaryStats] = useState({ today: 0, week: 0, month: 0 });
-  const [summaryError, setSummaryError] = useState("");
   const [downloadingPeriod, setDownloadingPeriod] = useState("");
-  const [downloadSuccess, setDownloadSuccess] = useState("");
 
   const isAdmin = user?.role === "admin";
 
@@ -124,9 +123,8 @@ export const Dashboard = () => {
 
   const handleDownload = async (period) => {
     setDownloadingPeriod(period);
-    setSummaryError("");
-    setDownloadSuccess("");
-    try {
+    
+    toast.promise((async () => {
       const timezoneOffset = new Date().getTimezoneOffset();
       const blobData = await patientService.exportSummary(period, timezoneOffset);
       const url = window.URL.createObjectURL(new Blob([blobData]));
@@ -139,14 +137,13 @@ export const Dashboard = () => {
       document.body.appendChild(link);
       link.click();
       link.parentNode.removeChild(link);
-      setDownloadSuccess(`Successfully downloaded ${period}'s patient summary.`);
-      setTimeout(() => setDownloadSuccess(""), 4000);
-    } catch (e) {
-      setSummaryError(`Failed to download ${period}'s patient summary.`);
-      console.error(e);
-    } finally {
-      setDownloadingPeriod("");
-    }
+      return `Successfully downloaded ${period}'s patient summary.`;
+    })(), {
+      loading: `Downloading ${period} summary...`,
+      success: (msg) => msg,
+      error: `Failed to download ${period}'s patient summary.`,
+      finally: () => setDownloadingPeriod("")
+    });
   };
 
   if (loading) {
@@ -200,19 +197,6 @@ export const Dashboard = () => {
             </div>
           </div>
 
-          {summaryError && (
-            <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-cards flex items-center space-x-2">
-              <ShieldAlert className="h-4 w-4 shrink-0" />
-              <span>{summaryError}</span>
-            </div>
-          )}
-
-          {downloadSuccess && (
-            <div className="p-3 bg-green-50 border border-green-200 text-green-700 text-sm rounded-cards flex items-center space-x-2">
-              <CheckCircle className="h-4 w-4 shrink-0" />
-              <span>{downloadSuccess}</span>
-            </div>
-          )}
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Today's patients column */}

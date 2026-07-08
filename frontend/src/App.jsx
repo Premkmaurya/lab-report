@@ -5,6 +5,7 @@ import { AuthProvider } from "./context/AuthContext";
 import { AppRoutes } from "./routes/AppRoutes";
 import { OfflineFallback } from "./components/OfflineFallback";
 import { PrintTemplateProvider } from "./context/PrintTemplateContext";
+import { Toaster } from "sonner";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -24,6 +25,7 @@ export const App = () => {
           <Router>
             <AppRoutes />
             <OfflineFallback />
+            <Toaster position="top-right" richColors closeButton />
           </Router>
         </PrintTemplateProvider>
       </AuthProvider>

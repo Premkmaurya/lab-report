@@ -3,12 +3,12 @@ import { useForm } from "react-hook-form";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { doctorService } from "../../services/doctorService";
 import { ArrowLeft, ShieldAlert, Upload } from "lucide-react";
+import { toast } from "../../lib/toast";
 
 export const EditDoctor = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-  const [submitError, setSubmitError] = useState("");
   const [currentDoctor, setCurrentDoctor] = useState(null);
   const [fileName, setFileName] = useState("");
 
@@ -30,7 +30,7 @@ export const EditDoctor = () => {
           isActive: data.doctor.isActive,
         });
       } catch (err) {
-        setSubmitError("Failed to fetch doctor details.");
+        toast.error("Failed to fetch doctor details.");
       } finally {
         setLoading(false);
       }
@@ -46,26 +46,25 @@ export const EditDoctor = () => {
 
   const onSubmit = async (data) => {
     setIsSubmitting(true);
-    setSubmitError("");
-    try {
-      const formData = new FormData();
-      formData.append("name", data.name);
-      formData.append("qualification", data.qualification);
-      formData.append("isActive", data.isActive);
+    
+    const formData = new FormData();
+    formData.append("name", data.name);
+    formData.append("qualification", data.qualification);
+    formData.append("isActive", data.isActive);
 
-      if (data.signature && data.signature[0]) {
-        formData.append("signature", data.signature[0]);
-      }
-
-      await doctorService.updateDoctor(id, formData);
-      navigate("/doctors");
-    } catch (err) {
-      setSubmitError(
-        err.response?.data?.message || "Failed to update doctor. Please try again."
-      );
-    } finally {
-      setIsSubmitting(false);
+    if (data.signature && data.signature[0]) {
+      formData.append("signature", data.signature[0]);
     }
+
+    toast.promise(doctorService.updateDoctor(id, formData), {
+      loading: "Updating doctor profile...",
+      success: () => {
+        navigate("/doctors");
+        return "Doctor updated successfully";
+      },
+      error: (err) => err.response?.data?.message || "Failed to update doctor. Please try again.",
+      finally: () => setIsSubmitting(false)
+    });
   };
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -104,12 +103,6 @@ export const EditDoctor = () => {
         </p>
       </div>
 
-      {submitError && (
-        <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-cards flex items-center space-x-2">
-          <ShieldAlert className="h-4 w-4 shrink-0" />
-          <span>{submitError}</span>
-        </div>
-      )}
 
       {/* Form Card */}
       <div className="bg-paper-white border border-cream-border rounded-cards p-6 md:p-8">

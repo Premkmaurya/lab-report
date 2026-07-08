@@ -10,6 +10,7 @@ import { ArrowLeft, ShieldAlert, Plus, FileText, ChevronRight, Edit, X, Printer 
 import { ReportLayout } from "../../components/report/ReportLayout";
 import { PrintWarningModal } from "../../components/report/PrintWarningModal";
 import { InlineTestEditor } from "../../components/report/InlineTestEditor";
+import { toast } from "../../lib/toast";
 
 export const PatientDetails = () => {
   const { id } = useParams();
@@ -17,7 +18,6 @@ export const PatientDetails = () => {
   const [patient, setPatient] = useState(null);
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [errorMsg, setErrorMsg] = useState("");
   const [reportToPrint, setReportToPrint] = useState(null);
   const [showWarningModal, setShowWarningModal] = useState(false);
   const [selectedReportForPrint, setSelectedReportForPrint] = useState(null);
@@ -86,27 +86,28 @@ export const PatientDetails = () => {
   const handleAddTest = async () => {
     if (!selectedTestIdToAdd) return;
     setIsAddingTest(true);
-    try {
-      const selectedTest = availableTests.find(t => t._id === selectedTestIdToAdd);
-      const res = await reportService.addTestToReport(selectedReportForAdd._id, {
+    
+    const selectedTest = availableTests.find(t => t._id === selectedTestIdToAdd);
+    
+    toast.promise(
+      reportService.addTestToReport(selectedReportForAdd._id, {
         testId: selectedTest._id,
         testName: selectedTest.name
-      });
-      
-      const updatedReport = res.patientTest;
-
-      setReports(reports.map(r => 
-        r._id === selectedReportForAdd._id ? updatedReport : r
-      ));
-      
-      setSelectedReportForAdd(updatedReport);
-      setAvailableTests(current => current.filter(t => t._id !== selectedTest._id));
-      setSelectedTestIdToAdd("");
-    } catch (err) {
-      console.error("Failed to add test", err);
-    } finally {
-      setIsAddingTest(false);
-    }
+      }),
+      {
+        loading: "Adding test to report...",
+        success: (res) => {
+          const updatedReport = res.patientTest;
+          setReports(reports.map(r => r._id === selectedReportForAdd._id ? updatedReport : r));
+          setSelectedReportForAdd(updatedReport);
+          setAvailableTests(current => current.filter(t => t._id !== selectedTest._id));
+          setSelectedTestIdToAdd("");
+          return "Test added successfully";
+        },
+        error: "Failed to add test",
+        finally: () => setIsAddingTest(false)
+      }
+    );
   };
 
   const _canManagePatients = canManagePatients(user);
@@ -126,9 +127,7 @@ export const PatientDetails = () => {
           console.warn("Error fetching patient test history", e);
         }
       } catch (err) {
-        setErrorMsg(
-          err.response?.data?.message || "Failed to load patient details."
-        );
+        toast.error(err.response?.data?.message || "Failed to load patient details.");
       } finally {
         setLoading(false);
       }
@@ -160,12 +159,6 @@ export const PatientDetails = () => {
         </Link>
       </div>
 
-      {errorMsg && (
-        <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-cards flex items-center space-x-2">
-          <ShieldAlert className="h-4 w-4 shrink-0" />
-          <span>{errorMsg}</span>
-        </div>
-      )}
 
       {patient && (
         <div className="space-y-8">

@@ -4,6 +4,7 @@ import { useNavigate, useParams, Link, useLocation } from "react-router-dom";
 import { testService } from "../../services/testService";
 import { departmentService } from "../../services/departmentService";
 import { ArrowLeft, ShieldAlert, Trash2, Search, ChevronDown } from "lucide-react";
+import { toast } from "../../lib/toast";
 
 export const EditTest = () => {
   const { id } = useParams();
@@ -12,7 +13,6 @@ export const EditTest = () => {
   const isReadOnly = pathname.includes('/view');
   const [loading, setLoading] = useState(true);
   const [step, setStep] = useState(id ? 2 : 1);
-  const [submitError, setSubmitError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Step 1 states
@@ -51,11 +51,17 @@ export const EditTest = () => {
 
   const isEmptyRow = (st) => {
     if (!st) return true;
+    if (st.type === "section") {
+      return !st.name;
+    }
     return !st.name && !st.unit && !st.normalRange && (st.price === "" || st.price === null || st.price === undefined);
   };
 
   const isRowComplete = (st) => {
     if (!st) return false;
+    if (st.type === "section") {
+      return !!st.name;
+    }
     return (
       !!st.name &&
       st.price !== "" &&
@@ -69,6 +75,8 @@ export const EditTest = () => {
     if (isReadOnly) return;
     const fieldsOrder = ["name", "price", "unit", "normalRange"];
     const fieldIndex = fieldsOrder.indexOf(fieldName);
+    const currentValues = watch("subTests");
+    const isSection = currentValues[index]?.type === "section";
     
     if (e.key === "Enter") {
       e.preventDefault();
@@ -76,15 +84,15 @@ export const EditTest = () => {
         if (fieldIndex > 0) {
           inputRefs.current[index]?.[fieldsOrder[fieldIndex - 1]]?.focus();
         } else if (index > 0) {
-          inputRefs.current[index - 1]?.[fieldsOrder[fieldsOrder.length - 1]]?.focus();
+          const prevIsSection = currentValues[index - 1]?.type === "section";
+          inputRefs.current[index - 1]?.[prevIsSection ? "name" : fieldsOrder[fieldsOrder.length - 1]]?.focus();
         }
       } else {
-        if (fieldIndex < fieldsOrder.length - 1) {
+        if (fieldIndex < fieldsOrder.length - 1 && !isSection) {
           inputRefs.current[index]?.[fieldsOrder[fieldIndex + 1]]?.focus();
         } else {
-          const currentValues = watch("subTests");
           if (index === fields.length - 1 && isRowComplete(currentValues[index])) {
-            append({ name: "", price: "", unit: "", normalRange: "" });
+            append({ name: "", type: "parameter", price: "", unit: "", normalRange: "" });
             setTimeout(() => {
               inputRefs.current[index + 1]?.name?.focus();
             }, 0);
@@ -96,12 +104,14 @@ export const EditTest = () => {
     } else if (e.key === "ArrowDown") {
       e.preventDefault();
       if (index < fields.length - 1) {
-        inputRefs.current[index + 1]?.[fieldName]?.focus();
+        const nextIsSection = currentValues[index + 1]?.type === "section";
+        inputRefs.current[index + 1]?.[nextIsSection ? "name" : fieldName]?.focus();
       }
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
       if (index > 0) {
-        inputRefs.current[index - 1]?.[fieldName]?.focus();
+        const prevIsSection = currentValues[index - 1]?.type === "section";
+        inputRefs.current[index - 1]?.[prevIsSection ? "name" : fieldName]?.focus();
       }
     } else if (e.key === "ArrowRight") {
       let isAtEnd = false;
@@ -114,7 +124,7 @@ export const EditTest = () => {
       }
       if (isAtEnd) {
         e.preventDefault();
-        if (fieldIndex < fieldsOrder.length - 1) {
+        if (fieldIndex < fieldsOrder.length - 1 && !isSection) {
           inputRefs.current[index]?.[fieldsOrder[fieldIndex + 1]]?.focus();
         } else if (index < fields.length - 1) {
           inputRefs.current[index + 1]?.[fieldsOrder[0]]?.focus();
@@ -134,7 +144,8 @@ export const EditTest = () => {
         if (fieldIndex > 0) {
           inputRefs.current[index]?.[fieldsOrder[fieldIndex - 1]]?.focus();
         } else if (index > 0) {
-          inputRefs.current[index - 1]?.[fieldsOrder[fieldsOrder.length - 1]]?.focus();
+          const prevIsSection = currentValues[index - 1]?.type === "section";
+          inputRefs.current[index - 1]?.[prevIsSection ? "name" : fieldsOrder[fieldsOrder.length - 1]]?.focus();
         }
       }
     }
@@ -142,11 +153,14 @@ export const EditTest = () => {
 
   const handleBlur = (index, fieldName) => {
     if (isReadOnly) return;
-    if (index === fields.length - 1 && fieldName === "normalRange") {
+    if (index === fields.length - 1) {
       setTimeout(() => {
         const currentValues = watch("subTests");
-        if (isRowComplete(currentValues[index])) {
-          append({ name: "", price: "", unit: "", normalRange: "" });
+        const isSection = currentValues[index]?.type === "section";
+        if ((fieldName === "normalRange" || (isSection && fieldName === "name")) && isRowComplete(currentValues[index])) {
+          if (isRowComplete(currentValues[currentValues.length - 1])) {
+            append({ name: "", type: "parameter", price: "", unit: "", normalRange: "" });
+          }
         }
       }, 100);
     }
@@ -170,7 +184,7 @@ export const EditTest = () => {
           const data = await testService.getAllTests();
           setAllTests(data.tests || []);
         } catch (err) {
-          setSubmitError("Failed to fetch tests catalog.");
+          toast.error("Failed to fetch tests catalog.");
         } finally {
           setLoading(false);
         }
@@ -185,7 +199,7 @@ export const EditTest = () => {
         const res = await departmentService.getAllDepartments();
         setDepartments(res.departments || []);
       } catch (err) {
-        setSubmitError("Failed to load departments.");
+        toast.error("Failed to load departments.");
       } finally {
         setLoadingDepts(false);
       }
@@ -206,8 +220,8 @@ export const EditTest = () => {
           const t = data.test;
           
           let tests = t.subTests || [];
-          if (tests.length === 0 || !isEmptyRow(tests[tests.length - 1])) {
-             tests = [...tests, { name: "", price: "", unit: "", normalRange: "" }];
+          if (!isReadOnly && (tests.length === 0 || !isEmptyRow(tests[tests.length - 1]))) {
+             tests = [...tests, { name: "", type: "parameter", price: "", unit: "", normalRange: "" }];
           }
 
           reset({
@@ -216,7 +230,7 @@ export const EditTest = () => {
             subTests: tests
           });
         } catch (err) {
-          setSubmitError("Failed to fetch test profile details.");
+          toast.error("Failed to fetch test profile details.");
         } finally {
           setLoading(false);
         }
@@ -227,47 +241,45 @@ export const EditTest = () => {
 
   const handleNextStep1 = () => {
     if (selectedTestId) {
-      setSubmitError("");
       setStep(2);
     } else {
-      setSubmitError("Please select a test to edit.");
+      toast.error("Please select a test to edit.");
     }
   };
 
   const onSubmit = async (data) => {
     setIsSubmitting(true);
-    setSubmitError("");
-    try {
-      const targetId = id || selectedTestId;
-      const validSubTests = data.subTests.filter(st => !isEmptyRow(st));
+    
+    const targetId = id || selectedTestId;
+    const validSubTests = data.subTests.filter(st => !isEmptyRow(st));
 
-      if (validSubTests.length === 0) {
-        setSubmitError("Please provide at least one complete parameter.");
-        setIsSubmitting(false);
-        return;
-      }
-
-      const rootPrice = validSubTests.reduce((acc, curr) => acc + (parseFloat(curr.price) || 0), 0);
-      
-      const payload = {
-        departmentId: data.departmentId,
-        name: data.name,
-        price: rootPrice,
-        subTests: validSubTests.map(st => ({
-          ...st,
-          price: parseFloat(st.price) || 0
-        })),
-      };
-      
-      await testService.updateTest(targetId, payload);
-      navigate("/tests");
-    } catch (err) {
-      setSubmitError(
-        err.response?.data?.message || "Failed to update test details. Please try again."
-      );
-    } finally {
+    if (validSubTests.length === 0) {
+      toast.error("Please provide at least one complete parameter.");
       setIsSubmitting(false);
+      return;
     }
+
+    const rootPrice = validSubTests.reduce((acc, curr) => acc + (parseFloat(curr.price) || 0), 0);
+    
+    const payload = {
+      departmentId: data.departmentId,
+      name: data.name,
+      price: rootPrice,
+      subTests: validSubTests.map(st => ({
+        ...st,
+        price: st.type === "section" ? 0 : (parseFloat(st.price) || 0)
+      })),
+    };
+    
+    toast.promise(testService.updateTest(targetId, payload), {
+      loading: "Saving changes...",
+      success: () => {
+        navigate("/tests");
+        return "Test updated successfully";
+      },
+      error: (err) => err.response?.data?.message || "Failed to update test details. Please try again.",
+      finally: () => setIsSubmitting(false)
+    });
   };
 
   const filteredTests = allTests.filter((t) =>
@@ -320,12 +332,6 @@ export const EditTest = () => {
         </p>
       </div>
 
-      {submitError && (
-        <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-cards flex items-center space-x-2">
-          <ShieldAlert className="h-4 w-4 shrink-0" />
-          <span>{submitError}</span>
-        </div>
-      )}
 
       {/* Form Card */}
       <div className="bg-paper-white border border-cream-border rounded-cards p-6 md:p-8">
@@ -484,12 +490,13 @@ export const EditTest = () => {
                   <tbody className="divide-y divide-cream-border">
                     {fields.map((item, index) => {
                       if (!inputRefs.current[index]) inputRefs.current[index] = {};
+                      const isSection = watch(`subTests.${index}.type`) === "section";
                       return (
                       <tr key={item.id} className="bg-paper-white">
                         <td className="px-4 py-3 align-top">
                           <input
                             type="text"
-                            placeholder="e.g. Hemoglobin"
+                            placeholder={isSection ? "e.g. DIFFERENTIAL LEUKOCYTE COUNT" : "e.g. Hemoglobin"}
                             className={`w-full min-w-[150px] text-sm ${errors?.subTests?.[index]?.name ? "border-red-500" : ""} ${isReadOnly ? "bg-transparent text-stone border-transparent" : ""}`}
                             disabled={isReadOnly}
                             {...register(`subTests.${index}.name`, { 
@@ -501,16 +508,47 @@ export const EditTest = () => {
                               inputRefs.current[index].name = el;
                             }}
                           />
+                          {!isReadOnly && (
+                            <div className="mt-2 flex items-center">
+                              <input 
+                                type="checkbox" 
+                                id={`isSection-${index}`} 
+                                className="mr-1.5 cursor-pointer"
+                                checked={isSection}
+                                onChange={(e) => {
+                                  setValue(`subTests.${index}.type`, e.target.checked ? 'section' : 'parameter');
+                                  if (e.target.checked) {
+                                    setValue(`subTests.${index}.price`, "");
+                                    setValue(`subTests.${index}.unit`, "");
+                                    setValue(`subTests.${index}.normalRange`, "");
+                                  }
+                                  setTimeout(() => {
+                                    const currentValues = watch("subTests");
+                                    if (index === currentValues.length - 1 && isRowComplete(currentValues[index])) {
+                                      append({ name: "", type: "parameter", price: "", unit: "", normalRange: "" });
+                                      setTimeout(() => {
+                                        inputRefs.current[index + 1]?.name?.focus();
+                                      }, 0);
+                                    }
+                                  }, 0);
+                                }}
+                              />
+                              <label htmlFor={`isSection-${index}`} className="text-[10px] text-stone uppercase tracking-wider font-bold cursor-pointer">
+                                Section Header
+                              </label>
+                            </div>
+                          )}
                         </td>
                         <td className="px-4 py-3 align-top">
                           <input
                             type="number"
                             step="0.01"
-                            placeholder="0.00"
-                            className={`w-full min-w-[80px] text-sm ${errors?.subTests?.[index]?.price ? "border-red-500" : ""} ${isReadOnly ? "bg-transparent text-stone border-transparent" : ""}`}
-                            disabled={isReadOnly}
+                            placeholder={isSection ? "-" : "0.00"}
+                            disabled={isReadOnly || isSection}
+                            className={`w-full min-w-[80px] text-sm ${errors?.subTests?.[index]?.price ? "border-red-500" : ""} ${isReadOnly ? "bg-transparent text-stone border-transparent" : (isSection ? "bg-slate-50 text-slate-400 cursor-not-allowed" : "")}`}
                             {...register(`subTests.${index}.price`, { 
                               validate: (val, formValues) => {
+                                if (formValues.subTests[index].type === "section") return true;
                                 if (isEmptyRow(formValues.subTests[index])) return true;
                                 if (val === "" || val === null || val === undefined) return "Required";
                                 if (parseFloat(val) < 0) return "Invalid";
@@ -527,9 +565,9 @@ export const EditTest = () => {
                         <td className="px-4 py-3 align-top">
                           <input
                             type="text"
-                            placeholder="e.g. g/dL"
-                            className={`w-full min-w-[80px] text-sm ${errors?.subTests?.[index]?.unit ? "border-red-500" : ""} ${isReadOnly ? "bg-transparent text-stone border-transparent" : ""}`}
-                            disabled={isReadOnly}
+                            placeholder={isSection ? "-" : "e.g. g/dL"}
+                            disabled={isReadOnly || isSection}
+                            className={`w-full min-w-[80px] text-sm ${errors?.subTests?.[index]?.unit ? "border-red-500" : ""} ${isReadOnly ? "bg-transparent text-stone border-transparent" : (isSection ? "bg-slate-50 text-slate-400 cursor-not-allowed" : "")}`}
                             {...register(`subTests.${index}.unit`, { 
                               validate: (val, formValues) => isEmptyRow(formValues.subTests[index]) ? true : true
                             })}
@@ -543,9 +581,9 @@ export const EditTest = () => {
                         <td className="px-4 py-3 align-top">
                           <input
                             type="text"
-                            placeholder="e.g. 13-17"
-                            className={`w-full min-w-[100px] text-sm ${errors?.subTests?.[index]?.normalRange ? "border-red-500" : ""} ${isReadOnly ? "bg-transparent text-stone border-transparent" : ""}`}
-                            disabled={isReadOnly}
+                            placeholder={isSection ? "-" : "e.g. 13-17"}
+                            disabled={isReadOnly || isSection}
+                            className={`w-full min-w-[100px] text-sm ${errors?.subTests?.[index]?.normalRange ? "border-red-500" : ""} ${isReadOnly ? "bg-transparent text-stone border-transparent" : (isSection ? "bg-slate-50 text-slate-400 cursor-not-allowed" : "")}`}
                             {...register(`subTests.${index}.normalRange`, { 
                               validate: (val, formValues) => isEmptyRow(formValues.subTests[index]) ? true : true
                             })}
@@ -565,8 +603,8 @@ export const EditTest = () => {
                                 onClick={() => {
                                   remove(index);
                                   const currentValues = watch("subTests");
-                                  if (currentValues.length <= 1) {
-                                    append({ name: "", price: "", unit: "", normalRange: "" });
+                                  if (currentValues.length <= 1 && !isReadOnly) {
+                                    append({ name: "", type: "parameter", price: "", unit: "", normalRange: "" });
                                   }
                                 }}
                                 className="text-red-600 hover:text-red-800 p-2 rounded-full hover:bg-red-50 transition-colors"

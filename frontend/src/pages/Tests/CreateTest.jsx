@@ -4,12 +4,12 @@ import { useNavigate, Link } from "react-router-dom";
 import { testService } from "../../services/testService";
 import { departmentService } from "../../services/departmentService";
 import { ArrowLeft, ShieldAlert, Trash2 } from "lucide-react";
+import { toast } from "../../lib/toast";
 
 export const CreateTest = () => {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState("");
   const [departments, setDepartments] = useState([]);
   const [loadingDepts, setLoadingDepts] = useState(true);
   const [isCreatingDept, setIsCreatingDept] = useState(false);
@@ -28,7 +28,7 @@ export const CreateTest = () => {
     defaultValues: {
       departmentId: "",
       name: "",
-      subTests: [{ name: "", price: "", unit: "", normalRange: "" }],
+      subTests: [{ name: "", type: "parameter", price: "", unit: "", normalRange: "" }],
     },
   });
 
@@ -38,7 +38,7 @@ export const CreateTest = () => {
         const res = await departmentService.getAllDepartments();
         setDepartments(res.departments || []);
       } catch (err) {
-        setSubmitError("Failed to load departments.");
+        toast.error("Failed to load departments.");
       } finally {
         setLoadingDepts(false);
       }
@@ -56,6 +56,9 @@ export const CreateTest = () => {
 
   const isEmptyRow = (st) => {
     if (!st) return true;
+    if (st.type === "section") {
+      return !st.name;
+    }
     return (
       !st.name &&
       !st.unit &&
@@ -66,6 +69,9 @@ export const CreateTest = () => {
 
   const isRowComplete = (st) => {
     if (!st) return false;
+    if (st.type === "section") {
+      return !!st.name;
+    }
     return (
       !!st.name &&
       st.price !== "" &&
@@ -77,6 +83,8 @@ export const CreateTest = () => {
   const handleKeyDown = (e, index, fieldName) => {
     const fieldsOrder = ["name", "price", "unit", "normalRange"];
     const fieldIndex = fieldsOrder.indexOf(fieldName);
+    const currentValues = watch("subTests");
+    const isSection = currentValues[index]?.type === "section";
 
     if (e.key === "Enter") {
       e.preventDefault();
@@ -85,22 +93,22 @@ export const CreateTest = () => {
         if (fieldIndex > 0) {
           inputRefs.current[index]?.[fieldsOrder[fieldIndex - 1]]?.focus();
         } else if (index > 0) {
+          const prevIsSection = currentValues[index - 1]?.type === "section";
           inputRefs.current[index - 1]?.[
-            fieldsOrder[fieldsOrder.length - 1]
+            prevIsSection ? "name" : fieldsOrder[fieldsOrder.length - 1]
           ]?.focus();
         }
       } else {
         // Move to next field
-        if (fieldIndex < fieldsOrder.length - 1) {
+        if (fieldIndex < fieldsOrder.length - 1 && !isSection) {
           inputRefs.current[index]?.[fieldsOrder[fieldIndex + 1]]?.focus();
         } else {
           // On last field, check completion
-          const currentValues = watch("subTests");
           if (
             index === fields.length - 1 &&
             isRowComplete(currentValues[index])
           ) {
-            append({ name: "", price: "", unit: "", normalRange: "" });
+            append({ name: "", type: "parameter", price: "", unit: "", normalRange: "" });
             setTimeout(() => {
               inputRefs.current[index + 1]?.name?.focus();
             }, 0);
@@ -112,12 +120,14 @@ export const CreateTest = () => {
     } else if (e.key === "ArrowDown") {
       e.preventDefault();
       if (index < fields.length - 1) {
-        inputRefs.current[index + 1]?.[fieldName]?.focus();
+        const nextIsSection = currentValues[index + 1]?.type === "section";
+        inputRefs.current[index + 1]?.[nextIsSection ? "name" : fieldName]?.focus();
       }
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
       if (index > 0) {
-        inputRefs.current[index - 1]?.[fieldName]?.focus();
+        const prevIsSection = currentValues[index - 1]?.type === "section";
+        inputRefs.current[index - 1]?.[prevIsSection ? "name" : fieldName]?.focus();
       }
     } else if (e.key === "ArrowRight") {
       let isAtEnd = false;
@@ -130,7 +140,7 @@ export const CreateTest = () => {
       }
       if (isAtEnd) {
         e.preventDefault();
-        if (fieldIndex < fieldsOrder.length - 1) {
+        if (fieldIndex < fieldsOrder.length - 1 && !isSection) {
           inputRefs.current[index]?.[fieldsOrder[fieldIndex + 1]]?.focus();
         } else if (index < fields.length - 1) {
           inputRefs.current[index + 1]?.[fieldsOrder[0]]?.focus();
@@ -150,8 +160,9 @@ export const CreateTest = () => {
         if (fieldIndex > 0) {
           inputRefs.current[index]?.[fieldsOrder[fieldIndex - 1]]?.focus();
         } else if (index > 0) {
+          const prevIsSection = currentValues[index - 1]?.type === "section";
           inputRefs.current[index - 1]?.[
-            fieldsOrder[fieldsOrder.length - 1]
+            prevIsSection ? "name" : fieldsOrder[fieldsOrder.length - 1]
           ]?.focus();
         }
       }
@@ -159,11 +170,17 @@ export const CreateTest = () => {
   };
 
   const handleBlur = (index, fieldName) => {
-    if (index === fields.length - 1 && fieldName === "normalRange") {
+    if (index === fields.length - 1) {
       setTimeout(() => {
         const currentValues = watch("subTests");
-        if (isRowComplete(currentValues[index])) {
-          append({ name: "", price: "", unit: "", normalRange: "" });
+        const isSection = currentValues[index]?.type === "section";
+        if ((fieldName === "normalRange" || (isSection && fieldName === "name")) && isRowComplete(currentValues[index])) {
+          // Do not append on blur to avoid duplicate rows since Enter might have already appended
+          // Actually the user requirement states: "When the final required field of a completed row is confirmed, create the next row."
+          // But appending on blur might cause issues if they click elsewhere. Let's keep it but check if the last row is actually complete and no blank row exists.
+          if (isRowComplete(currentValues[currentValues.length - 1])) {
+            append({ name: "", type: "parameter", price: "", unit: "", normalRange: "" });
+          }
         }
       }, 100);
     }
@@ -172,19 +189,20 @@ export const CreateTest = () => {
   const handleCreateDepartment = async () => {
     if (!newDeptName.trim()) return;
     setIsSavingDept(true);
-    setSubmitError("");
-    try {
-      const res = await departmentService.createDepartment({ name: newDeptName });
-      const newDept = res.department;
-      setDepartments(prev => [...prev, newDept].sort((a,b) => a.name.localeCompare(b.name)));
-      setValue("departmentId", newDept._id, { shouldValidate: true });
-      setIsCreatingDept(false);
-      setNewDeptName("");
-    } catch (err) {
-      setSubmitError(err.response?.data?.message || "Failed to create department");
-    } finally {
-      setIsSavingDept(false);
-    }
+    
+    toast.promise(departmentService.createDepartment({ name: newDeptName }), {
+      loading: "Creating department...",
+      success: (res) => {
+        const newDept = res.department;
+        setDepartments(prev => [...prev, newDept].sort((a,b) => a.name.localeCompare(b.name)));
+        setValue("departmentId", newDept._id, { shouldValidate: true });
+        setIsCreatingDept(false);
+        setNewDeptName("");
+        return "Department created successfully";
+      },
+      error: (err) => err.response?.data?.message || "Failed to create department",
+      finally: () => setIsSavingDept(false)
+    });
   };
 
   const handleNextStep1 = async () => {
@@ -199,40 +217,39 @@ export const CreateTest = () => {
 
   const onSubmit = async (data) => {
     setIsSubmitting(true);
-    setSubmitError("");
-    try {
-      const validSubTests = data.subTests.filter((st) => !isEmptyRow(st));
+    
+    const validSubTests = data.subTests.filter((st) => !isEmptyRow(st));
 
-      if (validSubTests.length === 0) {
-        setSubmitError("Please provide at least one complete parameter.");
-        setIsSubmitting(false);
-        return;
-      }
-
-      const rootPrice = validSubTests.reduce(
-        (acc, curr) => acc + (parseFloat(curr.price) || 0),
-        0,
-      );
-
-      const payload = {
-        departmentId: data.departmentId,
-        name: data.name,
-        price: rootPrice,
-        subTests: validSubTests.map((st) => ({
-          ...st,
-          price: parseFloat(st.price) || 0,
-        })),
-      };
-      await testService.createTest(payload);
-      navigate("/tests");
-    } catch (err) {
-      setSubmitError(
-        err.response?.data?.message ||
-          "Failed to create test profile. Please try again.",
-      );
-    } finally {
+    if (validSubTests.length === 0) {
+      toast.error("Please provide at least one complete parameter.");
       setIsSubmitting(false);
+      return;
     }
+
+    const rootPrice = validSubTests.reduce(
+      (acc, curr) => acc + (parseFloat(curr.price) || 0),
+      0,
+    );
+
+    const payload = {
+      departmentId: data.departmentId,
+      name: data.name,
+      price: rootPrice,
+      subTests: validSubTests.map((st) => ({
+        ...st,
+        price: st.type === "section" ? 0 : (parseFloat(st.price) || 0),
+      })),
+    };
+
+    toast.promise(testService.createTest(payload), {
+      loading: "Saving test...",
+      success: () => {
+        navigate("/tests");
+        return "Test created successfully";
+      },
+      error: (err) => err.response?.data?.message || "Failed to create test profile. Please try again.",
+      finally: () => setIsSubmitting(false)
+    });
   };
 
   return (
@@ -276,13 +293,6 @@ export const CreateTest = () => {
             : "Add test parameters, pricing, and configure reporting ranges."}
         </p>
       </div>
-
-      {submitError && (
-        <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-cards flex items-center space-x-2">
-          <ShieldAlert className="h-4 w-4 shrink-0" />
-          <span>{submitError}</span>
-        </div>
-      )}
 
       {/* Form Card */}
       <div className="bg-paper-white border border-cream-border rounded-cards p-6 md:p-8">
@@ -445,12 +455,13 @@ export const CreateTest = () => {
                     {fields.map((item, index) => {
                       if (!inputRefs.current[index])
                         inputRefs.current[index] = {};
+                      const isSection = watch(`subTests.${index}.type`) === "section";
                       return (
                         <tr key={item.id} className="bg-paper-white">
                           <td className="px-4 py-3 align-top">
                             <input
                               type="text"
-                              placeholder="e.g. Hemoglobin"
+                              placeholder={isSection ? "e.g. DIFFERENTIAL LEUKOCYTE COUNT" : "e.g. Hemoglobin"}
                               className={`w-full min-w-[150px] text-sm ${errors?.subTests?.[index]?.name ? "border-red-500" : ""}`}
                               {...register(`subTests.${index}.name`, {
                                 validate: (val, formValues) =>
@@ -464,15 +475,45 @@ export const CreateTest = () => {
                                 inputRefs.current[index].name = el;
                               }}
                             />
+                            <div className="mt-2 flex items-center">
+                              <input 
+                                type="checkbox" 
+                                id={`isSection-${index}`} 
+                                className="mr-1.5 cursor-pointer"
+                                checked={isSection}
+                                onChange={(e) => {
+                                  setValue(`subTests.${index}.type`, e.target.checked ? 'section' : 'parameter');
+                                  if (e.target.checked) {
+                                    setValue(`subTests.${index}.price`, "");
+                                    setValue(`subTests.${index}.unit`, "");
+                                    setValue(`subTests.${index}.normalRange`, "");
+                                  }
+                                  setTimeout(() => {
+                                    const currentValues = watch("subTests");
+                                    if (index === currentValues.length - 1 && isRowComplete(currentValues[index])) {
+                                      append({ name: "", type: "parameter", price: "", unit: "", normalRange: "" });
+                                      setTimeout(() => {
+                                        inputRefs.current[index + 1]?.name?.focus();
+                                      }, 0);
+                                    }
+                                  }, 0);
+                                }}
+                              />
+                              <label htmlFor={`isSection-${index}`} className="text-[10px] text-stone uppercase tracking-wider font-bold cursor-pointer">
+                                Section Header
+                              </label>
+                            </div>
                           </td>
                           <td className="px-4 py-3 align-top">
                             <input
                               type="number"
                               step="0.01"
-                              placeholder="0.00"
-                              className={`w-full min-w-[80px] text-sm ${errors?.subTests?.[index]?.price ? "border-red-500" : ""}`}
+                              placeholder={isSection ? "-" : "0.00"}
+                              disabled={isSection}
+                              className={`w-full min-w-[80px] text-sm ${isSection ? "bg-slate-50 text-slate-400 cursor-not-allowed" : ""} ${errors?.subTests?.[index]?.price ? "border-red-500" : ""}`}
                               {...register(`subTests.${index}.price`, {
                                 validate: (val, formValues) => {
+                                  if (formValues.subTests[index].type === "section") return true;
                                   if (isEmptyRow(formValues.subTests[index]))
                                     return true;
                                   if (
@@ -497,8 +538,9 @@ export const CreateTest = () => {
                           <td className="px-4 py-3 align-top">
                             <input
                               type="text"
-                              placeholder="e.g. g/dL"
-                              className={`w-full min-w-[80px] text-sm ${errors?.subTests?.[index]?.unit ? "border-red-500" : ""}`}
+                              placeholder={isSection ? "-" : "e.g. g/dL"}
+                              disabled={isSection}
+                              className={`w-full min-w-[80px] text-sm ${isSection ? "bg-slate-50 text-slate-400 cursor-not-allowed" : ""} ${errors?.subTests?.[index]?.unit ? "border-red-500" : ""}`}
                               {...register(`subTests.${index}.unit`, {
                                 validate: (val, formValues) =>
                                   isEmptyRow(formValues.subTests[index])
@@ -515,8 +557,9 @@ export const CreateTest = () => {
                           <td className="px-4 py-3 align-top">
                             <input
                               type="text"
-                              placeholder="e.g. 13-17"
-                              className={`w-full min-w-[100px] text-sm ${errors?.subTests?.[index]?.normalRange ? "border-red-500" : ""}`}
+                              placeholder={isSection ? "-" : "e.g. 13-17"}
+                              disabled={isSection}
+                              className={`w-full min-w-[100px] text-sm ${isSection ? "bg-slate-50 text-slate-400 cursor-not-allowed" : ""} ${errors?.subTests?.[index]?.normalRange ? "border-red-500" : ""}`}
                               {...register(`subTests.${index}.normalRange`, {
                                 validate: (val, formValues) =>
                                   isEmptyRow(formValues.subTests[index])
@@ -546,6 +589,7 @@ export const CreateTest = () => {
                                   if (currentValues.length <= 1) {
                                     append({
                                       name: "",
+                                      type: "parameter",
                                       price: "",
                                       unit: "",
                                       normalRange: "",

@@ -5,12 +5,12 @@ import { patientService } from "../../services/patientService";
 import { doctorService } from "../../services/doctorService";
 import { ArrowLeft, ShieldAlert } from "lucide-react";
 import DoctorAutocomplete from "../../components/DoctorAutocomplete";
+import { toast } from "../../lib/toast";
 
 export const EditPatient = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-  const [submitError, setSubmitError] = useState("");
   const [doctors, setDoctors] = useState([]);
 
   const {
@@ -47,9 +47,7 @@ export const EditPatient = () => {
           console.warn("Could not load doctor listings", e);
         }
       } catch (err) {
-        setSubmitError(
-          err.response?.data?.message || "Failed to load patient records."
-        );
+        toast.error(err.response?.data?.message || "Failed to load patient records.");
       } finally {
         setLoading(false);
       }
@@ -59,21 +57,20 @@ export const EditPatient = () => {
 
   const onSubmit = async (data) => {
     setIsSubmitting(true);
-    setSubmitError("");
-    try {
-      const payload = {
-        ...data,
-        age: parseInt(data.age, 10),
-      };
-      await patientService.updatePatient(id, payload);
-      navigate(`/patients/${id}`);
-    } catch (err) {
-      setSubmitError(
-        err.response?.data?.message || "Failed to update patient details."
-      );
-    } finally {
-      setIsSubmitting(false);
-    }
+    const payload = {
+      ...data,
+      age: parseInt(data.age, 10),
+    };
+    
+    toast.promise(patientService.updatePatient(id, payload), {
+      loading: "Saving changes...",
+      success: () => {
+        navigate(`/patients/${id}`);
+        return "Patient updated successfully";
+      },
+      error: (err) => err.response?.data?.message || "Failed to update patient details.",
+      finally: () => setIsSubmitting(false)
+    });
   };
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -112,12 +109,6 @@ export const EditPatient = () => {
         </p>
       </div>
 
-      {submitError && (
-        <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-cards flex items-center space-x-2">
-          <ShieldAlert className="h-4 w-4 shrink-0" />
-          <span>{submitError}</span>
-        </div>
-      )}
 
       {/* Form Card */}
       <div className="bg-paper-white border border-cream-border rounded-cards p-6 md:p-8">

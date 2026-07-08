@@ -16,32 +16,90 @@ const LoadingScreen = () => (
 );
 
 // Lazy Loaded Pages
-const Login = lazy(() => import("../pages/Login").then((m) => ({ default: m.Login })));
-const Signup = lazy(() => import("../pages/Signup").then((m) => ({ default: m.Signup })));
-const Pending = lazy(() => import("../pages/Pending").then((m) => ({ default: m.Pending })));
-const Dashboard = lazy(() => import("../pages/Dashboard").then((m) => ({ default: m.Dashboard })));
+const Login = lazy(() =>
+  import("../pages/Login").then((m) => ({ default: m.Login })),
+);
+const Signup = lazy(() =>
+  import("../pages/Signup").then((m) => ({ default: m.Signup })),
+);
+const Pending = lazy(() =>
+  import("../pages/Pending").then((m) => ({ default: m.Pending })),
+);
+const Dashboard = lazy(() =>
+  import("../pages/Dashboard").then((m) => ({ default: m.Dashboard })),
+);
 
-const UserList = lazy(() => import("../pages/Users/UserList").then((m) => ({ default: m.UserList })));
-const CreateUser = lazy(() => import("../pages/Users/CreateUser").then((m) => ({ default: m.CreateUser })));
-const EditUser = lazy(() => import("../pages/Users/EditUser").then((m) => ({ default: m.EditUser })));
+const UserList = lazy(() =>
+  import("../pages/Users/UserList").then((m) => ({ default: m.UserList })),
+);
+const CreateUser = lazy(() =>
+  import("../pages/Users/CreateUser").then((m) => ({ default: m.CreateUser })),
+);
+const EditUser = lazy(() =>
+  import("../pages/Users/EditUser").then((m) => ({ default: m.EditUser })),
+);
 
-const PatientList = lazy(() => import("../pages/Patients/PatientList").then((m) => ({ default: m.PatientList })));
-const CreatePatient = lazy(() => import("../pages/Patients/CreatePatient").then((m) => ({ default: m.CreatePatient })));
-const PatientDetails = lazy(() => import("../pages/Patients/PatientDetails").then((m) => ({ default: m.PatientDetails })));
-const EditPatient = lazy(() => import("../pages/Patients/EditPatient").then((m) => ({ default: m.EditPatient })));
+const PatientList = lazy(() =>
+  import("../pages/Patients/PatientList").then((m) => ({
+    default: m.PatientList,
+  })),
+);
+const CreatePatient = lazy(() =>
+  import("../pages/Patients/CreatePatient").then((m) => ({
+    default: m.CreatePatient,
+  })),
+);
+const PatientDetails = lazy(() =>
+  import("../pages/Patients/PatientDetails").then((m) => ({
+    default: m.PatientDetails,
+  })),
+);
+const EditPatient = lazy(() =>
+  import("../pages/Patients/EditPatient").then((m) => ({
+    default: m.EditPatient,
+  })),
+);
 
-const DoctorList = lazy(() => import("../pages/Doctors/DoctorList").then((m) => ({ default: m.DoctorList })));
-const CreateDoctor = lazy(() => import("../pages/Doctors/CreateDoctor").then((m) => ({ default: m.CreateDoctor })));
-const EditDoctor = lazy(() => import("../pages/Doctors/EditDoctor").then((m) => ({ default: m.EditDoctor })));
+const DoctorList = lazy(() =>
+  import("../pages/Doctors/DoctorList").then((m) => ({
+    default: m.DoctorList,
+  })),
+);
+const CreateDoctor = lazy(() =>
+  import("../pages/Doctors/CreateDoctor").then((m) => ({
+    default: m.CreateDoctor,
+  })),
+);
+const EditDoctor = lazy(() =>
+  import("../pages/Doctors/EditDoctor").then((m) => ({
+    default: m.EditDoctor,
+  })),
+);
 
-const TestList = lazy(() => import("../pages/Tests/TestList").then((m) => ({ default: m.TestList })));
-const CreateTest = lazy(() => import("../pages/Tests/CreateTest").then((m) => ({ default: m.CreateTest })));
-const EditTest = lazy(() => import("../pages/Tests/EditTest").then((m) => ({ default: m.EditTest })));
+const TestList = lazy(() =>
+  import("../pages/Tests/TestList").then((m) => ({ default: m.TestList })),
+);
+const CreateTest = lazy(() =>
+  import("../pages/Tests/CreateTest").then((m) => ({ default: m.CreateTest })),
+);
+const EditTest = lazy(() =>
+  import("../pages/Tests/EditTest").then((m) => ({ default: m.EditTest })),
+);
 
-const CreateReport = lazy(() => import("../pages/Reports/CreateReport").then((m) => ({ default: m.CreateReport })));
+const CreateReport = lazy(() =>
+  import("../pages/Reports/CreateReport").then((m) => ({
+    default: m.CreateReport,
+  })),
+);
 
-const Settings = lazy(() => import("../pages/Settings").then((m) => ({ default: m.Settings })));
-const PrintTemplateDesigner = lazy(() => import("../pages/Settings/PrintTemplateDesigner").then((m) => ({ default: m.PrintTemplateDesigner })));
+const Settings = lazy(() =>
+  import("../pages/Settings").then((m) => ({ default: m.Settings })),
+);
+const PrintTemplateDesigner = lazy(() =>
+  import("../pages/Settings/PrintTemplateDesigner").then((m) => ({
+    default: m.PrintTemplateDesigner,
+  })),
+);
 
 export const AppRoutes = () => {
   return (
@@ -72,27 +130,37 @@ export const AppRoutes = () => {
             <Route path="/tests" element={<TestList />} />
             <Route path="/tests/view/:id" element={<EditTest />} />
             {/* Test Access Control */}
-            <Route element={<PermissionGuard requiredPermission="manage_tests" />}>
+            <Route
+              element={<PermissionGuard requiredPermission="manage_tests" />}
+            >
               <Route path="/tests/create" element={<CreateTest />} />
               <Route path="/tests/edit" element={<EditTest />} />
               <Route path="/tests/edit/:id" element={<EditTest />} />
             </Route>
 
             {/* Doctor Access Control */}
-            <Route element={<PermissionGuard requiredPermission="manage_doctors" />}>
+            <Route
+              element={<PermissionGuard requiredPermission="manage_doctors" />}
+            >
               <Route path="/doctors" element={<DoctorList />} />
               <Route path="/doctors/create" element={<CreateDoctor />} />
               <Route path="/doctors/edit/:id" element={<EditDoctor />} />
             </Route>
 
+            <Route
+              element={<PermissionGuard requiredPermission="manage_settings" />}
+            >
+              <Route path="/settings" element={<Settings />} />
+              <Route
+                path="/settings/print-designer"
+                element={<PrintTemplateDesigner />}
+              />
+            </Route>
             {/* Admin Only Views */}
             <Route element={<RoleGuard allowedRoles={["admin"]} />}>
               <Route path="/users" element={<UserList />} />
               <Route path="/users/create" element={<CreateUser />} />
               <Route path="/users/edit/:id" element={<EditUser />} />
-
-              <Route path="/settings" element={<Settings />} />
-              <Route path="/settings/print-designer" element={<PrintTemplateDesigner />} />
             </Route>
           </Route>
         </Route>

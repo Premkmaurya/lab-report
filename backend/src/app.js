@@ -10,7 +10,8 @@ const patientTestRoutes = require("./routes/patientTest.routes");
 const departmentRoutes = require("./routes/department.routes");
 const healthRoutes = require("./routes/health.routes");
 const printTemplateRoutes = require("./routes/printTemplate.routes");
-const { apiLimiter } = require("./middlewares/rateLimit");
+const labDetailsRoutes = require("./routes/labDetails.routes");
+
 const { userAuth, authorizeRoles } = require("./middlewares/auth.middleware");
 const logger = require("./utils/logger");
 const errorHandler = require("./middlewares/error.middleware");
@@ -42,12 +43,13 @@ app.use(statusMonitor());
 
 app.use("/api/health", healthRoutes);
 app.use("/api/auth", authRoutes); // Auth routes have their own limiters
-app.use("/api/doctors", apiLimiter, doctorRoutes);
-app.use("/api/patients", apiLimiter, patientRoutes);
-app.use("/api/departments", apiLimiter, departmentRoutes);
-app.use("/api/tests", apiLimiter, testRoutes);
-app.use("/api/patient-tests", apiLimiter, patientTestRoutes);
-app.use("/api/settings/print-template", apiLimiter, printTemplateRoutes);
+app.use("/api/doctors", doctorRoutes);
+app.use("/api/patients", patientRoutes);
+app.use("/api/departments", departmentRoutes);
+app.use("/api/tests", testRoutes);
+app.use("/api/patient-tests", patientTestRoutes);
+app.use("/api/settings/print-template", printTemplateRoutes);
+app.use("/api/settings/lab-details", labDetailsRoutes);
 
 // Global Error Handler (must be the last middleware)
 app.use(errorHandler);

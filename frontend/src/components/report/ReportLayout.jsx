@@ -39,10 +39,10 @@ export const ReportLayout = ({ patient, report, customTemplate }) => {
               </td>
             </tr>
             <tr>
-              <th className="px-3 py-2 text-left text-xl font-semibold w-[45%]" style={thStyles}>TEST NAME</th>
-              <th className="px-3 py-2 text-left text-xl font-semibold w-[20%]" style={thStyles}>RESULT</th>
-              <th className="px-3 py-2 text-left text-xl font-semibold w-[20%] whitespace-nowrap" style={thStyles}>REFERENCE RANGE</th>
-              <th className="px-3 py-2 text-left text-xl font-semibold w-[15%]" style={thStyles}>UNIT</th>
+              <th className="px-3 py-2 text-left text-sm font-semibold w-[45%]">TEST NAME</th>
+              <th className="px-3 py-2 text-left text-sm font-semibold w-[20%]">RESULT</th>
+              <th className="px-3 py-2 text-left text-sm font-semibold w-[15%]">UNIT</th>
+              <th className="px-3 py-2 text-left text-sm font-semibold w-[20%] whitespace-nowrap">REFERENCE RANGE</th>
             </tr>
           </thead>
           <tbody>
@@ -60,7 +60,6 @@ export const ReportLayout = ({ patient, report, customTemplate }) => {
                     <td colSpan="4" className="pt-8 pb-2 text-center bg-white">
                       <span 
                         className="text-2xl font-bold text-[#0F172A] uppercase tracking-wider block"
-                        style={template?.elements?.departmentHeading || {}}
                       >
                         {department}
                       </span>

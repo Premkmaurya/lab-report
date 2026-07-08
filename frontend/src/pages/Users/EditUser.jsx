@@ -2,10 +2,12 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { userService } from "../../services/userService";
 import { ArrowLeft, ShieldAlert, CheckCircle, XCircle } from "lucide-react";
+import { toast } from "../../lib/toast";
 
 const AVAILABLE_PERMISSIONS = [
   { key: 'manage_doctors', label: 'Manage Doctors' },
   { key: 'manage_tests', label: 'Manage Tests' },
+  { key: 'manage_settings', label: 'Manage Settings' },
 ];
 
 export const EditUser = () => {
@@ -13,8 +15,6 @@ export const EditUser = () => {
   const navigate = useNavigate();
   const [userItem, setUserItem] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [errorMsg, setErrorMsg] = useState("");
-  const [successMsg, setSuccessMsg] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [selectedPermissions, setSelectedPermissions] = useState([]);
 
@@ -25,9 +25,7 @@ export const EditUser = () => {
         setUserItem(data.user);
         setSelectedPermissions(data.user.permissions || []);
       } catch (err) {
-        setErrorMsg(
-          err.response?.data?.message || "Failed to load user information."
-        );
+        toast.error("Failed to load user information.");
       } finally {
         setLoading(false);
       }
@@ -37,23 +35,16 @@ export const EditUser = () => {
 
   const handleStatusChange = async (newStatus) => {
     setIsSaving(true);
-    setErrorMsg("");
-    setSuccessMsg("");
-    try {
-      await userService.updateUserStatus(id, newStatus, selectedPermissions);
-      setUserItem((prev) => ({ ...prev, isAuthorized: newStatus, permissions: selectedPermissions }));
-      setSuccessMsg(
-        `User status has been successfully updated to ${
-          newStatus ? "Authorized" : "Suspended"
-        }.`
-      );
-    } catch (err) {
-      setErrorMsg(
-        err.response?.data?.message || "Failed to update user authorization status."
-      );
-    } finally {
-      setIsSaving(false);
-    }
+    
+    toast.promise(userService.updateUserStatus(id, newStatus, selectedPermissions), {
+      loading: "Updating user status...",
+      success: () => {
+        setUserItem((prev) => ({ ...prev, isAuthorized: newStatus, permissions: selectedPermissions }));
+        return `User status has been successfully updated to ${newStatus ? "Authorized" : "Suspended"}.`;
+      },
+      error: (err) => err.response?.data?.message || "Failed to update user authorization status.",
+      finally: () => setIsSaving(false)
+    });
   };
 
   if (loading) {
@@ -90,19 +81,6 @@ export const EditUser = () => {
         </p>
       </div>
 
-      {errorMsg && (
-        <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-cards flex items-center space-x-2">
-          <ShieldAlert className="h-4 w-4 shrink-0" />
-          <span>{errorMsg}</span>
-        </div>
-      )}
-
-      {successMsg && (
-        <div className="p-3 bg-green-50 border border-green-200 text-green-700 text-sm rounded-cards flex items-center space-x-2">
-          <CheckCircle className="h-4 w-4 shrink-0" />
-          <span>{successMsg}</span>
-        </div>
-      )}
 
       {userItem && (
         <div className="bg-paper-white border border-cream-border rounded-cards p-6 md:p-8 space-y-6">

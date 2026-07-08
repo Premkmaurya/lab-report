@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
+import { toast } from "../lib/toast";
 
 export const Signup = () => {
   const { signup, authError } = useAuth();
@@ -18,14 +19,19 @@ export const Signup = () => {
   const onSubmit = async (data) => {
     setIsSubmitting(true);
     setLocalError("");
-    try {
-      await signup(data.username, data.email, data.password);
-      navigate("/pending");
-    } catch (err) {
-      setLocalError(err.message || "Registration failed");
-    } finally {
-      setIsSubmitting(false);
-    }
+    
+    toast.promise(signup(data.username, data.email, data.password), {
+      loading: "Creating account...",
+      success: () => {
+        navigate("/pending");
+        return "Account created successfully";
+      },
+      error: (err) => {
+        setLocalError(err.message || "Registration failed");
+        return err.message || "Registration failed";
+      },
+      finally: () => setIsSubmitting(false)
+    });
   };
 
   return (

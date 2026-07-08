@@ -5,19 +5,19 @@ export const SignatureSection = ({ patient, template }) => {
 
   return (
     <div className="mt-12 pt-4 px-15 flex justify-between text-[13px] text-slate-900" style={footerStyles}>
-      <div className="w-30 text-center">
+      <div className="w-35 text-center">
         <div className="h-16 w-full"></div>
         <div className="border-t border-slate-900 pt-1">
-          <p className="font-semibold">Lab Technician</p>
-          <p className="text-[11px] text-[#475569]">System Admin</p>
+          <p className="text-[#475569] text-base">System Admin</p>
+          <p className="font-semibold text-lg whitespace-nowrap">Lab Technician</p>
         </div>
       </div>
       
-      <div className="w-30 text-center">
+      <div className="w-35 text-center">
         <div className="h-16 w-full"></div>
         <div className="border-t border-slate-900 pt-1">
-          <p className="font-semibold">Pathologist</p>
-          <p className="text-[11px] text-[#475569]">Dr. {patient.referredDoctor || "Admin"}</p>
+          <p className="text-[#475569] text-base">Dr. {patient.referredDoctor || "Admin"}</p>
+          <p className="font-semibold text-lg whitespace-nowrap">Pathologist</p>
         </div>
       </div>
     </div>

@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
+import axios from "axios";
+import { labDetailsService } from "../services/labDetailsService";
 import { Shield, Settings as SettingsIcon, User, Save, CheckCircle, Printer } from "lucide-react";
+import { toast } from "../lib/toast";
 
 export const Settings = () => {
   const { user } = useAuth();
-  const [successMsg, setSuccessMsg] = useState("");
   const [labSettings, setLabSettings] = useState({
     labName: "Balaji Diagnostics",
     labAddress: "Plot 12, Medical Square, Sector 4, Nagpur - 440012",
@@ -14,23 +16,38 @@ export const Settings = () => {
   });
 
   useEffect(() => {
-    const saved = localStorage.getItem("balaji_lab_settings");
-    if (saved) {
-      try {
-        setLabSettings(JSON.parse(saved));
-      } catch (e) {
-        console.error("Failed to parse saved lab settings", e);
+    const fetchLabSettings = async () => {
+      const res = await labDetailsService.get();
+      if (res.success && res.labDetails) {
+        setLabSettings({
+          labName: res.labDetails.laboratoryDisplayName || "",
+          labAddress: res.labDetails.letterheadAddressLine || "",
+          labPhone: res.labDetails.contactPhone || "",
+          labEmail: res.labDetails.contactEmail || "",
+        });
       }
     }
+    fetchLabSettings();
   }, []);
 
-  const handleSaveLabSettings = (e) => {
+  const handleSaveLabSettings = async (e) => {
     e.preventDefault();
-    setSuccessMsg("");
-    localStorage.setItem("balaji_lab_settings", JSON.stringify(labSettings));
-    setSuccessMsg("Laboratory settings updated successfully.");
-    // Dispatch a storage event to alert other tabs/components
-    window.dispatchEvent(new Event("storage"));
+    
+    const payload = {
+      laboratoryDisplayName: labSettings.labName,
+      letterheadAddressLine: labSettings.labAddress,
+      contactPhone: labSettings.labPhone,
+      contactEmail: labSettings.labEmail,
+    };
+
+    toast.promise(labDetailsService.upsert(payload), {
+      loading: "Saving lab settings...",
+      success: () => {
+        localStorage.setItem("lab_settings", JSON.stringify(labSettings));
+        return "Lab details saved successfully";
+      },
+      error: (err) => err?.response?.data?.message || "Failed to save lab details"
+    });
   };
 
   const handleFieldChange = (field, value) => {
@@ -52,12 +69,6 @@ export const Settings = () => {
         </p>
       </div>
 
-      {successMsg && (
-        <div className="p-3 bg-green-50 border border-green-200 text-green-700 text-sm rounded-cards flex items-center space-x-2">
-          <CheckCircle className="h-4 w-4 shrink-0" />
-          <span>{successMsg}</span>
-        </div>
-      )}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
         {/* User Profile Card */}
@@ -105,7 +116,7 @@ export const Settings = () => {
         </div>
 
         {/* Print Template Designer Card */}
-        {user?.role === "admin" && (
+        {(user?.role === "admin" || user?.permissions?.includes("manage_settings")) && (
           <div className="md:col-span-1 bg-paper-white border border-cream-border rounded-cards p-6 space-y-6">
             <div className="flex items-center space-x-3 border-b border-cream-border pb-4">
               <Printer className="h-5 w-5 text-electric-cobalt shrink-0" />

@@ -4,6 +4,7 @@ import { ArrowLeft, ShieldAlert, Plus, CheckCircle } from "lucide-react";
 import { patientService } from "../../services/patientService";
 import { reportService } from "../../services/reportService";
 import { testService } from "../../services/testService";
+import { toast } from "../../lib/toast";
 
 export const CreateReport = () => {
   const { id } = useParams();
@@ -13,7 +14,6 @@ export const CreateReport = () => {
   const [allTests, setAllTests] = useState([]);
   const [selectedTests, setSelectedTests] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [submitError, setSubmitError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -40,9 +40,7 @@ export const CreateReport = () => {
 
         setSelectedTests(initialSelected);
       } catch (err) {
-        setSubmitError(
-          err.response?.data?.message || "Failed to load patient and test data."
-        );
+        toast.error("Failed to load patient and test data.");
       } finally {
         setLoading(false);
       }
@@ -80,32 +78,30 @@ export const CreateReport = () => {
     e.preventDefault();
 
     if (selectedTests.length === 0) {
-      setSubmitError("Please select at least one test to create a report.");
+      toast.error("Please select at least one test to create a report.");
       return;
     }
 
     setIsSubmitting(true);
-    setSubmitError("");
 
-    try {
-      const payload = {
-        patientId: id,
-        tests: selectedTests.map((test) => ({
-          testId: test._id,
-          testName: test.name,
-          result: [],
-        })),
-      };
+    const payload = {
+      patientId: id,
+      tests: selectedTests.map((test) => ({
+        testId: test._id,
+        testName: test.name,
+        result: [],
+      })),
+    };
 
-      await reportService.createReport(payload);
-      navigate(`/patients/${id}`);
-    } catch (err) {
-      setSubmitError(
-        err.response?.data?.message || "Failed to create report. Please try again."
-      );
-    } finally {
-      setIsSubmitting(false);
-    }
+    toast.promise(reportService.createReport(payload), {
+      loading: "Creating report...",
+      success: () => {
+        navigate(`/patients/${id}`);
+        return "Report created successfully";
+      },
+      error: (err) => err.response?.data?.message || "Failed to create report. Please try again.",
+      finally: () => setIsSubmitting(false)
+    });
   };
 
   if (loading) {
@@ -139,13 +135,6 @@ export const CreateReport = () => {
           {patient?.name ? `For ${patient.name}` : "Select the tests to include in this report."}
         </p>
       </div>
-
-      {submitError && (
-        <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-cards flex items-center space-x-2">
-          <ShieldAlert className="h-4 w-4 shrink-0" />
-          <span>{submitError}</span>
-        </div>
-      )}
 
       <div className="bg-paper-white border border-cream-border rounded-cards p-6 md:p-8">
         <form onSubmit={handleSubmit} className="space-y-6">
