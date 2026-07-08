@@ -9,6 +9,7 @@ const testRoutes = require("./routes/test.routes");
 const patientTestRoutes = require("./routes/patientTest.routes");
 const departmentRoutes = require("./routes/department.routes");
 const healthRoutes = require("./routes/health.routes");
+const printTemplateRoutes = require("./routes/printTemplate.routes");
 const { apiLimiter } = require("./middlewares/rateLimit");
 const { userAuth, authorizeRoles } = require("./middlewares/auth.middleware");
 const logger = require("./utils/logger");
@@ -46,6 +47,7 @@ app.use("/api/patients", apiLimiter, patientRoutes);
 app.use("/api/departments", apiLimiter, departmentRoutes);
 app.use("/api/tests", apiLimiter, testRoutes);
 app.use("/api/patient-tests", apiLimiter, patientTestRoutes);
+app.use("/api/settings/print-template", apiLimiter, printTemplateRoutes);
 
 // Global Error Handler (must be the last middleware)
 app.use(errorHandler);

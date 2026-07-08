@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "./context/AuthContext";
 import { AppRoutes } from "./routes/AppRoutes";
 import { OfflineFallback } from "./components/OfflineFallback";
+import { PrintTemplateProvider } from "./context/PrintTemplateContext";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -19,10 +20,12 @@ export const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <Router>
-          <AppRoutes />
-          <OfflineFallback />
-        </Router>
+        <PrintTemplateProvider>
+          <Router>
+            <AppRoutes />
+            <OfflineFallback />
+          </Router>
+        </PrintTemplateProvider>
       </AuthProvider>
     </QueryClientProvider>
   );

@@ -8,6 +8,7 @@ import {
   Stethoscope,
   FlaskConical,
   Settings,
+  FileText,
   LogOut,
   User,
   Menu,
@@ -90,6 +91,12 @@ export const DashboardLayout = () => {
       name: "Settings",
       path: "/settings",
       icon: Settings,
+      roles: ["admin"],
+    },
+    {
+      name: "Print Designer",
+      path: "/settings/print-designer",
+      icon: FileText,
       roles: ["admin"],
     },
   ];

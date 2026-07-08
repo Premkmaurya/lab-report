@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
-import { Shield, Settings as SettingsIcon, User, Save, CheckCircle } from "lucide-react";
+import { Shield, Settings as SettingsIcon, User, Save, CheckCircle, Printer } from "lucide-react";
 
 export const Settings = () => {
   const { user } = useAuth();
@@ -37,7 +38,7 @@ export const Settings = () => {
   };
 
   return (
-    <div className="space-y-8 max-w-3xl">
+    <div className="space-y-8 max-w-4xl mx-auto">
       {/* Header */}
       <div>
         <span className="font-abcfavoritvariable text-xs font-bold text-electric-cobalt uppercase tracking-widest block mb-2">
@@ -102,6 +103,29 @@ export const Settings = () => {
             </div>
           </div>
         </div>
+
+        {/* Print Template Designer Card */}
+        {user?.role === "admin" && (
+          <div className="md:col-span-1 bg-paper-white border border-cream-border rounded-cards p-6 space-y-6">
+            <div className="flex items-center space-x-3 border-b border-cream-border pb-4">
+              <Printer className="h-5 w-5 text-electric-cobalt shrink-0" />
+              <h3 className="font-abcfavoritvariable text-sm font-semibold text-charcoal">
+                Print Templates
+              </h3>
+            </div>
+            <div className="space-y-4">
+              <p className="text-sm text-stone font-inter">
+                Customize the visual layout, typography, and spacing for all laboratory printed reports.
+              </p>
+              <Link 
+                to="/settings/print-designer"
+                className="inline-flex items-center justify-center w-full space-x-2 bg-lavender-mist text-electric-cobalt font-medium py-2.5 px-4 rounded-buttons hover:bg-electric-cobalt hover:text-white transition duration-200 text-sm"
+              >
+                <span>Open Designer</span>
+              </Link>
+            </div>
+          </div>
+        )}
 
         {/* Lab Profile Form */}
         <div className="md:col-span-2 bg-paper-white border border-cream-border rounded-cards p-6 md:p-8 space-y-6">

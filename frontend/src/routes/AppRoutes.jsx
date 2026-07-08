@@ -41,6 +41,7 @@ const EditTest = lazy(() => import("../pages/Tests/EditTest").then((m) => ({ def
 const CreateReport = lazy(() => import("../pages/Reports/CreateReport").then((m) => ({ default: m.CreateReport })));
 
 const Settings = lazy(() => import("../pages/Settings").then((m) => ({ default: m.Settings })));
+const PrintTemplateDesigner = lazy(() => import("../pages/Settings/PrintTemplateDesigner").then((m) => ({ default: m.PrintTemplateDesigner })));
 
 export const AppRoutes = () => {
   return (
@@ -91,6 +92,7 @@ export const AppRoutes = () => {
               <Route path="/users/edit/:id" element={<EditUser />} />
 
               <Route path="/settings" element={<Settings />} />
+              <Route path="/settings/print-designer" element={<PrintTemplateDesigner />} />
             </Route>
           </Route>
         </Route>
