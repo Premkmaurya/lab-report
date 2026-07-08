@@ -142,12 +142,6 @@ export const PrintTemplateDesigner = () => {
           >
             Typography
           </button>
-          <button 
-            className={`flex-1 py-3 font-medium border-b-2 ${activeTab === 'elements' ? 'border-electric-cobalt text-electric-cobalt' : 'border-transparent text-slate-500'}`}
-            onClick={() => setActiveTab('elements')}
-          >
-            Elements
-          </button>
         </div>
 
         <div className="flex-1 overflow-y-auto p-4 space-y-6">
@@ -187,10 +181,6 @@ export const PrintTemplateDesigner = () => {
                   <option value="Arial, sans-serif">Arial</option>
                   <option value="Times New Roman, serif">Times New Roman</option>
                 </select>
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-slate-700 mb-1">Base Font Size</label>
-                <input type="text" className="w-full text-sm border-cream-border rounded" value={template.typography.baseFontSize} onChange={(e) => handleTypographyChange('baseFontSize', e.target.value)} />
               </div>
               <div>
                 <label className="block text-xs font-medium text-slate-700 mb-1">Line Height</label>

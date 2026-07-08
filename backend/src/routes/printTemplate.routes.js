@@ -8,7 +8,7 @@ const router = express.Router();
 router.get("/", userAuth, getTemplate);
 
 // Only admins can update or reset the template
-router.put("/", userAuth, authorizeRoles("admin"), updateTemplate);
-router.post("/reset", userAuth, authorizeRoles("admin"), resetTemplate);
+router.put("/", userAuth, authorizeRoles("admin","user"), updateTemplate);
+router.post("/reset", userAuth, authorizeRoles("admin","user"), resetTemplate);
 
 module.exports = router;

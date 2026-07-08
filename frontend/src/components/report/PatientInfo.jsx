@@ -23,13 +23,13 @@ export const PatientInfo = ({ patient, report, template }) => {
       <div className="grid grid-cols-2 gap-2">
         <div className="space-y-1">
           <div className="grid grid-cols-[110px_auto] text-lg gap-4">
-            <span className="text-black font-semibold font-medium whitespace-nowrap">
+            <span className="text-black  font-medium whitespace-nowrap">
               Patient Name:
             </span>
             <span>{patient.name}</span>
           </div>
           <div className="grid grid-cols-[110px_auto] text-lg gap-2">
-            <span className="text-black font-semibold font-medium whitespace-nowrap">
+            <span className="text-black  font-medium whitespace-nowrap">
               Age/Gender:
             </span>
             <span className=" capitalize">
@@ -37,7 +37,7 @@ export const PatientInfo = ({ patient, report, template }) => {
             </span>
           </div>
           <div className="grid grid-cols-[100px_auto] text-lg gap-2">
-            <span className="text-black font-semibold font-medium whitespace-nowrap">
+            <span className="text-black  font-medium whitespace-nowrap">
               Ref. Doctor:
             </span>
             <span>{patient.referredDoctor}</span>
@@ -46,19 +46,19 @@ export const PatientInfo = ({ patient, report, template }) => {
 
         <div className="space-y-1">
           <div className="grid grid-cols-[100px_auto] text-lg gap-2">
-            <span className="text-black font-semibold font-medium">
+            <span className="text-black  font-medium">
               Visit ID:
             </span>
             <span>{patient.visitId || "N/A"}</span>
           </div>
           <div className="grid grid-cols-[100px_auto] text-lg gap-2">
-            <span className="text-black font-semibold font-medium">
+            <span className="text-black  font-medium">
               Reg. Date:
             </span>
             <span>{regDate}</span>
           </div>
           <div className="grid grid-cols-[100px_auto] text-lg gap-4">
-            <span className="text-black font-semibold font-medium whitespace-nowrap">
+            <span className="text-black  font-medium whitespace-nowrap">
               Report Date:
             </span>
             <span>{reportDate}</span>
