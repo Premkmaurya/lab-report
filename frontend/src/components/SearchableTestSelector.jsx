@@ -1,7 +1,14 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { X, Search } from 'lucide-react';
 
-export const TestMultiSelect = ({ tests, selectedTests, onChange }) => {
+export const SearchableTestSelector = ({ 
+  tests, 
+  selectedTests, 
+  onChange, 
+  multi = true,
+  placeholder = "Search tests...",
+  autoFocus = false
+}) => {
   const [search, setSearch] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
@@ -20,9 +27,20 @@ export const TestMultiSelect = ({ tests, selectedTests, onChange }) => {
     };
   }, [wrapperRef]);
 
+  useEffect(() => {
+    if (autoFocus && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [autoFocus]);
+
+  // When in single mode, if a test is selected, we might want to show its name in the input.
+  // We'll manage this by keeping the selected test name in the search field when closed,
+  // or just handling it naturally: when they select, we set search to test name.
+
   const availableTests = useMemo(() => {
+    if (!multi) return tests;
     return tests.filter(test => !selectedTests.some(st => st.testId === test._id));
-  }, [tests, selectedTests]);
+  }, [tests, selectedTests, multi]);
 
   const filteredTests = useMemo(() => {
     const searchLower = search.toLowerCase();
@@ -43,7 +61,11 @@ export const TestMultiSelect = ({ tests, selectedTests, onChange }) => {
       }
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
-      setHighlightedIndex(prev => (prev > 0 ? prev - 1 : 0));
+      if (!isOpen) {
+        setIsOpen(true);
+      } else {
+        setHighlightedIndex(prev => (prev > 0 ? prev - 1 : 0));
+      }
     } else if (e.key === 'Enter') {
       e.preventDefault();
       if (isOpen && highlightedIndex >= 0 && highlightedIndex < filteredTests.length) {
@@ -52,23 +74,41 @@ export const TestMultiSelect = ({ tests, selectedTests, onChange }) => {
     } else if (e.key === 'Escape') {
       setIsOpen(false);
     } else if (e.key === 'Backspace' && search === '') {
-      if (selectedTests.length > 0) {
+      if (multi && selectedTests.length > 0) {
         removeTest(selectedTests[selectedTests.length - 1].testId);
       }
     }
   };
 
   const selectTest = (test) => {
-    onChange([...selectedTests, { testId: test._id, testName: test.name }]);
-    setSearch('');
+    if (multi) {
+      onChange([...selectedTests, { testId: test._id, testName: test.name }]);
+      setSearch('');
+      inputRef.current?.focus();
+    } else {
+      onChange([{ testId: test._id, testName: test.name }]);
+      setSearch(test.name);
+    }
     setIsOpen(false);
     setHighlightedIndex(-1);
-    inputRef.current?.focus();
   };
 
   const removeTest = (testId) => {
-    onChange(selectedTests.filter(t => t.testId !== testId));
-    inputRef.current?.focus();
+    if (multi) {
+      onChange(selectedTests.filter(t => t.testId !== testId));
+      inputRef.current?.focus();
+    }
+  };
+
+  const handleInputChange = (e) => {
+    setSearch(e.target.value);
+    setIsOpen(true);
+    setHighlightedIndex(-1);
+    
+    // If we're in single mode and user starts typing, we clear the selection
+    if (!multi && selectedTests.length > 0) {
+      onChange([]);
+    }
   };
 
   return (
@@ -79,14 +119,10 @@ export const TestMultiSelect = ({ tests, selectedTests, onChange }) => {
           <input
             ref={inputRef}
             type="text"
-            placeholder="Search tests..."
+            placeholder={placeholder}
             className="w-full bg-transparent border-none outline-none text-sm text-charcoal py-0.5"
             value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setIsOpen(true);
-              setHighlightedIndex(-1);
-            }}
+            onChange={handleInputChange}
             onFocus={() => setIsOpen(true)}
             onKeyDown={handleKeyDown}
             role="combobox"
@@ -128,32 +164,34 @@ export const TestMultiSelect = ({ tests, selectedTests, onChange }) => {
         )}
       </div>
 
-      <div className="min-h-[40px] pt-1">
-        {selectedTests.length > 0 ? (
-          <div className="flex flex-wrap gap-2">
-            {selectedTests.map((test) => (
-              <span
-                key={test.testId}
-                className="inline-flex items-center px-3 py-1.5 bg-warm-canvas border border-cream-border rounded-full text-xs font-semibold text-charcoal shadow-sm"
-              >
-                {test.testName}
-                <button
-                  type="button"
-                  onClick={() => removeTest(test.testId)}
-                  className="ml-2 text-stone hover:text-red-500 transition-colors focus:outline-none"
-                  aria-label={`Remove ${test.testName}`}
+      {multi && (
+        <div className="min-h-[40px] pt-1">
+          {selectedTests.length > 0 ? (
+            <div className="flex flex-wrap gap-2">
+              {selectedTests.map((test) => (
+                <span
+                  key={test.testId}
+                  className="inline-flex items-center px-3 py-1.5 bg-warm-canvas border border-cream-border rounded-full text-xs font-semibold text-charcoal shadow-sm"
                 >
-                  <X className="h-3.5 w-3.5" />
-                </button>
-              </span>
-            ))}
-          </div>
-        ) : (
-          <p className="text-sm text-stone italic">No tests selected.</p>
-        )}
-      </div>
+                  {test.testName}
+                  <button
+                    type="button"
+                    onClick={() => removeTest(test.testId)}
+                    className="ml-2 text-stone hover:text-red-500 transition-colors focus:outline-none"
+                    aria-label={`Remove ${test.testName}`}
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </span>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-stone italic">No tests selected.</p>
+          )}
+        </div>
+      )}
     </div>
   );
 };
 
-export default TestMultiSelect;
+export default SearchableTestSelector;

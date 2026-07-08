@@ -10,6 +10,7 @@ import { ArrowLeft, ShieldAlert, Plus, FileText, ChevronRight, Edit, X, Printer 
 import { ReportLayout } from "../../components/report/ReportLayout";
 import { PrintWarningModal } from "../../components/report/PrintWarningModal";
 import { InlineTestEditor } from "../../components/report/InlineTestEditor";
+import SearchableTestSelector from "../../components/SearchableTestSelector";
 import { toast } from "../../lib/toast";
 
 export const PatientDetails = () => {
@@ -375,29 +376,14 @@ export const PatientDetails = () => {
             {availableTests.length === 0 ? (
               <p className="text-sm text-stone italic">All available laboratory tests have already been added to this report.</p>
             ) : (
-              <select
-                className="w-full border border-cream-border rounded-inputs px-3 py-2 text-sm focus:outline-none"
-                value={selectedTestIdToAdd}
-                onChange={(e) => setSelectedTestIdToAdd(e.target.value)}
-              >
-                <option value="">-- Select a Test --</option>
-                {(() => {
-                  const grouped = availableTests.reduce((acc, t) => {
-                    const dName = t.departmentId?.name || "General";
-                    if (!acc[dName]) acc[dName] = [];
-                    acc[dName].push(t);
-                    return acc;
-                  }, {});
-                  
-                  return Object.keys(grouped).sort().map(dept => (
-                    <optgroup key={dept} label={dept}>
-                      {grouped[dept].map(t => (
-                        <option key={t._id} value={t._id}>{t.name}</option>
-                      ))}
-                    </optgroup>
-                  ));
-                })()}
-              </select>
+              <SearchableTestSelector
+                tests={availableTests}
+                selectedTests={selectedTestIdToAdd ? [{ testId: selectedTestIdToAdd }] : []}
+                onChange={(selected) => setSelectedTestIdToAdd(selected.length > 0 ? selected[0].testId : "")}
+                multi={false}
+                placeholder="Search tests..."
+                autoFocus={true}
+              />
             )}
           </div>
           <div className="bg-warm-canvas border-t border-cream-border p-6 flex justify-end space-x-3">

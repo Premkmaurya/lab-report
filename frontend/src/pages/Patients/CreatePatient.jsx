@@ -7,7 +7,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { testService } from "../../services/testService";
 import { ArrowLeft, ShieldAlert } from "lucide-react";
 import DoctorAutocomplete from "../../components/DoctorAutocomplete";
-import TestMultiSelect from "../../components/TestMultiSelect";
+import SearchableTestSelector from "../../components/SearchableTestSelector";
 import { toast } from "../../lib/toast";
 
 export const CreatePatient = () => {
@@ -273,10 +273,11 @@ export const CreatePatient = () => {
                   No tests available. Please configure tests in the system.
                 </p>
               ) : (
-                <TestMultiSelect
+                <SearchableTestSelector
                   tests={tests}
                   selectedTests={selectedTestIds}
                   onChange={setSelectedTestIds}
+                  multi={true}
                 />
               )}
             </div>
