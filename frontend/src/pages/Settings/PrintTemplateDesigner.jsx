@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Save, RotateCcw } from "lucide-react";
 import { usePrintTemplate } from "../../context/PrintTemplateContext";
-import { ReportLayout } from "../../components/report/ReportLayout";
+import { ReportCanvas } from "../../components/report/ReportCanvas";
 import { toast } from "../../lib/toast";
 
 export const PrintTemplateDesigner = () => {
@@ -15,9 +15,13 @@ export const PrintTemplateDesigner = () => {
   } = usePrintTemplate();
 
   const [template, setTemplate] = useState(null);
-  const [activeTab, setActiveTab] = useState("page"); // page, typography, elements
+  const [activeTab, setActiveTab] = useState("page"); // page, typography, elements, footer
   const [selectedElement, setSelectedElement] = useState("patientName");
   const [error, setError] = useState(null);
+  
+  // Zoom state
+  const [zoomLevel, setZoomLevel] = useState(1);
+  const workspaceRef = React.useRef(null);
 
   // Initialize local state with context template
   useEffect(() => {
@@ -60,6 +64,22 @@ export const PrintTemplateDesigner = () => {
     }));
   };
 
+  const handleSignatureChange = (role, field, value) => {
+    setTemplate((prev) => {
+      const signatures = prev.signatures || {
+        technician: { name: "", designation: "", show: true },
+        pathologist: { name: "", designation: "", qualification: "", registrationNumber: "", show: true }
+      };
+      return {
+        ...prev,
+        signatures: {
+          ...prev.signatures,
+          [role]: { ...signatures[role], [field]: value }
+        }
+      };
+    });
+  };
+
   const handleSave = async () => {
     toast.promise(updateTemplate(template), {
       loading: "Saving template...",
@@ -79,6 +99,28 @@ export const PrintTemplateDesigner = () => {
         success: "Template reset to default!",
         error: "Failed to reset template.",
       });
+    }
+  };
+
+  const handleZoom = (level) => {
+    setZoomLevel(level);
+  };
+
+  const handleFitWidth = () => {
+    if (workspaceRef.current) {
+      // 794 is the A4 width. We leave a 40px padding.
+      const containerWidth = workspaceRef.current.clientWidth - 40;
+      const newZoom = containerWidth / 794;
+      setZoomLevel(Math.min(Math.max(newZoom, 0.25), 3));
+    }
+  };
+
+  const handleFitPage = () => {
+    if (workspaceRef.current) {
+      // 1123 is the A4 height. We leave a 40px padding.
+      const containerHeight = workspaceRef.current.clientHeight - 40;
+      const newZoom = containerHeight / 1123;
+      setZoomLevel(Math.min(Math.max(newZoom, 0.25), 3));
     }
   };
 
@@ -163,7 +205,7 @@ export const PrintTemplateDesigner = () => {
   return (
     <div className="h-[calc(100vh-80px)] flex flex-col md:flex-row gap-6 -m-4 md:-m-6 lg:-m-8 p-4 md:p-6 lg:p-8 bg-warm-canvas">
       {/* Left Panel: Controls */}
-      <div className="w-full md:w-[350px] lg:w-[400px] flex flex-col bg-paper-white border border-cream-border rounded-cards shadow-sm h-full overflow-hidden shrink-0">
+      <div className="w-full md:w-[400px] flex flex-col bg-paper-white border border-cream-border rounded-cards shadow-sm h-full overflow-hidden shrink-0">
         <div className="p-4 border-b border-cream-border bg-white flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <button
@@ -212,6 +254,12 @@ export const PrintTemplateDesigner = () => {
             onClick={() => setActiveTab("elements")}
           >
             Elements
+          </button>
+          <button
+            className={`flex-1 py-3 font-medium border-b-2 ${activeTab === "footer" ? "border-electric-cobalt text-electric-cobalt" : "border-transparent text-slate-500"}`}
+            onClick={() => setActiveTab("footer")}
+          >
+            Footer
           </button>
         </div>
 
@@ -445,18 +493,163 @@ export const PrintTemplateDesigner = () => {
               </div>
             </div>
           )}
+
+          {activeTab === "footer" && (
+            <div className="space-y-6">
+              {/* Technician Settings */}
+              <div className="space-y-4">
+                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider border-b border-cream-border pb-2">
+                  Lab Technician
+                </h3>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="showTechnician"
+                    checked={template.signatures?.technician?.show ?? true}
+                    onChange={(e) => handleSignatureChange("technician", "show", e.target.checked)}
+                    className="rounded border-slate-300 text-electric-cobalt focus:ring-electric-cobalt"
+                  />
+                  <label htmlFor="showTechnician" className="text-sm font-medium text-slate-700">
+                    Show Technician Signature
+                  </label>
+                </div>
+                <div>
+                  <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">Name *</label>
+                  <input
+                    type="text"
+                    className="w-full text-sm border-slate-300 rounded"
+                    value={template.signatures?.technician?.name || ""}
+                    onChange={(e) => handleSignatureChange("technician", "name", e.target.value)}
+                    placeholder="e.g. System Admin"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">Designation</label>
+                  <input
+                    type="text"
+                    className="w-full text-sm border-slate-300 rounded"
+                    value={template.signatures?.technician?.designation || ""}
+                    onChange={(e) => handleSignatureChange("technician", "designation", e.target.value)}
+                    placeholder="e.g. Lab Technician"
+                  />
+                </div>
+              </div>
+
+              {/* Pathologist Settings */}
+              <div className="space-y-4">
+                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider border-b border-cream-border pb-2 mt-6">
+                  Pathologist
+                </h3>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="showPathologist"
+                    checked={template.signatures?.pathologist?.show ?? true}
+                    onChange={(e) => handleSignatureChange("pathologist", "show", e.target.checked)}
+                    className="rounded border-slate-300 text-electric-cobalt focus:ring-electric-cobalt"
+                  />
+                  <label htmlFor="showPathologist" className="text-sm font-medium text-slate-700">
+                    Show Pathologist Signature
+                  </label>
+                </div>
+                <div>
+                  <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">Name *</label>
+                  <input
+                    type="text"
+                    className="w-full text-sm border-slate-300 rounded"
+                    value={template.signatures?.pathologist?.name || ""}
+                    onChange={(e) => handleSignatureChange("pathologist", "name", e.target.value)}
+                    placeholder="Leave empty to use referred doctor"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">Designation</label>
+                  <input
+                    type="text"
+                    className="w-full text-sm border-slate-300 rounded"
+                    value={template.signatures?.pathologist?.designation || ""}
+                    onChange={(e) => handleSignatureChange("pathologist", "designation", e.target.value)}
+                    placeholder="e.g. Pathologist"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">Qualification</label>
+                  <input
+                    type="text"
+                    className="w-full text-sm border-slate-300 rounded"
+                    value={template.signatures?.pathologist?.qualification || ""}
+                    onChange={(e) => handleSignatureChange("pathologist", "qualification", e.target.value)}
+                    placeholder="e.g. MBBS, MD (Pathology)"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">Registration Number</label>
+                  <input
+                    type="text"
+                    className="w-full text-sm border-slate-300 rounded"
+                    value={template.signatures?.pathologist?.registrationNumber || ""}
+                    onChange={(e) => handleSignatureChange("pathologist", "registrationNumber", e.target.value)}
+                    placeholder="e.g. Reg. No. 123456"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
       {/* Right Panel: Live Preview */}
-      <div className="flex-1 bg-slate-200 border border-slate-300 rounded overflow-y-auto flex items-start justify-center p-8">
-        {/* We use scale to fit the A4 preview into the container nicely */}
-        <div className="origin-top transform scale-90 md:scale-100 shadow-2xl transition-all duration-300">
-          <ReportLayout
-            patient={mockPatient}
-            report={mockReport}
-            customTemplate={template}
-          />
+      <div className="flex-1 bg-slate-100 border border-slate-300 rounded shadow-inner flex flex-col overflow-hidden relative">
+        {/* Zoom Toolbar */}
+        <div className="h-12 bg-white border-b border-slate-300 flex items-center justify-center px-4 space-x-2 shrink-0 z-10 shadow-sm">
+          <button onClick={() => handleZoom(Math.max(0.25, zoomLevel - 0.25))} className="px-2 py-1 text-slate-600 hover:bg-slate-100 rounded font-medium text-sm border border-transparent hover:border-slate-200 transition-colors">-</button>
+          
+          <select 
+            value={zoomLevel} 
+            onChange={(e) => handleZoom(parseFloat(e.target.value))}
+            className="text-sm font-medium border-slate-300 rounded px-2 py-1 focus:ring-0 cursor-pointer"
+          >
+            <option value={0.5}>50%</option>
+            <option value={0.75}>75%</option>
+            <option value={1}>100%</option>
+            <option value={1.25}>125%</option>
+            <option value={1.5}>150%</option>
+            <option value={2}>200%</option>
+          </select>
+          
+          <button onClick={() => handleZoom(Math.min(3, zoomLevel + 0.25))} className="px-2 py-1 text-slate-600 hover:bg-slate-100 rounded font-medium text-sm border border-transparent hover:border-slate-200 transition-colors">+</button>
+          
+          <div className="w-px h-6 bg-slate-300 mx-2"></div>
+          
+          <button onClick={handleFitWidth} className="px-3 py-1.5 text-slate-600 hover:bg-slate-100 rounded font-medium text-xs border border-slate-200 transition-colors">Fit Width</button>
+          <button onClick={handleFitPage} className="px-3 py-1.5 text-slate-600 hover:bg-slate-100 rounded font-medium text-xs border border-slate-200 transition-colors">Fit Page</button>
+        </div>
+
+        {/* Scrollable Workspace */}
+        <div 
+          ref={workspaceRef}
+          className="flex-1 overflow-auto bg-[#ECECEC] flex items-start justify-center p-8"
+        >
+          {/* Zoom Wrapper */}
+          <div 
+            className="transition-all duration-200 flex-shrink-0"
+            style={{ 
+              width: `${794 * zoomLevel}px`, 
+              height: `${1123 * zoomLevel}px` 
+            }}
+          >
+            {/* The scaled canvas */}
+            <div 
+              className="origin-top-left transition-transform duration-200"
+              style={{ transform: `scale(${zoomLevel})`, width: '794px' }}
+            >
+              <ReportCanvas
+                patient={mockPatient}
+                report={mockReport}
+                customTemplate={template}
+              />
+            </div>
+          </div>
         </div>
       </div>
     </div>

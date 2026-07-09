@@ -18,11 +18,11 @@ exports.getTemplate = async (req, res, next) => {
 
 exports.updateTemplate = async (req, res, next) => {
   try {
-    const { page, typography, elements } = req.body;
+    const { page, typography, elements, signatures } = req.body;
     
     const template = await PrintTemplate.findOneAndUpdate(
       { singletonIdentifier: "DEFAULT" },
-      { page, typography, elements },
+      { page, typography, elements, signatures },
       { new: true, upsert: true, runValidators: true }
     );
     

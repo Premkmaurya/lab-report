@@ -7,7 +7,7 @@ import { reportService } from "../../services/reportService";
 import { testService } from "../../services/testService";
 import { handlePrint } from "../../utils/printUtils";
 import { ArrowLeft, ShieldAlert, Plus, FileText, ChevronRight, Edit, X, Printer } from "lucide-react";
-import { ReportLayout } from "../../components/report/ReportLayout";
+import { ReportCanvas } from "../../components/report/ReportCanvas";
 import { PrintWarningModal } from "../../components/report/PrintWarningModal";
 import { InlineTestEditor } from "../../components/report/InlineTestEditor";
 import SearchableTestSelector from "../../components/SearchableTestSelector";
@@ -415,7 +415,7 @@ export const PatientDetails = () => {
 
     {reportToPrint && (
       <div className="hidden print:block fixed inset-0 bg-white z-50 overflow-visible">
-        <ReportLayout patient={patient} report={reportToPrint} />
+        <ReportCanvas patient={patient} report={reportToPrint} />
       </div>
     )}
     </>

@@ -4,7 +4,7 @@ import { TestResultTable } from './TestResultTable';
 import { SignatureSection } from './SignatureSection';
 import { usePrintTemplate } from '../../context/PrintTemplateContext';
 
-export const ReportLayout = ({ patient, report, customTemplate }) => {
+export const ReportCanvas = ({ patient, report, customTemplate }) => {
   const context = usePrintTemplate();
   const template = customTemplate || (context ? context.template : null);
 
@@ -27,10 +27,10 @@ export const ReportLayout = ({ patient, report, customTemplate }) => {
 
   return (
     <div 
-      className="report-page bg-white font-sans text-[#0F172A] w-full max-w-[210mm] min-h-[297mm] mx-auto shadow-xl print:shadow-none print:max-w-none print:w-auto"
+      className="report-page bg-white font-sans text-[#0F172A] w-[794px] min-h-[1123px] mx-auto shadow-md border border-gray-200 rounded-sm print:border-none print:shadow-none print:rounded-none print:w-auto print:min-h-full print:max-w-none print:mx-0 flex flex-col"
       style={{ ...pageStyles, ...typoStyles }}
     >
-      <div className="report-content">
+      <div className="report-content flex-1">
         <table className="w-full text-caption text-slate-900 border-collapse mt-6" style={typoStyles}>
           <thead className="bg-[#F8FAFC]">
             <tr>

@@ -37,6 +37,24 @@ const printTemplateSchema = new mongoose.Schema({
     result: { type: elementStyleSchema, default: () => ({ fontSize: "12px", fontWeight: "400" }) },
     unit: { type: elementStyleSchema, default: () => ({ fontSize: "12px", fontWeight: "400", color: "#475569" }) },
     footer: { type: elementStyleSchema, default: () => ({ fontSize: "12px", fontWeight: "400" }) }
+  },
+  signatures: {
+    technician: {
+      name: { type: String, default: "Lab Technician" },
+      designation: { type: String, default: "System Admin" },
+      show: { type: Boolean, default: true },
+      signatureImage: { type: String, default: "" },
+      showSignatureImage: { type: Boolean, default: false }
+    },
+    pathologist: {
+      name: { type: String, default: "" },
+      designation: { type: String, default: "Pathologist" },
+      qualification: { type: String, default: "" },
+      registrationNumber: { type: String, default: "" },
+      show: { type: Boolean, default: true },
+      signatureImage: { type: String, default: "" },
+      showSignatureImage: { type: Boolean, default: false }
+    }
   }
 }, { timestamps: true });
 
