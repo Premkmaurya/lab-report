@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
@@ -8,6 +9,7 @@ export const Signup = () => {
   const { signup, authError } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [localError, setLocalError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   const {
@@ -109,18 +111,28 @@ export const Signup = () => {
           <label className="block text-xs font-bold text-charcoal uppercase tracking-wider mb-2">
             Password
           </label>
-          <input
-            type="password"
-            placeholder="••••••••"
-            className={`w-full ${errors.password ? "border-red-500 focus:border-red-500" : ""}`}
-            {...register("password", {
-              required: "Password is required",
-              minLength: {
-                value: 6,
-                message: "Password must be at least 6 characters long",
-              },
-            })}
-          />
+          <div className="relative">
+            <input
+              type={showPassword ? "text" : "password"}
+              placeholder="••••••••"
+              className={`w-full pr-10 ${errors.password ? "border-red-500 focus:border-red-500" : ""}`}
+              {...register("password", {
+                required: "Password is required",
+                minLength: {
+                  value: 6,
+                  message: "Password must be at least 6 characters long",
+                },
+              })}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((prev) => !prev)}
+              className="absolute inset-y-0 right-3 flex items-center text-stone hover:text-charcoal"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </button>
+          </div>
           {errors.password && (
             <p className="text-xs text-red-500 mt-1">
               {errors.password.message}

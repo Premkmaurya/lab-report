@@ -1,6 +1,7 @@
 const Test = require("../models/test.model");
 const asyncHandler = require("../utils/asyncHandler");
 const { BadRequestError, NotFoundError } = require("../utils/errors");
+const { invalidateCacheKey } = require("../services/cache.service");
 
 const getTests = asyncHandler(async (req, res) => {
   const tests = await Test.find()
@@ -52,6 +53,8 @@ const createTest = asyncHandler(async (req, res) => {
     .populate('createdBy', 'username _id')
     .populate('updatedBy', 'username _id');
 
+  await invalidateCacheKey("tests:all");
+
   res.status(201).json({
     success: true,
     test,
@@ -87,6 +90,9 @@ const updateTest = asyncHandler(async (req, res) => {
     throw new NotFoundError("Test not found");
   }
 
+  await invalidateCacheKey("tests:all");
+  await invalidateCacheKey(`test:${req.params.id}`);
+
   res.status(200).json({
     success: true,
     test,
@@ -101,6 +107,9 @@ const deleteTest = asyncHandler(async (req, res) => {
   }
 
   await test.delete();
+
+  await invalidateCacheKey("tests:all");
+  await invalidateCacheKey(`test:${req.params.id}`);
 
   res.status(200).json({
     success: true,

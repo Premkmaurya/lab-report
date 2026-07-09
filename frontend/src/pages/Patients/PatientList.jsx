@@ -24,7 +24,8 @@ export const PatientList = () => {
       : {})
   };
 
-  const isCustomValid = activeFilter !== "custom" || (customStartDate && customEndDate);
+  const isCustomValid = activeFilter !== "custom" || Boolean(customStartDate && customEndDate);
+
 
   const { data, isLoading: loading, error } = useQuery({
     queryKey: ['reports', queryParams],

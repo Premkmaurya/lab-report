@@ -1,6 +1,7 @@
 const Department = require("../models/department.model");
 const asyncHandler = require("../utils/asyncHandler");
 const { BadRequestError, NotFoundError } = require("../utils/errors");
+const { invalidateCacheKey } = require("../services/cache.service");
 
 const getDepartments = asyncHandler(async (req, res) => {
   const departments = await Department.find({ isActive: true }).sort({ name: 1 });
@@ -27,6 +28,8 @@ const createDepartment = asyncHandler(async (req, res) => {
     description,
   });
 
+  await invalidateCacheKey("departments:all");
+
   res.status(201).json({
     success: true,
     department,
@@ -48,6 +51,8 @@ const updateDepartment = asyncHandler(async (req, res) => {
   if (!department) {
     throw new NotFoundError("Department not found");
   }
+
+  await invalidateCacheKey("departments:all");
 
   res.status(200).json({
     success: true,
@@ -71,6 +76,8 @@ const deleteDepartment = asyncHandler(async (req, res) => {
   }
 
   await department.delete();
+
+  await invalidateCacheKey("departments:all");
 
   res.status(200).json({
     success: true,

@@ -12,6 +12,7 @@ const {
 } = require("../controllers/patient.controller");
 
 const authMiddleware = require("../middlewares/auth.middleware");
+const cacheMiddleware = require("../middlewares/cache.middleware");
 
 const {
   validateCreatePatient,
@@ -32,6 +33,7 @@ router.get("/", getPatients);
 router.get(
   "/summary/:period",
   authMiddleware.authorizeRoles("admin"),
+  cacheMiddleware(300, (req) => `dashboard:stats:${req.params.period}:${req.query.timezoneOffset || 0}`),
   getPatientsSummary
 );
 

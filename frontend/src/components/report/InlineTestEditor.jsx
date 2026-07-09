@@ -55,12 +55,11 @@ export const InlineTestEditor = ({
   // Setup form data when entering edit mode or when template loads
   useEffect(() => {
     if ((isEditing || isExpanded) && testTemplate) {
-      const mergedResults = testTemplate.subTests.map((sub) => {
-        const existingResult = test.result?.find(
-          (r) => r.parameter.toLowerCase() === sub.name.toLowerCase()
-        );
+      const mergedResults = testTemplate.subTests.map((sub, index) => {
+        // Match by index to preserve customized parameter names instead of strictly matching by template name
+        const existingResult = test.result?.[index];
         return {
-          parameter: sub.name,
+          parameter: existingResult ? existingResult.parameter : sub.name,
           value: existingResult ? existingResult.value : "",
           unit: sub.unit,
           normalRange: sub.normalRange,
@@ -85,12 +84,10 @@ export const InlineTestEditor = ({
     onCancelEditing();
     // Reset back to original values
     if (testTemplate) {
-      const mergedResults = testTemplate.subTests.map((sub) => {
-        const existingResult = test.result?.find(
-          (r) => r.parameter.toLowerCase() === sub.name.toLowerCase()
-        );
+      const mergedResults = testTemplate.subTests.map((sub, index) => {
+        const existingResult = test.result?.[index];
         return {
-          parameter: sub.name,
+          parameter: existingResult ? existingResult.parameter : sub.name,
           value: existingResult ? existingResult.value : "",
           unit: sub.unit,
           normalRange: sub.normalRange,
@@ -254,10 +251,11 @@ export const InlineTestEditor = ({
                           return (
                             <tr key={item.id} className="bg-warm-canvas/50 border-y border-cream-border">
                               <td colSpan="4" className="py-3 px-3 align-middle">
-                                <span className="text-base font-bold text-black uppercase tracking-wider block">
-                                  {item.parameter}
-                                </span>
-                                <input type="hidden" {...register(`results.${index}.parameter`)} />
+                                <input
+                                  type="text"
+                                  className="w-full text-base font-bold text-black uppercase tracking-wider block bg-transparent border-none outline-none focus:ring-1 focus:ring-electric-cobalt rounded px-2"
+                                  {...register(`results.${index}.parameter`)}
+                                />
                                 <input type="hidden" value="section" {...register(`results.${index}.type`)} />
                               </td>
                             </tr>
@@ -267,10 +265,11 @@ export const InlineTestEditor = ({
                         return (
                           <tr key={item.id} className="hover:bg-warm-canvas/30 transition-colors">
                             <td className="py-3 px-3 align-middle pl-6 border-l-4 border-l-transparent hover:border-l-electric-cobalt/30">
-                              <span className="text-sm font-medium text-charcoal block">
-                                {item.parameter}
-                              </span>
-                              <input type="hidden" {...register(`results.${index}.parameter`)} />
+                              <input
+                                type="text"
+                                className="w-full text-sm font-medium text-charcoal block bg-transparent border-none outline-none focus:ring-1 focus:ring-electric-cobalt rounded px-2"
+                                {...register(`results.${index}.parameter`)}
+                              />
                               <input type="hidden" value="parameter" {...register(`results.${index}.type`)} />
                             </td>
                             <td className="py-3 px-3 align-middle">

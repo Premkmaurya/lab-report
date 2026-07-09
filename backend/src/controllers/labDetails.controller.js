@@ -1,6 +1,7 @@
 const LabDetails = require("../models/labDetails.model");
 const asyncHandler = require("../utils/asyncHandler");
 const { BadRequestError, NotFoundError } = require("../utils/errors");
+const { invalidateCacheKey } = require("../services/cache.service");
 
 const getLabDetails = asyncHandler(async (req, res) => {
   const lab = await LabDetails.findOne({ userId: req.user._id });
@@ -27,6 +28,8 @@ const createOrUpdateLabDetails = asyncHandler(async (req, res) => {
     { new: true, upsert: true, runValidators: true },
   );
 
+  await invalidateCacheKey(`settings:lab-details:${req.user._id}`);
+
   res.status(200).json({ success: true, labDetails: lab });
 });
 
@@ -37,6 +40,8 @@ const deleteLabDetails = asyncHandler(async (req, res) => {
   }
 
   await LabDetails.deleteOne({ _id: lab._id });
+
+  await invalidateCacheKey(`settings:lab-details:${req.user._id}`);
 
   res.status(200).json({ success: true, message: "Lab details deleted" });
 });

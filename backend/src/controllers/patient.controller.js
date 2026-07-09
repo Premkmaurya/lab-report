@@ -2,6 +2,7 @@ const Patient = require("../models/patient.model");
 const PatientTest = require("../models/patientTest.model");
 const asyncHandler = require("../utils/asyncHandler");
 const { BadRequestError, NotFoundError } = require("../utils/errors");
+const { invalidateCachePattern } = require("../services/cache.service");
 
 const getPatients = asyncHandler(async (req, res) => {
   const patients = await Patient.find()
@@ -39,6 +40,8 @@ const deletePatient = asyncHandler(async (req, res) => {
 
   await patient.delete();
 
+  await invalidateCachePattern("dashboard:stats:*");
+
   res.status(200).json({
     success: true,
     message: "Patient deleted successfully",
@@ -61,6 +64,8 @@ const createPatient = asyncHandler(async (req, res) => {
     referredDoctor,
     createdBy: req.user.id,
   });
+
+  await invalidateCachePattern("dashboard:stats:*");
 
   res.status(201).json({
     success: true,
@@ -91,6 +96,8 @@ const updatePatient = asyncHandler(async (req, res) => {
   if (!patient) {
     throw new NotFoundError("Patient not found");
   }
+
+  await invalidateCachePattern("dashboard:stats:*");
 
   res.status(200).json({
     success: true,

@@ -1,4 +1,5 @@
 const PrintTemplate = require("../models/printTemplate.model");
+const { invalidateCacheKey } = require("../services/cache.service");
 
 exports.getTemplate = async (req, res, next) => {
   try {
@@ -25,6 +26,8 @@ exports.updateTemplate = async (req, res, next) => {
       { new: true, upsert: true, runValidators: true }
     );
     
+    await invalidateCacheKey("settings:print-template");
+    
     res.status(200).json({ success: true, data: template });
   } catch (error) {
     next(error);
@@ -38,6 +41,8 @@ exports.resetTemplate = async (req, res, next) => {
     
     // Recreate the default one
     const template = await PrintTemplate.create({ singletonIdentifier: "DEFAULT" });
+    
+    await invalidateCacheKey("settings:print-template");
     
     res.status(200).json({ success: true, data: template, message: "Template reset to defaults" });
   } catch (error) {

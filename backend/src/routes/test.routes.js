@@ -9,6 +9,7 @@ const {
   deleteTest,
 } = require("../controllers/test.controller");
 const authMiddleware = require("../middlewares/auth.middleware");
+const cacheMiddleware = require("../middlewares/cache.middleware");
 const {
   validateCreateTest,
   validateUpdateTest,
@@ -23,13 +24,14 @@ const router = express.Router();
 router.use(authMiddleware.userAuth);
 
 // Get all tests
-router.get("/", getTests);
+router.get("/", cacheMiddleware(86400, () => "tests:all"), getTests);
 
 // Get test by ID
 router.get(
   "/:id",
   validateGetTestById,
   validateRequest,
+  cacheMiddleware(86400, (req) => `test:${req.params.id}`),
   getTestById,
 );
 

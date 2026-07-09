@@ -11,6 +11,7 @@ const {
   deleteDoctor,
 } = require("../controllers/doctor.controller");
 const authMiddleware = require("../middlewares/auth.middleware");
+const cacheMiddleware = require("../middlewares/cache.middleware");
 const {
   validateCreateDoctor,
   validateUpdateDoctor,
@@ -25,11 +26,12 @@ const upload = multer({ storage: multer.memoryStorage() });
 
 router.use(authMiddleware.userAuth);
 
-router.get("/", getAllDoctors);
+router.get("/", cacheMiddleware(86400, () => "doctors:all"), getAllDoctors);
 router.get(
   "/:id",
   validateGetDoctorById,
   validateRequest,
+  cacheMiddleware(86400, (req) => `doctor:${req.params.id}`),
   getDoctorById,
 );
 
