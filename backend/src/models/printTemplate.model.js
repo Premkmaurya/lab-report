@@ -134,6 +134,16 @@ const printTemplateSchema = new mongoose.Schema(
           textDecoration: "underline",
         }),
       },
+      barcode: {
+        show: { type: Boolean, default: true },
+        width: { type: String, default: "1.5" },
+        height: { type: String, default: "40" },
+        position: { type: String, default: "top-right" },
+        alignment: { type: String, default: "right" },
+        marginTop: { type: String, default: "0px" },
+        marginBottom: { type: String, default: "0px" },
+        displayValue: { type: Boolean, default: true }
+      },
       tableHeader: {
         type: elementStyleSchema,
          default: () => ({

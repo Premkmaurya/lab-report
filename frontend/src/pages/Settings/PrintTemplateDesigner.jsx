@@ -83,6 +83,16 @@ const DEFAULT_ELEMENT_STYLES = {
     fontSize: "12px",
     fontWeight: "400",
     color: ""
+  },
+  barcode: {
+    show: true,
+    width: "1.5",
+    height: "40",
+    position: "top-right",
+    alignment: "right",
+    marginTop: "0px",
+    marginBottom: "0px",
+    displayValue: true
   }
 };
 
@@ -306,6 +316,7 @@ export const PrintTemplateDesigner = () => {
     { value: "parameter", label: "Parameter" },
     { value: "result", label: "Result" },
     { value: "unit", label: "Normal Range & Unit" },
+    { value: "barcode", label: "Barcode" },
     { value: "footer", label: "Footer / Signatures" },
   ];
 
@@ -497,102 +508,196 @@ export const PrintTemplateDesigner = () => {
               </div>
 
               <div className="p-4 bg-slate-50 border border-slate-200 rounded space-y-4 mt-4">
-                <div>
-                  <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
-                    Font Size
-                  </label>
-                  <input
-                    type="text"
-                    className="w-full text-sm border-slate-300 rounded"
-                    value={getElementValue("fontSize")}
-                    onChange={(e) =>
-                      handleElementChange("fontSize", e.target.value)
-                    }
-                    placeholder="e.g. 14px"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
-                    Font Weight
-                  </label>
-                  <select
-                    className="w-full text-sm border-slate-300 rounded"
-                    value={getElementValue("fontWeight")}
-                    onChange={(e) =>
-                      handleElementChange("fontWeight", e.target.value)
-                    }
-                  >
-                    <option value="">Inherit</option>
-                    <option value="400">Normal (400)</option>
-                    <option value="500">Medium (500)</option>
-                    <option value="600">Semibold (600)</option>
-                    <option value="700">Bold (700)</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
-                    Text Color
-                  </label>
-                  <input
-                    type="text"
-                    className="w-full text-sm border-slate-300 rounded"
-                    value={getElementValue("color")}
-                    onChange={(e) =>
-                      handleElementChange("color", e.target.value)
-                    }
-                    placeholder="e.g. #0F172A"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
-                    Text Alignment
-                  </label>
-                  <select
-                    className="w-full text-sm border-slate-300 rounded"
-                    value={getElementValue("textAlign")}
-                    onChange={(e) =>
-                      handleElementChange("textAlign", e.target.value)
-                    }
-                  >
-                    <option value="">Inherit</option>
-                    <option value="left">Left</option>
-                    <option value="center">Center</option>
-                    <option value="right">Right</option>
-                  </select>
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
-                      Transform
-                    </label>
-                    <select
-                      className="w-full text-sm border-slate-300 rounded"
-                      value={getElementValue("textTransform")}
-                      onChange={(e) =>
-                        handleElementChange("textTransform", e.target.value)
-                      }
-                    >
-                      <option value="">None</option>
-                      <option value="uppercase">Uppercase</option>
-                      <option value="capitalize">Capitalize</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
-                      Decoration
-                    </label>
-                    <select
-                      className="w-full text-sm border-slate-300 rounded"
-                      value={getElementValue("textDecoration")}
-                      onChange={(e) =>
-                        handleElementChange("textDecoration", e.target.value)
-                      }
-                    >
-                      <option value="">None</option>
-                      <option value="underline">Underline</option>
-                    </select>
-                  </div>
-                </div>
+                {selectedElement === "barcode" ? (
+                  <>
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id="showBarcode"
+                        checked={getElementValue("show") !== false}
+                        onChange={(e) => handleElementChange("show", e.target.checked)}
+                        className="rounded border-slate-300 text-electric-cobalt focus:ring-electric-cobalt"
+                      />
+                      <label htmlFor="showBarcode" className="text-[11px] font-medium text-slate-700 uppercase">
+                        Show Barcode
+                      </label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id="displayValue"
+                        checked={getElementValue("displayValue") !== false}
+                        onChange={(e) => handleElementChange("displayValue", e.target.checked)}
+                        className="rounded border-slate-300 text-electric-cobalt focus:ring-electric-cobalt"
+                      />
+                      <label htmlFor="displayValue" className="text-[11px] font-medium text-slate-700 uppercase">
+                        Show Human-Readable Text
+                      </label>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
+                          Width Multiplier
+                        </label>
+                        <input
+                          type="number"
+                          step="0.1"
+                          className="w-full text-sm border-slate-300 rounded"
+                          value={getElementValue("width")}
+                          onChange={(e) => handleElementChange("width", e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
+                          Height (px)
+                        </label>
+                        <input
+                          type="number"
+                          className="w-full text-sm border-slate-300 rounded"
+                          value={getElementValue("height")}
+                          onChange={(e) => handleElementChange("height", e.target.value)}
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
+                        Alignment
+                      </label>
+                      <select
+                        className="w-full text-sm border-slate-300 rounded"
+                        value={getElementValue("alignment")}
+                        onChange={(e) => handleElementChange("alignment", e.target.value)}
+                      >
+                        <option value="left">Left</option>
+                        <option value="center">Center</option>
+                        <option value="right">Right</option>
+                      </select>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
+                          Margin Top
+                        </label>
+                        <input
+                          type="text"
+                          className="w-full text-sm border-slate-300 rounded"
+                          value={getElementValue("marginTop")}
+                          onChange={(e) => handleElementChange("marginTop", e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
+                          Margin Bottom
+                        </label>
+                        <input
+                          type="text"
+                          className="w-full text-sm border-slate-300 rounded"
+                          value={getElementValue("marginBottom")}
+                          onChange={(e) => handleElementChange("marginBottom", e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div>
+                      <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
+                        Font Size
+                      </label>
+                      <input
+                        type="text"
+                        className="w-full text-sm border-slate-300 rounded"
+                        value={getElementValue("fontSize")}
+                        onChange={(e) =>
+                          handleElementChange("fontSize", e.target.value)
+                        }
+                        placeholder="e.g. 14px"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
+                        Font Weight
+                      </label>
+                      <select
+                        className="w-full text-sm border-slate-300 rounded"
+                        value={getElementValue("fontWeight")}
+                        onChange={(e) =>
+                          handleElementChange("fontWeight", e.target.value)
+                        }
+                      >
+                        <option value="">Inherit</option>
+                        <option value="400">Normal (400)</option>
+                        <option value="500">Medium (500)</option>
+                        <option value="600">Semibold (600)</option>
+                        <option value="700">Bold (700)</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
+                        Text Color
+                      </label>
+                      <input
+                        type="text"
+                        className="w-full text-sm border-slate-300 rounded"
+                        value={getElementValue("color")}
+                        onChange={(e) =>
+                          handleElementChange("color", e.target.value)
+                        }
+                        placeholder="e.g. #0F172A"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
+                        Text Alignment
+                      </label>
+                      <select
+                        className="w-full text-sm border-slate-300 rounded"
+                        value={getElementValue("textAlign")}
+                        onChange={(e) =>
+                          handleElementChange("textAlign", e.target.value)
+                        }
+                      >
+                        <option value="">Inherit</option>
+                        <option value="left">Left</option>
+                        <option value="center">Center</option>
+                        <option value="right">Right</option>
+                      </select>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
+                          Transform
+                        </label>
+                        <select
+                          className="w-full text-sm border-slate-300 rounded"
+                          value={getElementValue("textTransform")}
+                          onChange={(e) =>
+                            handleElementChange("textTransform", e.target.value)
+                          }
+                        >
+                          <option value="">None</option>
+                          <option value="uppercase">Uppercase</option>
+                          <option value="capitalize">Capitalize</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
+                          Decoration
+                        </label>
+                        <select
+                          className="w-full text-sm border-slate-300 rounded"
+                          value={getElementValue("textDecoration")}
+                          onChange={(e) =>
+                            handleElementChange("textDecoration", e.target.value)
+                          }
+                        >
+                          <option value="">None</option>
+                          <option value="underline">Underline</option>
+                        </select>
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           )}
@@ -636,6 +741,50 @@ export const PrintTemplateDesigner = () => {
                     placeholder="e.g. Lab Technician"
                   />
                 </div>
+                <div className="flex items-center space-x-2 mt-2">
+                  <input
+                    type="checkbox"
+                    id="showTechImage"
+                    checked={template.signatures?.technician?.showSignatureImage ?? false}
+                    onChange={(e) => handleSignatureChange("technician", "showSignatureImage", e.target.checked)}
+                    className="rounded border-slate-300 text-electric-cobalt focus:ring-electric-cobalt"
+                  />
+                  <label htmlFor="showTechImage" className="text-[11px] font-medium text-slate-700 uppercase">
+                    Use Image Signature
+                  </label>
+                </div>
+                {template.signatures?.technician?.showSignatureImage && (
+                  <div>
+                    <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">Upload Image</label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="w-full text-sm"
+                      onChange={(e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onload = (upload) => {
+                            handleSignatureChange("technician", "signatureImage", upload.target.result);
+                          };
+                          reader.readAsDataURL(file);
+                        }
+                      }}
+                    />
+                    {template.signatures?.technician?.signatureImage && (
+                      <div className="mt-2 border border-slate-200 p-2 inline-block rounded bg-white">
+                        <img src={template.signatures.technician.signatureImage} alt="Signature" className="h-12 object-contain" />
+                        <button
+                          type="button"
+                          className="text-xs text-red-500 hover:text-red-700 mt-1 block"
+                          onClick={() => handleSignatureChange("technician", "signatureImage", "")}
+                        >
+                          Remove Image
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Pathologist Settings */}
@@ -695,6 +844,50 @@ export const PrintTemplateDesigner = () => {
                     placeholder="e.g. Reg. No. 123456"
                   />
                 </div>
+                <div className="flex items-center space-x-2 mt-2">
+                  <input
+                    type="checkbox"
+                    id="showPathImage"
+                    checked={template.signatures?.pathologist?.showSignatureImage ?? false}
+                    onChange={(e) => handleSignatureChange("pathologist", "showSignatureImage", e.target.checked)}
+                    className="rounded border-slate-300 text-electric-cobalt focus:ring-electric-cobalt"
+                  />
+                  <label htmlFor="showPathImage" className="text-[11px] font-medium text-slate-700 uppercase">
+                    Use Image Signature
+                  </label>
+                </div>
+                {template.signatures?.pathologist?.showSignatureImage && (
+                  <div>
+                    <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">Upload Image</label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="w-full text-sm"
+                      onChange={(e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onload = (upload) => {
+                            handleSignatureChange("pathologist", "signatureImage", upload.target.result);
+                          };
+                          reader.readAsDataURL(file);
+                        }
+                      }}
+                    />
+                    {template.signatures?.pathologist?.signatureImage && (
+                      <div className="mt-2 border border-slate-200 p-2 inline-block rounded bg-white">
+                        <img src={template.signatures.pathologist.signatureImage} alt="Signature" className="h-12 object-contain" />
+                        <button
+                          type="button"
+                          className="text-xs text-red-500 hover:text-red-700 mt-1 block"
+                          onClick={() => handleSignatureChange("pathologist", "signatureImage", "")}
+                        >
+                          Remove Image
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           )}

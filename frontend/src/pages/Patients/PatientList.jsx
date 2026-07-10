@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { reportService } from "../../services/reportService";
-import { Plus, Search, FileText, Calendar, Filter } from "lucide-react";
+import { Plus, Search, FileText, Calendar, Filter, Printer } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
-import { canManagePatients } from "../../config/permissions";
+import { canManagePatients, canPrintReports } from "../../config/permissions";
+import { handlePrint } from "../../utils/printUtils";
+import { ReportCanvas, PrintableReport } from "../../components/report/ReportCanvas";
+import { PrintWarningModal } from "../../components/report/PrintWarningModal";
 
 import { useQuery } from "@tanstack/react-query";
 
@@ -12,8 +15,40 @@ export const PatientList = () => {
   const [activeFilter, setActiveFilter] = useState("today");
   const [customStartDate, setCustomStartDate] = useState("");
   const [customEndDate, setCustomEndDate] = useState("");
+  const [reportToPrint, setReportToPrint] = useState(null);
+  const [showWarningModal, setShowWarningModal] = useState(false);
+  const [selectedReportForPrint, setSelectedReportForPrint] = useState(null);
   const { user } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const handleAfterPrint = () => {
+      setReportToPrint(null);
+    };
+    window.addEventListener('afterprint', handleAfterPrint);
+    return () => window.removeEventListener('afterprint', handleAfterPrint);
+  }, []);
+
+  const triggerPrintRequest = (e, report) => {
+    e.stopPropagation(); // prevent row click navigation
+    const hideWarning = localStorage.getItem('hidePrintWarning');
+    if (hideWarning === 'true') {
+      executePrint(report);
+    } else {
+      setSelectedReportForPrint(report);
+      setShowWarningModal(true);
+    }
+  };
+
+  const executePrint = (report) => {
+    setShowWarningModal(false);
+    setSelectedReportForPrint(null);
+    
+    handlePrint(
+      () => setReportToPrint(report),
+      null
+    );
+  };
 
   const tzOffset = new Date().getTimezoneOffset();
   const queryParams = {
@@ -24,7 +59,7 @@ export const PatientList = () => {
       : {})
   };
 
-  const isCustomValid = activeFilter !== "custom" || Boolean(customStartDate && customEndDate);
+  const isCustomValid = !!(activeFilter !== "custom" || (customStartDate && customEndDate));
 
 
   const { data, isLoading: loading, error } = useQuery({
@@ -51,9 +86,10 @@ export const PatientList = () => {
   ];
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <>
+      <div className={`space-y-6 ${reportToPrint ? 'hidden print:hidden' : 'print:hidden'}`}>
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <span className="font-abcfavoritvariable text-xs font-bold text-electric-cobalt uppercase tracking-widest block mb-2">
             DAILY FEED
@@ -204,6 +240,15 @@ export const PatientList = () => {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-right">
                           <div className="flex items-center justify-end space-x-2">
+                            {canPrintReports(user) && (
+                              <button
+                                onClick={(e) => triggerPrintRequest(e, report)}
+                                className="inline-flex items-center space-x-1 border border-electric-cobalt text-electric-cobalt bg-paper-white hover:bg-lavender-mist/40 px-3 py-1.5 rounded-buttons text-xs transition duration-200 cursor-pointer"
+                              >
+                                <Printer className="h-3.5 w-3.5" />
+                                <span>Print</span>
+                              </button>
+                            )}
                             <Link
                               to={`/patients/${patient._id || report.patientId}`}
                               className="inline-flex items-center space-x-1 border border-cream-border text-electric-cobalt bg-paper-white hover:bg-lavender-mist/40 px-3 py-1.5 rounded-buttons text-xs transition duration-200 cursor-pointer"
@@ -222,7 +267,25 @@ export const PatientList = () => {
           </div>
         )}
       </div>
-    </div>
+      </div>
+
+      {reportToPrint && (
+        <PrintableReport
+          report={reportToPrint}
+          patient={reportToPrint.patientId}
+        />
+      )}
+
+      {showWarningModal && selectedReportForPrint && (
+        <PrintWarningModal
+          onConfirm={() => executePrint(selectedReportForPrint)}
+          onCancel={() => {
+            setShowWarningModal(false);
+            setSelectedReportForPrint(null);
+          }}
+        />
+      )}
+    </>
   );
 };
 export default PatientList;

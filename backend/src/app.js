@@ -20,7 +20,7 @@ const statusMonitor = require("express-status-monitor");
 
 const app = express();
 
-app.use(express.json());
+app.use(express.json({ limit: '5mb' }));
 app.use(cookieParser());
 app.use(
   cors({

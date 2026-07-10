@@ -109,7 +109,7 @@ const getPatientTests = asyncHandler(async (req, res) => {
     query.createdAt = { $gte: start, $lte: end };
   }
   const patientTests = await PatientTest.find(query)
-    .populate("patientId", "name age gender referredDoctor")
+    .populate("patientId")
     .populate("createdBy", "username email")
     .populate({
       path: "tests.testId",
@@ -134,7 +134,7 @@ const getPatientTests = asyncHandler(async (req, res) => {
 
 const getPatientTestById = asyncHandler(async (req, res) => {
   const patientTest = await PatientTest.findById(req.params.id)
-    .populate("patientId", "name age")
+    .populate("patientId")
     .populate("createdBy", "username email")
     .populate({
       path: "tests.testId",
@@ -161,7 +161,7 @@ const getTestsByPatientId = asyncHandler(async (req, res) => {
   const patientTests = await PatientTest.find({
     patientId: req.params.patientId,
   })
-    .populate("patientId", "name age")
+    .populate("patientId")
     .populate("createdBy", "username email")
     .populate({
       path: "tests.testId",

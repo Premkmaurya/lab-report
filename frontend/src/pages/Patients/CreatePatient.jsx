@@ -29,6 +29,9 @@ export const CreatePatient = () => {
     formState: { errors },
   } = useForm({
     defaultValues: {
+      title: "Mr.",
+      firstName: "",
+      lastName: "",
       gender: "male",
       date: new Date().toISOString().substring(0, 10), // Defaults to today's date
     },
@@ -135,31 +138,53 @@ export const CreatePatient = () => {
       <div className="bg-paper-white border border-cream-border rounded-cards p-6 md:p-8">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
           <div className={step === 1 ? "block space-y-5" : "hidden"}>
-            <div>
-              <label className="block text-xs font-bold text-charcoal uppercase tracking-wider mb-2">
-                Patient Full Name
-              </label>
-              <input
-                type="text"
-                placeholder="e.g. Eleanor Vance"
-                className={`w-full ${errors.name ? "border-red-500" : ""}`}
-                {...register("name", {
-                  required: "Patient name is required",
-                  minLength: {
-                    value: 1,
-                    message: "Name cannot be empty",
-                  },
-                  maxLength: {
-                    value: 100,
-                    message: "Name cannot exceed 100 characters",
-                  },
-                })}
-              />
-              {errors.name && (
-                <p className="text-xs text-red-500 mt-1">
-                  {errors.name.message}
-                </p>
-              )}
+            <div className="grid grid-cols-[100px_auto] gap-4">
+              <div>
+                <label className="block text-xs font-bold text-charcoal uppercase tracking-wider mb-2">
+                  Title
+                </label>
+                <select
+                  className="w-full bg-paper-white border border-cream-border rounded-inputs px-3 py-3 outline-none text-sm"
+                  {...register("title")}
+                >
+                  <option value="Mr.">Mr.</option>
+                  <option value="Mrs.">Mrs.</option>
+                  <option value="Miss">Miss</option>
+                  <option value="Master">Master</option>
+                  <option value="Baby of">Baby of</option>
+                </select>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-charcoal uppercase tracking-wider mb-2">
+                    First Name
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Prem"
+                    className={`w-full bg-paper-white border border-cream-border rounded-inputs px-4 py-3 outline-none ${
+                      errors.firstName ? "border-red-500" : ""
+                    }`}
+                    {...register("firstName", {
+                      required: "First name is required",
+                    })}
+                  />
+                  {errors.firstName && (
+                    <p className="text-xs text-red-500 mt-1">{errors.firstName.message}</p>
+                  )}
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-charcoal uppercase tracking-wider mb-2">
+                    Last Name
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Maurya"
+                    className="w-full bg-paper-white border border-cream-border rounded-inputs px-4 py-3 outline-none"
+                    {...register("lastName")}
+                  />
+                </div>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">

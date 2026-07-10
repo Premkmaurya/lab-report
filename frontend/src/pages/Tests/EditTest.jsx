@@ -28,6 +28,8 @@ export const EditTest = () => {
     register,
     handleSubmit,
     control,
+    setValue,
+    getValues,
     reset,
     watch,
     formState: { errors },
@@ -45,7 +47,7 @@ export const EditTest = () => {
   });
 
   const testName = watch("name");
-  const watchSubTests = watch("subTests");
+  const watchedTypes = watch(fields.map((_, i) => `subTests.${i}.type`));
 
   const inputRefs = useRef({});
 
@@ -75,7 +77,7 @@ export const EditTest = () => {
     if (isReadOnly) return;
     const fieldsOrder = ["name", "price", "unit", "normalRange"];
     const fieldIndex = fieldsOrder.indexOf(fieldName);
-    const currentValues = watch("subTests");
+    const currentValues = getValues("subTests");
     const isSection = currentValues[index]?.type === "section";
     
     if (e.key === "Enter") {
@@ -155,11 +157,11 @@ export const EditTest = () => {
     if (isReadOnly) return;
     if (index === fields.length - 1) {
       setTimeout(() => {
-        const currentValues = watch("subTests");
+        const currentValues = getValues("subTests");
         const isSection = currentValues[index]?.type === "section";
         if ((fieldName === "normalRange" || (isSection && fieldName === "name")) && isRowComplete(currentValues[index])) {
           if (isRowComplete(currentValues[currentValues.length - 1])) {
-            append({ name: "", type: "parameter", price: "", unit: "", normalRange: "" });
+            append({ name: "", type: "parameter", price: "", unit: "", normalRange: "", resultType: "Numeric", options: "" });
           }
         }
       }, 100);
@@ -265,10 +267,20 @@ export const EditTest = () => {
       departmentId: data.departmentId,
       name: data.name,
       price: rootPrice,
-      subTests: validSubTests.map(st => ({
-        ...st,
-        price: st.type === "section" ? 0 : (parseFloat(st.price) || 0)
-      })),
+      subTests: validSubTests.map((st) => {
+        let parsedOptions = [];
+        if (st.resultType === 'Selection' && st.options) {
+          parsedOptions = typeof st.options === 'string' 
+            ? st.options.split(',').map(opt => opt.trim()).filter(Boolean)
+            : st.options;
+        }
+        return {
+          ...st,
+          price: st.type === "section" ? 0 : (parseFloat(st.price) || 0),
+          options: parsedOptions,
+          resultType: st.resultType || "Numeric",
+        };
+      }),
     };
     
     toast.promise(testService.updateTest(targetId, payload), {
@@ -480,6 +492,9 @@ export const EditTest = () => {
                       <th className="px-4 py-3 font-abcfavoritvariable text-xs font-bold text-graphite uppercase tracking-wider">
                         Normal Range
                       </th>
+                      <th className="px-4 py-3 font-abcfavoritvariable text-xs font-bold text-graphite uppercase tracking-wider">
+                        Result Type
+                      </th>
                       {!isReadOnly && (
                         <th className="px-4 py-3 font-abcfavoritvariable text-xs font-bold text-graphite uppercase tracking-wider text-right">
                           Actions
@@ -490,7 +505,7 @@ export const EditTest = () => {
                   <tbody className="divide-y divide-cream-border">
                     {fields.map((item, index) => {
                       if (!inputRefs.current[index]) inputRefs.current[index] = {};
-                      const isSection = watch(`subTests.${index}.type`) === "section";
+                      const isSection = watchedTypes[index] === "section";
                       return (
                       <tr key={item.id} className="bg-paper-white">
                         <td className="px-4 py-3 align-top">
@@ -510,6 +525,7 @@ export const EditTest = () => {
                           />
                           {!isReadOnly && (
                             <div className="mt-2 flex items-center">
+                              <input type="hidden" {...register(`subTests.${index}.type`)} />
                               <input 
                                 type="checkbox" 
                                 id={`isSection-${index}`} 
@@ -522,15 +538,13 @@ export const EditTest = () => {
                                     setValue(`subTests.${index}.unit`, "");
                                     setValue(`subTests.${index}.normalRange`, "");
                                   }
-                                  setTimeout(() => {
-                                    const currentValues = watch("subTests");
-                                    if (index === currentValues.length - 1 && isRowComplete(currentValues[index])) {
-                                      append({ name: "", type: "parameter", price: "", unit: "", normalRange: "" });
-                                      setTimeout(() => {
-                                        inputRefs.current[index + 1]?.name?.focus();
-                                      }, 0);
-                                    }
-                                  }, 0);
+                                  const currentValues = getValues("subTests");
+                                  if (index === currentValues.length - 1 && isRowComplete(currentValues[index])) {
+                                    append({ name: "", type: "parameter", price: "", unit: "", normalRange: "", resultType: "Numeric", options: "" });
+                                    setTimeout(() => {
+                                      inputRefs.current[index + 1]?.name?.focus();
+                                    }, 0);
+                                  }
                                 }}
                               />
                               <label htmlFor={`isSection-${index}`} className="text-[10px] text-stone uppercase tracking-wider font-bold cursor-pointer">
@@ -594,6 +608,30 @@ export const EditTest = () => {
                               inputRefs.current[index].normalRange = el;
                             }}
                           />
+                        </td>
+                        <td className="px-4 py-3 align-top">
+                          <select
+                            disabled={isReadOnly || isSection}
+                            className={`w-full min-w-[100px] text-sm bg-white border border-cream-border rounded px-2 py-1 outline-none ${isReadOnly ? "bg-transparent text-stone border-transparent appearance-none" : (isSection ? "bg-slate-50 text-slate-400 cursor-not-allowed" : "")}`}
+                            {...register(`subTests.${index}.resultType`)}
+                            defaultValue="Numeric"
+                          >
+                            <option value="Numeric">Numeric</option>
+                            <option value="Positive/Negative">Pos/Neg</option>
+                            <option value="Text">Text</option>
+                            <option value="Selection">Selection</option>
+                            <option value="Boolean">Boolean</option>
+                            <option value="Custom">Custom</option>
+                          </select>
+                          {watch(`subTests.${index}.resultType`) === 'Selection' && !isSection && (
+                            <input
+                              type="text"
+                              placeholder="Comma separated options"
+                              disabled={isReadOnly}
+                              className={`w-full min-w-[120px] text-xs mt-2 border border-cream-border rounded px-2 py-1 ${isReadOnly ? "bg-transparent text-stone border-transparent" : ""}`}
+                              {...register(`subTests.${index}.options`)}
+                            />
+                          )}
                         </td>
                         {!isReadOnly && (
                           <td className="px-4 py-3 align-top text-right">

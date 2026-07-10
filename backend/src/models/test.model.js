@@ -13,6 +13,15 @@ const subTestSchema = new mongoose.Schema(
       enum: ['parameter', 'section'],
       default: 'parameter',
     },
+    resultType: {
+      type: String,
+      enum: ['Numeric', 'Positive/Negative', 'Text', 'Selection', 'Boolean', 'Custom'],
+      default: 'Numeric',
+    },
+    options: {
+      type: [String],
+      default: [],
+    },
     price: {
       type: Number,
       required: function() { return this.type === 'parameter'; },

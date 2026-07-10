@@ -24,9 +24,17 @@ const patientTestItemSchema = new mongoose.Schema(
           enum: ['parameter', 'section'],
           default: 'parameter',
         },
+        resultType: {
+          type: String,
+          default: 'Numeric',
+        },
+        options: {
+          type: [String],
+          default: [],
+        },
         value: {
           type: String,
-          required: function() { return this.type === 'parameter'; },
+          required: false,
           trim: true,
         },
         unit: {

@@ -3,6 +3,19 @@ const mongooseDelete = require("mongoose-delete");
 
 const patientSchema = new mongoose.Schema(
   {
+    title: {
+      type: String,
+      enum: ["Mr.", "Mrs.", "Miss", "Master", "Baby of"],
+      default: "",
+    },
+    firstName: {
+      type: String,
+      trim: true,
+    },
+    lastName: {
+      type: String,
+      trim: true,
+    },
     name: {
       type: String,
       required: true,
@@ -60,6 +73,10 @@ patientSchema.pre("validate", async function () {
       // Fallback: use timestamp-based ID
       this.visitId = String(Date.now()).slice(-5);
     }
+  }
+  
+  if (this.firstName) {
+    this.name = [this.title, this.firstName, this.lastName].filter(Boolean).join(" ");
   }
 });
 

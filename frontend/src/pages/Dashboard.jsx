@@ -54,7 +54,7 @@ export const Dashboard = () => {
   const { data: summaryDataObj, isLoading: isSummaryLoading } = useQuery({
     queryKey: ['summary', 'today'],
     queryFn: () => patientService.getSummary("today", new Date().getTimezoneOffset()),
-    enabled: user?.role === "admin",
+    enabled: !!(user?.role === "admin"),
   });
 
   useEffect(() => {
