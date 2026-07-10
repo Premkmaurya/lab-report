@@ -16,6 +16,8 @@ const isAbnormal = (value, rangeStr) => {
 };
 
 export const TestResultTable = ({ test, rowSpacing = 4, template }) => {
+  const testHeadingStyles = template?.elements?.testHeading || {};
+  const sectionHeaderStyles = template?.elements?.sectionHeader || {};
   const profileStyles = template?.elements?.profileName || {};
   const parameterStyles = template?.elements?.parameter || {};
   const resultStyles = template?.elements?.result || {};
@@ -28,7 +30,8 @@ export const TestResultTable = ({ test, rowSpacing = 4, template }) => {
       <tr className="bg-white">
         <td colSpan="4" className="pt-6 pb-2 px-3 text-left">
           <span
-            className="text-lg font-bold text-[#0F172A] underline decoration-1 underline-offset-4"
+            className="text-lg font-bold text-[#0F172A] uppercase underline decoration-1 underline-offset-4"
+            style={{ ...testHeadingStyles }}
           >
             {test.testName}
           </span>
@@ -39,9 +42,10 @@ export const TestResultTable = ({ test, rowSpacing = 4, template }) => {
           if (res.type === 'section') {
             return (
               <tr key={index} className="bg-white">
-                <td colSpan="4" className="pt-6 pb-2 border-y border-stone/20">
+                <td colSpan="4" className="pt-6 pb-2">
                   <span
-                    className="text-sm font-extrabold text-left text-[#0F172A] uppercase tracking-wider block"
+                    className="text-lg font-extrabold text-left text-[#0F172A] uppercase tracking-wider block"
+                    style={{ ...sectionHeaderStyles }}
                   >
                     {res.parameter}
                   </span>

@@ -264,12 +264,11 @@ export const InlineTestEditor = ({
 
                         return (
                           <tr key={item.id} className="hover:bg-warm-canvas/30 transition-colors">
-                            <td className="py-3 px-3 align-middle pl-6 border-l-4 border-l-transparent hover:border-l-electric-cobalt/30">
-                              <input
-                                type="text"
-                                className="w-full text-sm font-medium text-charcoal block bg-transparent border-none outline-none focus:ring-1 focus:ring-electric-cobalt rounded px-2"
-                                {...register(`results.${index}.parameter`)}
-                              />
+                            <td className="py-3 px-3 align-middle pl-6 border-l-4 border-l-transparent">
+                              <span className="w-full text-sm font-medium text-charcoal block px-2">
+                                {item.parameter}
+                              </span>
+                              <input type="hidden" value={item.parameter} {...register(`results.${index}.parameter`)} />
                               <input type="hidden" value="parameter" {...register(`results.${index}.type`)} />
                             </td>
                             <td className="py-3 px-3 align-middle">

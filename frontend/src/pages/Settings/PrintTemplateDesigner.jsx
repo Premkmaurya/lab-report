@@ -5,6 +5,87 @@ import { usePrintTemplate } from "../../context/PrintTemplateContext";
 import { ReportCanvas } from "../../components/report/ReportCanvas";
 import { toast } from "../../lib/toast";
 
+// Default element styles derived from backend schema
+const DEFAULT_ELEMENT_STYLES = {
+  patientName: {
+    fontSize: "16px",
+    fontWeight: "600",
+    textAlign: "left",
+    textTransform: "capitalize",
+    textDecoration: "none",
+    color: ""
+  },
+  profileName: {
+    fontSize: "14px",
+    fontWeight: "600",
+    textAlign: "left",
+    textTransform: "capitalize",
+    textDecoration: "none",
+    color: ""
+  },
+  testHeading: {
+    fontSize: "18px",
+    fontWeight: "600",
+    textAlign: "left",
+    textTransform: "uppercase",
+    textDecoration: "underline",
+    color: ""
+  },
+  sectionHeader: {
+    fontSize: "16px",
+    fontWeight: "700",
+    textAlign: "left",
+    textTransform: "uppercase",
+    textDecoration: "none",
+    color: ""
+  },
+  departmentHeading: {
+    fontSize: "25px",
+    fontWeight: "700",
+    textAlign: "center",
+    textTransform: "uppercase",
+    textDecoration: "underline",
+    color: ""
+  },
+  tableHeader: {
+    fontSize: "20px",
+    fontWeight: "500",
+    textAlign: "center",
+    textTransform: "uppercase",
+    textDecoration: "underline",
+    color: ""
+  },
+  parameter: {
+    fontSize: "20px",
+    fontWeight: "500",
+    textAlign: "left",
+    textTransform: "capitalize",
+    textDecoration: "none",
+    color: ""
+  },
+  result: {
+    fontSize: "20px",
+    fontWeight: "400",
+    textAlign: "center",
+    textTransform: "uppercase",
+    textDecoration: "none",
+    color: ""
+  },
+  unit: {
+    fontSize: "20px",
+    fontWeight: "400",
+    textAlign: "center",
+    textTransform: "capitalize",
+    textDecoration: "none",
+    color: ""
+  },
+  footer: {
+    fontSize: "12px",
+    fontWeight: "400",
+    color: ""
+  }
+};
+
 export const PrintTemplateDesigner = () => {
   const navigate = useNavigate();
   const {
@@ -23,11 +104,34 @@ export const PrintTemplateDesigner = () => {
   const [zoomLevel, setZoomLevel] = useState(1);
   const workspaceRef = React.useRef(null);
 
-  // Initialize local state with context template
+  // Helper function to get element value with default fallback
+  const getElementValue = (field) => {
+    const value = template?.elements[selectedElement]?.[field];
+    if (value !== undefined && value !== null && value !== "") {
+      return value;
+    }
+    return DEFAULT_ELEMENT_STYLES[selectedElement]?.[field] || "";
+  };
+
+  // Initialize local state with context template and merge with defaults
   useEffect(() => {
     if (!loading) {
       if (savedTemplate) {
-        setTemplate(JSON.parse(JSON.stringify(savedTemplate))); // Deep copy
+        // Deep copy the saved template
+        const initialTemplate = JSON.parse(JSON.stringify(savedTemplate));
+        
+        // Ensure the elements object exists
+        initialTemplate.elements = initialTemplate.elements || {};
+        
+        // Merge each element with its schema defaults
+        Object.keys(DEFAULT_ELEMENT_STYLES).forEach(elementKey => {
+          initialTemplate.elements[elementKey] = {
+            ...DEFAULT_ELEMENT_STYLES[elementKey],
+            ...(initialTemplate.elements[elementKey] || {})
+          };
+        });
+        
+        setTemplate(initialTemplate);
         setError(null);
       } else {
         setError(
@@ -36,6 +140,7 @@ export const PrintTemplateDesigner = () => {
       }
     }
   }, [loading, savedTemplate]);
+
 
   const handlePageChange = (field, value) => {
     setTemplate((prev) => ({
@@ -194,6 +299,8 @@ export const PrintTemplateDesigner = () => {
   const elementOptions = [
     { value: "patientName", label: "Patient Name" },
     { value: "departmentHeading", label: "Department Heading" },
+    { value: "testHeading", label: "Test Heading" },
+    { value: "sectionHeader", label: "Section Header" },
     { value: "profileName", label: "Profile Name" },
     { value: "tableHeader", label: "Table Header" },
     { value: "parameter", label: "Parameter" },
@@ -397,7 +504,7 @@ export const PrintTemplateDesigner = () => {
                   <input
                     type="text"
                     className="w-full text-sm border-slate-300 rounded"
-                    value={template.elements[selectedElement]?.fontSize || ""}
+                    value={getElementValue("fontSize")}
                     onChange={(e) =>
                       handleElementChange("fontSize", e.target.value)
                     }
@@ -410,7 +517,7 @@ export const PrintTemplateDesigner = () => {
                   </label>
                   <select
                     className="w-full text-sm border-slate-300 rounded"
-                    value={template.elements[selectedElement]?.fontWeight || ""}
+                    value={getElementValue("fontWeight")}
                     onChange={(e) =>
                       handleElementChange("fontWeight", e.target.value)
                     }
@@ -429,7 +536,7 @@ export const PrintTemplateDesigner = () => {
                   <input
                     type="text"
                     className="w-full text-sm border-slate-300 rounded"
-                    value={template.elements[selectedElement]?.color || ""}
+                    value={getElementValue("color")}
                     onChange={(e) =>
                       handleElementChange("color", e.target.value)
                     }
@@ -442,7 +549,7 @@ export const PrintTemplateDesigner = () => {
                   </label>
                   <select
                     className="w-full text-sm border-slate-300 rounded"
-                    value={template.elements[selectedElement]?.textAlign || ""}
+                    value={getElementValue("textAlign")}
                     onChange={(e) =>
                       handleElementChange("textAlign", e.target.value)
                     }
@@ -460,9 +567,7 @@ export const PrintTemplateDesigner = () => {
                     </label>
                     <select
                       className="w-full text-sm border-slate-300 rounded"
-                      value={
-                        template.elements[selectedElement]?.textTransform || ""
-                      }
+                      value={getElementValue("textTransform")}
                       onChange={(e) =>
                         handleElementChange("textTransform", e.target.value)
                       }
@@ -478,9 +583,7 @@ export const PrintTemplateDesigner = () => {
                     </label>
                     <select
                       className="w-full text-sm border-slate-300 rounded"
-                      value={
-                        template.elements[selectedElement]?.textDecoration || ""
-                      }
+                      value={getElementValue("textDecoration")}
                       onChange={(e) =>
                         handleElementChange("textDecoration", e.target.value)
                       }

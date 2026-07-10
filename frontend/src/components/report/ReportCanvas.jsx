@@ -24,6 +24,7 @@ export const ReportCanvas = ({ patient, report, customTemplate }) => {
   } : {};
   
   const thStyles = template?.elements?.tableHeader || {};
+  const deptHeadingStyles = template?.elements?.departmentHeading || {};
 
   return (
     <div 
@@ -60,6 +61,7 @@ export const ReportCanvas = ({ patient, report, customTemplate }) => {
                     <td colSpan="4" className="pt-8 pb-2 text-center bg-white">
                       <span 
                         className="text-2xl font-bold text-[#0F172A] uppercase tracking-wider block"
+                        style={deptHeadingStyles}
                       >
                         {department}
                       </span>
