@@ -110,7 +110,13 @@ export const Dashboard = () => {
 
   const filteredFeed = feedReports.filter((report) => {
     const patientName = report.patientId?.name || "";
-    return patientName.toLowerCase().includes(searchQuery.toLowerCase());
+    const patientVisitId = report.patientId?.visitId || "";
+    const normalizedQuery = searchQuery.toLowerCase();
+
+    return (
+      patientName.toLowerCase().includes(normalizedQuery) ||
+      patientVisitId.toLowerCase().includes(normalizedQuery)
+    );
   });
 
   const filters = [
@@ -334,7 +340,7 @@ export const Dashboard = () => {
                 <Search className="h-3.5 w-3.5 text-stone shrink-0 mr-2" />
                 <input
                   type="text"
-                  placeholder="Search..."
+                  placeholder="Search by patient name or visit ID..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full border-none bg-transparent p-1 text-xs text-charcoal outline-none focus:ring-0"
@@ -377,6 +383,9 @@ export const Dashboard = () => {
                         Patient Name
                       </th>
                       <th className="px-4 py-3 font-abcfavoritvariable text-[10px] font-bold text-graphite uppercase tracking-wider">
+                        Visit ID
+                      </th>
+                      <th className="px-4 py-3 font-abcfavoritvariable text-[10px] font-bold text-graphite uppercase tracking-wider">
                         Age/Gender
                       </th>
                       <th className="px-4 py-3 font-abcfavoritvariable text-[10px] font-bold text-graphite uppercase tracking-wider">
@@ -410,6 +419,9 @@ export const Dashboard = () => {
                           >
                             <td className="px-4 py-3 whitespace-nowrap text-xs font-semibold text-charcoal">
                               {patient.name || "Unknown Patient"}
+                            </td>
+                            <td className="px-4 py-3 whitespace-nowrap text-[11px] text-stone">
+                              {patient.visitId || '-'}
                             </td>
                             <td className="px-4 py-3 whitespace-nowrap text-[11px] text-stone">
                               {patient.age ? `${patient.age}y • ` : ''}<span className="capitalize">{patient.gender || '-'}</span>

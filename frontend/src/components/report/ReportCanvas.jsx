@@ -1,4 +1,5 @@
 import React from 'react';
+import Barcode from 'react-barcode';
 import { PatientInfo } from './PatientInfo';
 import { SignatureSection } from './SignatureSection';
 import { usePrintTemplate } from '../../context/PrintTemplateContext';
@@ -94,6 +95,15 @@ export const ReportCanvas = ({ patient, report, customTemplate }) => {
 
   const pages = paginateReport(report, template);
 
+  const barcodeStyles = template?.elements?.barcode || { show: true };
+  const barcodeAlignment = barcodeStyles.alignment || "right";
+  const barcodePositionClass =
+    barcodeAlignment === "left"
+      ? "justify-start"
+      : barcodeAlignment === "center"
+      ? "justify-center"
+      : "justify-end";
+
   return (
     <div className="report-container flex flex-col gap-8 bg-gray-100 print:bg-white print:gap-0 print:block">
       {pages.map((page, index) => (
@@ -112,6 +122,28 @@ export const ReportCanvas = ({ patient, report, customTemplate }) => {
           }}
         >
           <div className="page-header shrink-0">
+            {barcodeStyles.show && patient.visitId && (
+              <div
+                className={`flex w-full ${barcodePositionClass} mb-3`}
+                style={{
+                  marginTop: barcodeStyles.marginTop || "0px",
+                  marginBottom: barcodeStyles.marginBottom || "0px",
+                  textAlign: barcodeAlignment,
+                }}
+              >
+                <div>
+                  <Barcode
+                    value={patient.visitId}
+                    width={parseFloat(barcodeStyles.width) || 1.5}
+                    height={parseInt(barcodeStyles.height, 10) || 40}
+                    displayValue={barcodeStyles.displayValue !== false}
+                    fontSize={12}
+                    margin={0}
+                    background="transparent"
+                  />
+                </div>
+              </div>
+            )}
             <PatientInfo patient={patient} report={report} template={template} />
             <table className="w-full text-caption text-slate-900 border-collapse mt-6" style={typoStyles}>
               <thead className="bg-[#F8FAFC]">

@@ -1,5 +1,4 @@
 import React from "react";
-import Barcode from "react-barcode";
 
 export const PatientInfo = ({ patient, report, template }) => {
   const reportDate = new Date(report.createdAt || report.date)
@@ -18,34 +17,9 @@ export const PatientInfo = ({ patient, report, template }) => {
     .replace(/ /g, "-");
 
   const nameStyles = template?.elements?.patientName || {};
-  const barcodeStyles = template?.elements?.barcode || { show: true };
 
   return (
-    <div className="border border-slate-300 p-4 mb-6 text-[13px] text-slate-900 bg-white relative">
-      {barcodeStyles.show && patient.visitId && (
-        <div style={{
-          position: "absolute",
-          top: barcodeStyles.position?.includes('bottom') ? 'auto' : '10px',
-          bottom: barcodeStyles.position?.includes('bottom') ? '10px' : 'auto',
-          left: barcodeStyles.position?.includes('left') ? '10px' : (barcodeStyles.position === 'center' ? '50%' : 'auto'),
-          right: barcodeStyles.position?.includes('right') ? '10px' : 'auto',
-          transform: barcodeStyles.position === 'center' ? 'translateX(-50%)' : 'none',
-          marginTop: barcodeStyles.marginTop || "0px",
-          marginBottom: barcodeStyles.marginBottom || "0px",
-          textAlign: barcodeStyles.alignment || 'right',
-          zIndex: 10
-        }}>
-          <Barcode 
-            value={patient.visitId} 
-            width={parseFloat(barcodeStyles.width) || 1.5} 
-            height={parseInt(barcodeStyles.height, 10) || 40} 
-            displayValue={barcodeStyles.displayValue !== false} 
-            fontSize={12}
-            margin={0}
-            background="transparent"
-          />
-        </div>
-      )}
+    <div className="border border-slate-300 p-4 mb-6 text-[13px] text-slate-900 bg-white">
       <div className="grid grid-cols-2 gap-2">
         <div className="space-y-1 relative z-20">
           <div className="grid grid-cols-[110px_auto] text-lg gap-4">
