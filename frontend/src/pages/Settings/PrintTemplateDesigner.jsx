@@ -13,7 +13,7 @@ const DEFAULT_ELEMENT_STYLES = {
     textAlign: "left",
     textTransform: "capitalize",
     textDecoration: "none",
-    color: ""
+    color: "",
   },
   profileName: {
     fontSize: "14px",
@@ -21,7 +21,7 @@ const DEFAULT_ELEMENT_STYLES = {
     textAlign: "left",
     textTransform: "capitalize",
     textDecoration: "none",
-    color: ""
+    color: "",
   },
   testHeading: {
     fontSize: "18px",
@@ -29,7 +29,7 @@ const DEFAULT_ELEMENT_STYLES = {
     textAlign: "left",
     textTransform: "uppercase",
     textDecoration: "underline",
-    color: ""
+    color: "",
   },
   sectionHeader: {
     fontSize: "16px",
@@ -37,7 +37,7 @@ const DEFAULT_ELEMENT_STYLES = {
     textAlign: "left",
     textTransform: "uppercase",
     textDecoration: "none",
-    color: ""
+    color: "",
   },
   departmentHeading: {
     fontSize: "25px",
@@ -45,7 +45,7 @@ const DEFAULT_ELEMENT_STYLES = {
     textAlign: "center",
     textTransform: "uppercase",
     textDecoration: "underline",
-    color: ""
+    color: "",
   },
   tableHeader: {
     fontSize: "20px",
@@ -53,7 +53,7 @@ const DEFAULT_ELEMENT_STYLES = {
     textAlign: "center",
     textTransform: "uppercase",
     textDecoration: "underline",
-    color: ""
+    color: "",
   },
   parameter: {
     fontSize: "20px",
@@ -61,7 +61,7 @@ const DEFAULT_ELEMENT_STYLES = {
     textAlign: "left",
     textTransform: "capitalize",
     textDecoration: "none",
-    color: ""
+    color: "",
   },
   result: {
     fontSize: "20px",
@@ -69,7 +69,7 @@ const DEFAULT_ELEMENT_STYLES = {
     textAlign: "center",
     textTransform: "uppercase",
     textDecoration: "none",
-    color: ""
+    color: "",
   },
   unit: {
     fontSize: "20px",
@@ -77,12 +77,12 @@ const DEFAULT_ELEMENT_STYLES = {
     textAlign: "center",
     textTransform: "capitalize",
     textDecoration: "none",
-    color: ""
+    color: "",
   },
   footer: {
     fontSize: "12px",
     fontWeight: "400",
-    color: ""
+    color: "",
   },
   barcode: {
     show: true,
@@ -92,8 +92,8 @@ const DEFAULT_ELEMENT_STYLES = {
     alignment: "right",
     marginTop: "0px",
     marginBottom: "0px",
-    displayValue: true
-  }
+    displayValue: true,
+  },
 };
 
 export const PrintTemplateDesigner = () => {
@@ -109,18 +109,33 @@ export const PrintTemplateDesigner = () => {
   const [activeTab, setActiveTab] = useState("page"); // page, typography, elements, footer
   const [selectedElement, setSelectedElement] = useState("patientName");
   const [error, setError] = useState(null);
-  
+
   // Zoom state
   const [zoomLevel, setZoomLevel] = useState(1);
   const workspaceRef = React.useRef(null);
 
   // Helper function to get element value with default fallback
-  const getElementValue = (field) => {
-    const value = template?.elements[selectedElement]?.[field];
+  const getElementValue = (field, elementKey = selectedElement) => {
+    const value = template?.elements?.[elementKey]?.[field];
     if (value !== undefined && value !== null && value !== "") {
       return value;
     }
-    return DEFAULT_ELEMENT_STYLES[selectedElement]?.[field] || "";
+    return DEFAULT_ELEMENT_STYLES[elementKey]?.[field] || "";
+  };
+
+  const getBarcodeValue = (field) => getElementValue(field, "barcode");
+
+  const handleElementChange = (field, value, elementKey = selectedElement) => {
+    setTemplate((prev) => ({
+      ...prev,
+      elements: {
+        ...prev.elements,
+        [elementKey]: {
+          ...prev.elements[elementKey],
+          [field]: value,
+        },
+      },
+    }));
   };
 
   // Initialize local state with context template and merge with defaults
@@ -129,18 +144,18 @@ export const PrintTemplateDesigner = () => {
       if (savedTemplate) {
         // Deep copy the saved template
         const initialTemplate = JSON.parse(JSON.stringify(savedTemplate));
-        
+
         // Ensure the elements object exists
         initialTemplate.elements = initialTemplate.elements || {};
-        
+
         // Merge each element with its schema defaults
-        Object.keys(DEFAULT_ELEMENT_STYLES).forEach(elementKey => {
+        Object.keys(DEFAULT_ELEMENT_STYLES).forEach((elementKey) => {
           initialTemplate.elements[elementKey] = {
             ...DEFAULT_ELEMENT_STYLES[elementKey],
-            ...(initialTemplate.elements[elementKey] || {})
+            ...(initialTemplate.elements[elementKey] || {}),
           };
         });
-        
+
         setTemplate(initialTemplate);
         setError(null);
       } else {
@@ -150,7 +165,6 @@ export const PrintTemplateDesigner = () => {
       }
     }
   }, [loading, savedTemplate]);
-
 
   const handlePageChange = (field, value) => {
     setTemplate((prev) => ({
@@ -166,31 +180,24 @@ export const PrintTemplateDesigner = () => {
     }));
   };
 
-  const handleElementChange = (field, value) => {
-    setTemplate((prev) => ({
-      ...prev,
-      elements: {
-        ...prev.elements,
-        [selectedElement]: {
-          ...prev.elements[selectedElement],
-          [field]: value,
-        },
-      },
-    }));
-  };
-
   const handleSignatureChange = (role, field, value) => {
     setTemplate((prev) => {
       const signatures = prev.signatures || {
         technician: { name: "", designation: "", show: true },
-        pathologist: { name: "", designation: "", qualification: "", registrationNumber: "", show: true }
+        pathologist: {
+          name: "",
+          designation: "",
+          qualification: "",
+          registrationNumber: "",
+          show: true,
+        },
       };
       return {
         ...prev,
         signatures: {
           ...prev.signatures,
-          [role]: { ...signatures[role], [field]: value }
-        }
+          [role]: { ...signatures[role], [field]: value },
+        },
       };
     });
   };
@@ -316,7 +323,6 @@ export const PrintTemplateDesigner = () => {
     { value: "parameter", label: "Parameter" },
     { value: "result", label: "Result" },
     { value: "unit", label: "Normal Range & Unit" },
-    { value: "barcode", label: "Barcode" },
     { value: "footer", label: "Footer / Signatures" },
   ];
 
@@ -378,6 +384,12 @@ export const PrintTemplateDesigner = () => {
             onClick={() => setActiveTab("footer")}
           >
             Footer
+          </button>
+          <button
+            className={`flex-1 py-3 font-medium border-b-2 ${activeTab === "bar-code" ? "border-electric-cobalt text-electric-cobalt" : "border-transparent text-slate-500"}`}
+            onClick={() => setActiveTab("bar-code")}
+          >
+            Bar Code
           </button>
         </div>
 
@@ -508,196 +520,104 @@ export const PrintTemplateDesigner = () => {
               </div>
 
               <div className="p-4 bg-slate-50 border border-slate-200 rounded space-y-4 mt-4">
-                {selectedElement === "barcode" ? (
-                  <>
-                    <div className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
-                        id="showBarcode"
-                        checked={getElementValue("show") !== false}
-                        onChange={(e) => handleElementChange("show", e.target.checked)}
-                        className="rounded border-slate-300 text-electric-cobalt focus:ring-electric-cobalt"
-                      />
-                      <label htmlFor="showBarcode" className="text-[11px] font-medium text-slate-700 uppercase">
-                        Show Barcode
-                      </label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
-                        id="displayValue"
-                        checked={getElementValue("displayValue") !== false}
-                        onChange={(e) => handleElementChange("displayValue", e.target.checked)}
-                        className="rounded border-slate-300 text-electric-cobalt focus:ring-electric-cobalt"
-                      />
-                      <label htmlFor="displayValue" className="text-[11px] font-medium text-slate-700 uppercase">
-                        Show Human-Readable Text
-                      </label>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
-                          Width Multiplier
-                        </label>
-                        <input
-                          type="number"
-                          step="0.1"
-                          className="w-full text-sm border-slate-300 rounded"
-                          value={getElementValue("width")}
-                          onChange={(e) => handleElementChange("width", e.target.value)}
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
-                          Height (px)
-                        </label>
-                        <input
-                          type="number"
-                          className="w-full text-sm border-slate-300 rounded"
-                          value={getElementValue("height")}
-                          onChange={(e) => handleElementChange("height", e.target.value)}
-                        />
-                      </div>
-                    </div>
+                <>
+                  <div>
+                    <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
+                      Font Size
+                    </label>
+                    <input
+                      type="text"
+                      className="w-full text-sm border-slate-300 rounded"
+                      value={getElementValue("fontSize")}
+                      onChange={(e) =>
+                        handleElementChange("fontSize", e.target.value)
+                      }
+                      placeholder="e.g. 14px"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
+                      Font Weight
+                    </label>
+                    <select
+                      className="w-full text-sm border-slate-300 rounded"
+                      value={getElementValue("fontWeight")}
+                      onChange={(e) =>
+                        handleElementChange("fontWeight", e.target.value)
+                      }
+                    >
+                      <option value="">Inherit</option>
+                      <option value="400">Normal (400)</option>
+                      <option value="500">Medium (500)</option>
+                      <option value="600">Semibold (600)</option>
+                      <option value="700">Bold (700)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
+                      Text Color
+                    </label>
+                    <input
+                      type="text"
+                      className="w-full text-sm border-slate-300 rounded"
+                      value={getElementValue("color")}
+                      onChange={(e) =>
+                        handleElementChange("color", e.target.value)
+                      }
+                      placeholder="e.g. #0F172A"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
+                      Text Alignment
+                    </label>
+                    <select
+                      className="w-full text-sm border-slate-300 rounded"
+                      value={getElementValue("textAlign")}
+                      onChange={(e) =>
+                        handleElementChange("textAlign", e.target.value)
+                      }
+                    >
+                      <option value="">Inherit</option>
+                      <option value="left">Left</option>
+                      <option value="center">Center</option>
+                      <option value="right">Right</option>
+                    </select>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
                     <div>
                       <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
-                        Alignment
+                        Transform
                       </label>
                       <select
                         className="w-full text-sm border-slate-300 rounded"
-                        value={getElementValue("alignment")}
-                        onChange={(e) => handleElementChange("alignment", e.target.value)}
-                      >
-                        <option value="left">Left</option>
-                        <option value="center">Center</option>
-                        <option value="right">Right</option>
-                      </select>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
-                          Margin Top
-                        </label>
-                        <input
-                          type="text"
-                          className="w-full text-sm border-slate-300 rounded"
-                          value={getElementValue("marginTop")}
-                          onChange={(e) => handleElementChange("marginTop", e.target.value)}
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
-                          Margin Bottom
-                        </label>
-                        <input
-                          type="text"
-                          className="w-full text-sm border-slate-300 rounded"
-                          value={getElementValue("marginBottom")}
-                          onChange={(e) => handleElementChange("marginBottom", e.target.value)}
-                        />
-                      </div>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div>
-                      <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
-                        Font Size
-                      </label>
-                      <input
-                        type="text"
-                        className="w-full text-sm border-slate-300 rounded"
-                        value={getElementValue("fontSize")}
+                        value={getElementValue("textTransform")}
                         onChange={(e) =>
-                          handleElementChange("fontSize", e.target.value)
-                        }
-                        placeholder="e.g. 14px"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
-                        Font Weight
-                      </label>
-                      <select
-                        className="w-full text-sm border-slate-300 rounded"
-                        value={getElementValue("fontWeight")}
-                        onChange={(e) =>
-                          handleElementChange("fontWeight", e.target.value)
+                          handleElementChange("textTransform", e.target.value)
                         }
                       >
-                        <option value="">Inherit</option>
-                        <option value="400">Normal (400)</option>
-                        <option value="500">Medium (500)</option>
-                        <option value="600">Semibold (600)</option>
-                        <option value="700">Bold (700)</option>
+                        <option value="">None</option>
+                        <option value="uppercase">Uppercase</option>
+                        <option value="capitalize">Capitalize</option>
                       </select>
                     </div>
                     <div>
                       <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
-                        Text Color
-                      </label>
-                      <input
-                        type="text"
-                        className="w-full text-sm border-slate-300 rounded"
-                        value={getElementValue("color")}
-                        onChange={(e) =>
-                          handleElementChange("color", e.target.value)
-                        }
-                        placeholder="e.g. #0F172A"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
-                        Text Alignment
+                        Decoration
                       </label>
                       <select
                         className="w-full text-sm border-slate-300 rounded"
-                        value={getElementValue("textAlign")}
+                        value={getElementValue("textDecoration")}
                         onChange={(e) =>
-                          handleElementChange("textAlign", e.target.value)
+                          handleElementChange("textDecoration", e.target.value)
                         }
                       >
-                        <option value="">Inherit</option>
-                        <option value="left">Left</option>
-                        <option value="center">Center</option>
-                        <option value="right">Right</option>
+                        <option value="">None</option>
+                        <option value="underline">Underline</option>
                       </select>
                     </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
-                          Transform
-                        </label>
-                        <select
-                          className="w-full text-sm border-slate-300 rounded"
-                          value={getElementValue("textTransform")}
-                          onChange={(e) =>
-                            handleElementChange("textTransform", e.target.value)
-                          }
-                        >
-                          <option value="">None</option>
-                          <option value="uppercase">Uppercase</option>
-                          <option value="capitalize">Capitalize</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
-                          Decoration
-                        </label>
-                        <select
-                          className="w-full text-sm border-slate-300 rounded"
-                          value={getElementValue("textDecoration")}
-                          onChange={(e) =>
-                            handleElementChange("textDecoration", e.target.value)
-                          }
-                        >
-                          <option value="">None</option>
-                          <option value="underline">Underline</option>
-                        </select>
-                      </div>
-                    </div>
-                  </>
-                )}
+                  </div>
+                </>
               </div>
             </div>
           )}
@@ -714,30 +634,55 @@ export const PrintTemplateDesigner = () => {
                     type="checkbox"
                     id="showTechnician"
                     checked={template.signatures?.technician?.show ?? true}
-                    onChange={(e) => handleSignatureChange("technician", "show", e.target.checked)}
+                    onChange={(e) =>
+                      handleSignatureChange(
+                        "technician",
+                        "show",
+                        e.target.checked,
+                      )
+                    }
                     className="rounded border-slate-300 text-electric-cobalt focus:ring-electric-cobalt"
                   />
-                  <label htmlFor="showTechnician" className="text-sm font-medium text-slate-700">
+                  <label
+                    htmlFor="showTechnician"
+                    className="text-sm font-medium text-slate-700"
+                  >
                     Show Technician Signature
                   </label>
                 </div>
                 <div>
-                  <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">Name *</label>
+                  <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
+                    Name *
+                  </label>
                   <input
                     type="text"
                     className="w-full text-sm border-slate-300 rounded"
                     value={template.signatures?.technician?.name || ""}
-                    onChange={(e) => handleSignatureChange("technician", "name", e.target.value)}
+                    onChange={(e) =>
+                      handleSignatureChange(
+                        "technician",
+                        "name",
+                        e.target.value,
+                      )
+                    }
                     placeholder="e.g. System Admin"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">Designation</label>
+                  <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
+                    Designation
+                  </label>
                   <input
                     type="text"
                     className="w-full text-sm border-slate-300 rounded"
                     value={template.signatures?.technician?.designation || ""}
-                    onChange={(e) => handleSignatureChange("technician", "designation", e.target.value)}
+                    onChange={(e) =>
+                      handleSignatureChange(
+                        "technician",
+                        "designation",
+                        e.target.value,
+                      )
+                    }
                     placeholder="e.g. Lab Technician"
                   />
                 </div>
@@ -745,17 +690,31 @@ export const PrintTemplateDesigner = () => {
                   <input
                     type="checkbox"
                     id="showTechImage"
-                    checked={template.signatures?.technician?.showSignatureImage ?? false}
-                    onChange={(e) => handleSignatureChange("technician", "showSignatureImage", e.target.checked)}
+                    checked={
+                      template.signatures?.technician?.showSignatureImage ??
+                      false
+                    }
+                    onChange={(e) =>
+                      handleSignatureChange(
+                        "technician",
+                        "showSignatureImage",
+                        e.target.checked,
+                      )
+                    }
                     className="rounded border-slate-300 text-electric-cobalt focus:ring-electric-cobalt"
                   />
-                  <label htmlFor="showTechImage" className="text-[11px] font-medium text-slate-700 uppercase">
+                  <label
+                    htmlFor="showTechImage"
+                    className="text-[11px] font-medium text-slate-700 uppercase"
+                  >
                     Use Image Signature
                   </label>
                 </div>
                 {template.signatures?.technician?.showSignatureImage && (
                   <div>
-                    <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">Upload Image</label>
+                    <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
+                      Upload Image
+                    </label>
                     <input
                       type="file"
                       accept="image/*"
@@ -765,7 +724,11 @@ export const PrintTemplateDesigner = () => {
                         if (file) {
                           const reader = new FileReader();
                           reader.onload = (upload) => {
-                            handleSignatureChange("technician", "signatureImage", upload.target.result);
+                            handleSignatureChange(
+                              "technician",
+                              "signatureImage",
+                              upload.target.result,
+                            );
                           };
                           reader.readAsDataURL(file);
                         }
@@ -773,11 +736,21 @@ export const PrintTemplateDesigner = () => {
                     />
                     {template.signatures?.technician?.signatureImage && (
                       <div className="mt-2 border border-slate-200 p-2 inline-block rounded bg-white">
-                        <img src={template.signatures.technician.signatureImage} alt="Signature" className="h-12 object-contain" />
+                        <img
+                          src={template.signatures.technician.signatureImage}
+                          alt="Signature"
+                          className="h-12 object-contain"
+                        />
                         <button
                           type="button"
                           className="text-xs text-red-500 hover:text-red-700 mt-1 block"
-                          onClick={() => handleSignatureChange("technician", "signatureImage", "")}
+                          onClick={() =>
+                            handleSignatureChange(
+                              "technician",
+                              "signatureImage",
+                              "",
+                            )
+                          }
                         >
                           Remove Image
                         </button>
@@ -797,50 +770,95 @@ export const PrintTemplateDesigner = () => {
                     type="checkbox"
                     id="showPathologist"
                     checked={template.signatures?.pathologist?.show ?? true}
-                    onChange={(e) => handleSignatureChange("pathologist", "show", e.target.checked)}
+                    onChange={(e) =>
+                      handleSignatureChange(
+                        "pathologist",
+                        "show",
+                        e.target.checked,
+                      )
+                    }
                     className="rounded border-slate-300 text-electric-cobalt focus:ring-electric-cobalt"
                   />
-                  <label htmlFor="showPathologist" className="text-sm font-medium text-slate-700">
+                  <label
+                    htmlFor="showPathologist"
+                    className="text-sm font-medium text-slate-700"
+                  >
                     Show Pathologist Signature
                   </label>
                 </div>
                 <div>
-                  <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">Name *</label>
+                  <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
+                    Name *
+                  </label>
                   <input
                     type="text"
                     className="w-full text-sm border-slate-300 rounded"
                     value={template.signatures?.pathologist?.name || ""}
-                    onChange={(e) => handleSignatureChange("pathologist", "name", e.target.value)}
+                    onChange={(e) =>
+                      handleSignatureChange(
+                        "pathologist",
+                        "name",
+                        e.target.value,
+                      )
+                    }
                     placeholder="Leave empty to use referred doctor"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">Designation</label>
+                  <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
+                    Designation
+                  </label>
                   <input
                     type="text"
                     className="w-full text-sm border-slate-300 rounded"
                     value={template.signatures?.pathologist?.designation || ""}
-                    onChange={(e) => handleSignatureChange("pathologist", "designation", e.target.value)}
+                    onChange={(e) =>
+                      handleSignatureChange(
+                        "pathologist",
+                        "designation",
+                        e.target.value,
+                      )
+                    }
                     placeholder="e.g. Pathologist"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">Qualification</label>
+                  <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
+                    Qualification
+                  </label>
                   <input
                     type="text"
                     className="w-full text-sm border-slate-300 rounded"
-                    value={template.signatures?.pathologist?.qualification || ""}
-                    onChange={(e) => handleSignatureChange("pathologist", "qualification", e.target.value)}
+                    value={
+                      template.signatures?.pathologist?.qualification || ""
+                    }
+                    onChange={(e) =>
+                      handleSignatureChange(
+                        "pathologist",
+                        "qualification",
+                        e.target.value,
+                      )
+                    }
                     placeholder="e.g. MBBS, MD (Pathology)"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">Registration Number</label>
+                  <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
+                    Registration Number
+                  </label>
                   <input
                     type="text"
                     className="w-full text-sm border-slate-300 rounded"
-                    value={template.signatures?.pathologist?.registrationNumber || ""}
-                    onChange={(e) => handleSignatureChange("pathologist", "registrationNumber", e.target.value)}
+                    value={
+                      template.signatures?.pathologist?.registrationNumber || ""
+                    }
+                    onChange={(e) =>
+                      handleSignatureChange(
+                        "pathologist",
+                        "registrationNumber",
+                        e.target.value,
+                      )
+                    }
                     placeholder="e.g. Reg. No. 123456"
                   />
                 </div>
@@ -848,17 +866,31 @@ export const PrintTemplateDesigner = () => {
                   <input
                     type="checkbox"
                     id="showPathImage"
-                    checked={template.signatures?.pathologist?.showSignatureImage ?? false}
-                    onChange={(e) => handleSignatureChange("pathologist", "showSignatureImage", e.target.checked)}
+                    checked={
+                      template.signatures?.pathologist?.showSignatureImage ??
+                      false
+                    }
+                    onChange={(e) =>
+                      handleSignatureChange(
+                        "pathologist",
+                        "showSignatureImage",
+                        e.target.checked,
+                      )
+                    }
                     className="rounded border-slate-300 text-electric-cobalt focus:ring-electric-cobalt"
                   />
-                  <label htmlFor="showPathImage" className="text-[11px] font-medium text-slate-700 uppercase">
+                  <label
+                    htmlFor="showPathImage"
+                    className="text-[11px] font-medium text-slate-700 uppercase"
+                  >
                     Use Image Signature
                   </label>
                 </div>
                 {template.signatures?.pathologist?.showSignatureImage && (
                   <div>
-                    <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">Upload Image</label>
+                    <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
+                      Upload Image
+                    </label>
                     <input
                       type="file"
                       accept="image/*"
@@ -868,7 +900,11 @@ export const PrintTemplateDesigner = () => {
                         if (file) {
                           const reader = new FileReader();
                           reader.onload = (upload) => {
-                            handleSignatureChange("pathologist", "signatureImage", upload.target.result);
+                            handleSignatureChange(
+                              "pathologist",
+                              "signatureImage",
+                              upload.target.result,
+                            );
                           };
                           reader.readAsDataURL(file);
                         }
@@ -876,11 +912,21 @@ export const PrintTemplateDesigner = () => {
                     />
                     {template.signatures?.pathologist?.signatureImage && (
                       <div className="mt-2 border border-slate-200 p-2 inline-block rounded bg-white">
-                        <img src={template.signatures.pathologist.signatureImage} alt="Signature" className="h-12 object-contain" />
+                        <img
+                          src={template.signatures.pathologist.signatureImage}
+                          alt="Signature"
+                          className="h-12 object-contain"
+                        />
                         <button
                           type="button"
                           className="text-xs text-red-500 hover:text-red-700 mt-1 block"
-                          onClick={() => handleSignatureChange("pathologist", "signatureImage", "")}
+                          onClick={() =>
+                            handleSignatureChange(
+                              "pathologist",
+                              "signatureImage",
+                              "",
+                            )
+                          }
                         >
                           Remove Image
                         </button>
@@ -891,6 +937,118 @@ export const PrintTemplateDesigner = () => {
               </div>
             </div>
           )}
+
+          {activeTab === "bar-code" && (
+            <>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="showBarcode"
+                  checked={getBarcodeValue("show") !== false}
+                  onChange={(e) =>
+                    handleElementChange("show", e.target.checked, "barcode")
+                  }
+                  className="rounded border-slate-300 text-electric-cobalt focus:ring-electric-cobalt"
+                />
+                <label
+                  htmlFor="showBarcode"
+                  className="text-[11px] font-medium text-slate-700 uppercase"
+                >
+                  Show Barcode
+                </label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="displayValue"
+                  checked={getBarcodeValue("displayValue") !== false}
+                  onChange={(e) =>
+                    handleElementChange("displayValue", e.target.checked, "barcode")
+                  }
+                  className="rounded border-slate-300 text-electric-cobalt focus:ring-electric-cobalt"
+                />
+                <label
+                  htmlFor="displayValue"
+                  className="text-[11px] font-medium text-slate-700 uppercase"
+                >
+                  Show Human-Readable Text
+                </label>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
+                    Width Multiplier
+                  </label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    className="w-full text-sm border-slate-300 rounded"
+                    value={getBarcodeValue("width")}
+                    onChange={(e) =>
+                      handleElementChange("width", e.target.value, "barcode")
+                    }
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
+                    Height (px)
+                  </label>
+                  <input
+                    type="number"
+                    className="w-full text-sm border-slate-300 rounded"
+                    value={getBarcodeValue("height")}
+                    onChange={(e) =>
+                      handleElementChange("height", e.target.value, "barcode")
+                    }
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
+                  Alignment
+                </label>
+                <select
+                  className="w-full text-sm border-slate-300 rounded"
+                  value={getBarcodeValue("alignment")}
+                  onChange={(e) =>
+                    handleElementChange("alignment", e.target.value, "barcode")
+                  }
+                >
+                  <option value="left">Left</option>
+                  <option value="center">Center</option>
+                  <option value="right">Right</option>
+                </select>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
+                    Margin Top
+                  </label>
+                  <input
+                    type="text"
+                    className="w-full text-sm border-slate-300 rounded"
+                    value={getBarcodeValue("marginTop")}
+                    onChange={(e) =>
+                      handleElementChange("marginTop", e.target.value, "barcode")
+                    }
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
+                    Margin Bottom
+                  </label>
+                  <input
+                    type="text"
+                    className="w-full text-sm border-slate-300 rounded"
+                    value={getBarcodeValue("marginBottom")}
+                    onChange={(e) =>
+                      handleElementChange("marginBottom", e.target.value, "barcode")
+                    }
+                  />
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
 
@@ -898,10 +1056,15 @@ export const PrintTemplateDesigner = () => {
       <div className="flex-1 bg-slate-100 border border-slate-300 rounded shadow-inner flex flex-col overflow-hidden relative">
         {/* Zoom Toolbar */}
         <div className="h-12 bg-white border-b border-slate-300 flex items-center justify-center px-4 space-x-2 shrink-0 z-10 shadow-sm">
-          <button onClick={() => handleZoom(Math.max(0.25, zoomLevel - 0.25))} className="px-2 py-1 text-slate-600 hover:bg-slate-100 rounded font-medium text-sm border border-transparent hover:border-slate-200 transition-colors">-</button>
-          
-          <select 
-            value={zoomLevel} 
+          <button
+            onClick={() => handleZoom(Math.max(0.25, zoomLevel - 0.25))}
+            className="px-2 py-1 text-slate-600 hover:bg-slate-100 rounded font-medium text-sm border border-transparent hover:border-slate-200 transition-colors"
+          >
+            -
+          </button>
+
+          <select
+            value={zoomLevel}
             onChange={(e) => handleZoom(parseFloat(e.target.value))}
             className="text-sm font-medium border-slate-300 rounded px-2 py-1 focus:ring-0 cursor-pointer"
           >
@@ -912,32 +1075,51 @@ export const PrintTemplateDesigner = () => {
             <option value={1.5}>150%</option>
             <option value={2}>200%</option>
           </select>
-          
-          <button onClick={() => handleZoom(Math.min(3, zoomLevel + 0.25))} className="px-2 py-1 text-slate-600 hover:bg-slate-100 rounded font-medium text-sm border border-transparent hover:border-slate-200 transition-colors">+</button>
-          
+
+          <button
+            onClick={() => handleZoom(Math.min(3, zoomLevel + 0.25))}
+            className="px-2 py-1 text-slate-600 hover:bg-slate-100 rounded font-medium text-sm border border-transparent hover:border-slate-200 transition-colors"
+          >
+            +
+          </button>
+
           <div className="w-px h-6 bg-slate-300 mx-2"></div>
-          
-          <button onClick={handleFitWidth} className="px-3 py-1.5 text-slate-600 hover:bg-slate-100 rounded font-medium text-xs border border-slate-200 transition-colors">Fit Width</button>
-          <button onClick={handleFitPage} className="px-3 py-1.5 text-slate-600 hover:bg-slate-100 rounded font-medium text-xs border border-slate-200 transition-colors">Fit Page</button>
+
+          <button
+            onClick={handleFitWidth}
+            className="px-3 py-1.5 text-slate-600 hover:bg-slate-100 rounded font-medium text-xs border border-slate-200 transition-colors"
+          >
+            Fit Width
+          </button>
+          <button
+            onClick={handleFitPage}
+            className="px-3 py-1.5 text-slate-600 hover:bg-slate-100 rounded font-medium text-xs border border-slate-200 transition-colors"
+          >
+            Fit Page
+          </button>
         </div>
 
         {/* Scrollable Workspace */}
-        <div 
+        <div
           ref={workspaceRef}
           className="flex-1 overflow-auto bg-[#ECECEC] flex items-start justify-center p-8"
         >
           {/* Zoom Wrapper */}
-          <div 
+          <div
             className="transition-all duration-200 flex-shrink-0"
-            style={{ 
-              width: `${794 * zoomLevel}px`, 
-              height: `${1123 * zoomLevel}px` 
+            style={{
+              width: `${794 * zoomLevel}px`,
+              height: `${1123 * zoomLevel}px`,
             }}
           >
             {/* The scaled canvas */}
-            <div 
+            <div
               className="origin-top-left transition-transform duration-200"
-              style={{ transform: `scale(${zoomLevel})`, width: '794px' }}
+              style={{
+                transform: `scale(${zoomLevel})`,
+                width: "794px",
+                height: "1123px",
+              }}
             >
               <ReportCanvas
                 patient={mockPatient}
