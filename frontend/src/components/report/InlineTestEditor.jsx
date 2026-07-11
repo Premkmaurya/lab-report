@@ -64,8 +64,8 @@ export const InlineTestEditor = ({
           unit: sub.unit,
           normalRange: sub.normalRange,
           type: sub.type || "parameter",
-          resultType: sub.resultType || "Numeric",
-          options: sub.options || [],
+          isListParameter: sub.isListParameter || false,
+          allowedValues: sub.allowedValues || [],
         };
       });
       reset({ results: mergedResults });
@@ -94,8 +94,8 @@ export const InlineTestEditor = ({
           unit: sub.unit,
           normalRange: sub.normalRange,
           type: sub.type || "parameter",
-          resultType: sub.resultType || "Numeric",
-          options: sub.options || [],
+          isListParameter: sub.isListParameter || false,
+          allowedValues: sub.allowedValues || [],
         };
       });
       reset({ results: mergedResults });
@@ -140,8 +140,8 @@ export const InlineTestEditor = ({
                 unit: r.unit,
                 normalRange: r.normalRange,
                 type: r.type || "parameter",
-                resultType: r.resultType,
-                options: r.options,
+                isListParameter: r.isListParameter,
+                allowedValues: r.allowedValues,
               };
             })
           };
@@ -281,7 +281,7 @@ export const InlineTestEditor = ({
                               {(() => {
                                 const { ref, ...rest } = register(`results.${index}.value`);
                                 
-                                if (item.resultType === 'Selection' || item.resultType === 'Custom') {
+                                if (item.isListParameter) {
                                   return (
                                     <select
                                       className="w-full min-w-[120px] bg-white border border-electric-cobalt focus:border-ink-navy focus:ring-1 focus:ring-ink-navy rounded-inputs px-3 py-1.5 text-sm font-medium text-charcoal transition-colors"
@@ -290,30 +290,11 @@ export const InlineTestEditor = ({
                                         ref(e);
                                         inputRefs.current[index] = e;
                                       }}
+                                      value={item.value || ""}
                                       onKeyDown={(e) => handleKeyDown(e, index)}
                                     >
                                       <option value="">Select...</option>
-                                      {(item.options || []).map((opt, i) => (
-                                        <option key={i} value={opt}>{opt}</option>
-                                      ))}
-                                    </select>
-                                  );
-                                }
-                                
-                                if (item.resultType === 'Boolean' || item.resultType === 'Positive/Negative') {
-                                  const opts = item.resultType === 'Boolean' ? ['True', 'False'] : ['Positive', 'Negative'];
-                                  return (
-                                    <select
-                                      className="w-full min-w-[120px] bg-white border border-electric-cobalt focus:border-ink-navy focus:ring-1 focus:ring-ink-navy rounded-inputs px-3 py-1.5 text-sm font-medium text-charcoal transition-colors"
-                                      {...rest}
-                                      ref={(e) => {
-                                        ref(e);
-                                        inputRefs.current[index] = e;
-                                      }}
-                                      onKeyDown={(e) => handleKeyDown(e, index)}
-                                    >
-                                      <option value="">Select...</option>
-                                      {opts.map((opt, i) => (
+                                      {(item.allowedValues || []).map((opt, i) => (
                                         <option key={i} value={opt}>{opt}</option>
                                       ))}
                                     </select>
@@ -322,8 +303,7 @@ export const InlineTestEditor = ({
                                 
                                 return (
                                   <input
-                                    type={item.resultType === 'Numeric' ? "number" : "text"}
-                                    step={item.resultType === 'Numeric' ? "any" : undefined}
+                                    type="text"
                                     placeholder="Value"
                                     className="w-full min-w-[120px] bg-white border border-electric-cobalt focus:border-ink-navy focus:ring-1 focus:ring-ink-navy rounded-inputs px-3 py-1.5 text-sm font-medium text-charcoal transition-colors"
                                     {...rest}

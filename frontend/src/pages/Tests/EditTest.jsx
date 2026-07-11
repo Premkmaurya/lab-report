@@ -94,7 +94,7 @@ export const EditTest = () => {
           inputRefs.current[index]?.[fieldsOrder[fieldIndex + 1]]?.focus();
         } else {
           if (index === fields.length - 1 && isRowComplete(currentValues[index])) {
-            append({ name: "", type: "parameter", price: "", unit: "", normalRange: "" });
+            append({ name: "", type: "parameter", price: "", unit: "", normalRange: "", isListParameter: false, allowedValues: [] });
             setTimeout(() => {
               inputRefs.current[index + 1]?.name?.focus();
             }, 0);
@@ -161,7 +161,7 @@ export const EditTest = () => {
         const isSection = currentValues[index]?.type === "section";
         if ((fieldName === "normalRange" || (isSection && fieldName === "name")) && isRowComplete(currentValues[index])) {
           if (isRowComplete(currentValues[currentValues.length - 1])) {
-            append({ name: "", type: "parameter", price: "", unit: "", normalRange: "", resultType: "Numeric", options: "" });
+            append({ name: "", type: "parameter", price: "", unit: "", normalRange: "", isListParameter: false, allowedValues: [] });
           }
         }
       }, 100);
@@ -223,7 +223,7 @@ export const EditTest = () => {
           
           let tests = t.subTests || [];
           if (!isReadOnly && (tests.length === 0 || !isEmptyRow(tests[tests.length - 1]))) {
-             tests = [...tests, { name: "", type: "parameter", price: "", unit: "", normalRange: "" }];
+             tests = [...tests, { name: "", type: "parameter", price: "", unit: "", normalRange: "", isListParameter: false, allowedValues: [] }];
           }
 
           reset({
@@ -268,17 +268,11 @@ export const EditTest = () => {
       name: data.name,
       price: rootPrice,
       subTests: validSubTests.map((st) => {
-        let parsedOptions = [];
-        if (st.resultType === 'Selection' && st.options) {
-          parsedOptions = typeof st.options === 'string' 
-            ? st.options.split(',').map(opt => opt.trim()).filter(Boolean)
-            : st.options;
-        }
         return {
           ...st,
           price: st.type === "section" ? 0 : (parseFloat(st.price) || 0),
-          options: parsedOptions,
-          resultType: st.resultType || "Numeric",
+          isListParameter: !!st.isListParameter,
+          allowedValues: st.allowedValues || [],
         };
       }),
     };
@@ -492,9 +486,6 @@ export const EditTest = () => {
                       <th className="px-4 py-3 font-abcfavoritvariable text-xs font-bold text-graphite uppercase tracking-wider">
                         Normal Range
                       </th>
-                      <th className="px-4 py-3 font-abcfavoritvariable text-xs font-bold text-graphite uppercase tracking-wider">
-                        Result Type
-                      </th>
                       {!isReadOnly && (
                         <th className="px-4 py-3 font-abcfavoritvariable text-xs font-bold text-graphite uppercase tracking-wider text-right">
                           Actions
@@ -507,153 +498,200 @@ export const EditTest = () => {
                       if (!inputRefs.current[index]) inputRefs.current[index] = {};
                       const isSection = watchedTypes[index] === "section";
                       return (
-                      <tr key={item.id} className="bg-paper-white">
-                        <td className="px-4 py-3 align-top">
-                          <input
-                            type="text"
-                            placeholder={isSection ? "e.g. DIFFERENTIAL LEUKOCYTE COUNT" : "e.g. Hemoglobin"}
-                            className={`w-full min-w-[150px] text-sm ${errors?.subTests?.[index]?.name ? "border-red-500" : ""} ${isReadOnly ? "bg-transparent text-stone border-transparent" : ""}`}
-                            disabled={isReadOnly}
-                            {...register(`subTests.${index}.name`, { 
-                              validate: (val, formValues) => isEmptyRow(formValues.subTests[index]) ? true : (!!val || "Required")
-                            })}
-                            onKeyDown={(e) => handleKeyDown(e, index, "name")}
-                            ref={(el) => {
-                              register(`subTests.${index}.name`).ref(el);
-                              inputRefs.current[index].name = el;
-                            }}
-                          />
-                          {!isReadOnly && (
-                            <div className="mt-2 flex items-center">
-                              <input type="hidden" {...register(`subTests.${index}.type`)} />
-                              <input 
-                                type="checkbox" 
-                                id={`isSection-${index}`} 
-                                className="mr-1.5 cursor-pointer"
-                                checked={isSection}
-                                onChange={(e) => {
-                                  setValue(`subTests.${index}.type`, e.target.checked ? 'section' : 'parameter');
-                                  if (e.target.checked) {
-                                    setValue(`subTests.${index}.price`, "");
-                                    setValue(`subTests.${index}.unit`, "");
-                                    setValue(`subTests.${index}.normalRange`, "");
-                                  }
-                                  const currentValues = getValues("subTests");
-                                  if (index === currentValues.length - 1 && isRowComplete(currentValues[index])) {
-                                    append({ name: "", type: "parameter", price: "", unit: "", normalRange: "", resultType: "Numeric", options: "" });
-                                    setTimeout(() => {
-                                      inputRefs.current[index + 1]?.name?.focus();
-                                    }, 0);
-                                  }
-                                }}
-                              />
-                              <label htmlFor={`isSection-${index}`} className="text-[10px] text-stone uppercase tracking-wider font-bold cursor-pointer">
-                                Section Header
-                              </label>
-                            </div>
-                          )}
-                        </td>
-                        <td className="px-4 py-3 align-top">
-                          <input
-                            type="number"
-                            step="0.01"
-                            placeholder={isSection ? "-" : "0.00"}
-                            disabled={isReadOnly || isSection}
-                            className={`w-full min-w-[80px] text-sm ${errors?.subTests?.[index]?.price ? "border-red-500" : ""} ${isReadOnly ? "bg-transparent text-stone border-transparent" : (isSection ? "bg-slate-50 text-slate-400 cursor-not-allowed" : "")}`}
-                            {...register(`subTests.${index}.price`, { 
-                              validate: (val, formValues) => {
-                                if (formValues.subTests[index].type === "section") return true;
-                                if (isEmptyRow(formValues.subTests[index])) return true;
-                                if (val === "" || val === null || val === undefined) return "Required";
-                                if (parseFloat(val) < 0) return "Invalid";
-                                return true;
-                              }
-                            })}
-                            onKeyDown={(e) => handleKeyDown(e, index, "price")}
-                            ref={(el) => {
-                              register(`subTests.${index}.price`).ref(el);
-                              inputRefs.current[index].price = el;
-                            }}
-                          />
-                        </td>
-                        <td className="px-4 py-3 align-top">
-                          <input
-                            type="text"
-                            placeholder={isSection ? "-" : "e.g. g/dL"}
-                            disabled={isReadOnly || isSection}
-                            className={`w-full min-w-[80px] text-sm ${errors?.subTests?.[index]?.unit ? "border-red-500" : ""} ${isReadOnly ? "bg-transparent text-stone border-transparent" : (isSection ? "bg-slate-50 text-slate-400 cursor-not-allowed" : "")}`}
-                            {...register(`subTests.${index}.unit`, { 
-                              validate: (val, formValues) => isEmptyRow(formValues.subTests[index]) ? true : true
-                            })}
-                            onKeyDown={(e) => handleKeyDown(e, index, "unit")}
-                            ref={(el) => {
-                              register(`subTests.${index}.unit`).ref(el);
-                              inputRefs.current[index].unit = el;
-                            }}
-                          />
-                        </td>
-                        <td className="px-4 py-3 align-top">
-                          <input
-                            type="text"
-                            placeholder={isSection ? "-" : "e.g. 13-17"}
-                            disabled={isReadOnly || isSection}
-                            className={`w-full min-w-[100px] text-sm ${errors?.subTests?.[index]?.normalRange ? "border-red-500" : ""} ${isReadOnly ? "bg-transparent text-stone border-transparent" : (isSection ? "bg-slate-50 text-slate-400 cursor-not-allowed" : "")}`}
-                            {...register(`subTests.${index}.normalRange`, { 
-                              validate: (val, formValues) => isEmptyRow(formValues.subTests[index]) ? true : true
-                            })}
-                            onKeyDown={(e) => handleKeyDown(e, index, "normalRange")}
-                            onBlur={() => handleBlur(index, "normalRange")}
-                            ref={(el) => {
-                              register(`subTests.${index}.normalRange`).ref(el);
-                              inputRefs.current[index].normalRange = el;
-                            }}
-                          />
-                        </td>
-                        <td className="px-4 py-3 align-top">
-                          <select
-                            disabled={isReadOnly || isSection}
-                            className={`w-full min-w-[100px] text-sm bg-white border border-cream-border rounded px-2 py-1 outline-none ${isReadOnly ? "bg-transparent text-stone border-transparent appearance-none" : (isSection ? "bg-slate-50 text-slate-400 cursor-not-allowed" : "")}`}
-                            {...register(`subTests.${index}.resultType`)}
-                            defaultValue="Numeric"
-                          >
-                            <option value="Numeric">Numeric</option>
-                            <option value="Positive/Negative">Pos/Neg</option>
-                            <option value="Text">Text</option>
-                            <option value="Selection">Selection</option>
-                            <option value="Boolean">Boolean</option>
-                            <option value="Custom">Custom</option>
-                          </select>
-                          {watch(`subTests.${index}.resultType`) === 'Selection' && !isSection && (
+                        <React.Fragment key={item.id}>
+                        <tr className="bg-paper-white">
+                          <td className="px-4 py-3 align-top">
                             <input
                               type="text"
-                              placeholder="Comma separated options"
+                              placeholder={isSection ? "e.g. DIFFERENTIAL LEUKOCYTE COUNT" : "e.g. Hemoglobin"}
+                              className={`w-full min-w-[150px] text-sm ${errors?.subTests?.[index]?.name ? "border-red-500" : ""} ${isReadOnly ? "bg-transparent text-stone border-transparent" : ""}`}
                               disabled={isReadOnly}
-                              className={`w-full min-w-[120px] text-xs mt-2 border border-cream-border rounded px-2 py-1 ${isReadOnly ? "bg-transparent text-stone border-transparent" : ""}`}
-                              {...register(`subTests.${index}.options`)}
+                              {...register(`subTests.${index}.name`, { 
+                                validate: (val, formValues) => isEmptyRow(formValues.subTests[index]) ? true : (!!val || "Required")
+                              })}
+                              onKeyDown={(e) => handleKeyDown(e, index, "name")}
+                              ref={(el) => {
+                                register(`subTests.${index}.name`).ref(el);
+                                inputRefs.current[index].name = el;
+                              }}
                             />
-                          )}
-                        </td>
-                        {!isReadOnly && (
-                          <td className="px-4 py-3 align-top text-right">
-                            {index !== fields.length - 1 && (
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  remove(index);
-                                  const currentValues = watch("subTests");
-                                  if (currentValues.length <= 1 && !isReadOnly) {
-                                    append({ name: "", type: "parameter", price: "", unit: "", normalRange: "" });
-                                  }
-                                }}
-                                className="text-red-600 hover:text-red-800 p-2 rounded-full hover:bg-red-50 transition-colors"
-                                title="Delete Parameter"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </button>
+                            {!isReadOnly && (
+                              <div className="mt-2 flex items-center">
+                                <input type="hidden" {...register(`subTests.${index}.type`)} />
+                                <input 
+                                  type="checkbox" 
+                                  id={`isSection-${index}`} 
+                                  className="mr-1.5 cursor-pointer"
+                                  checked={isSection}
+                                  onChange={(e) => {
+                                    setValue(`subTests.${index}.type`, e.target.checked ? 'section' : 'parameter');
+                                    if (e.target.checked) {
+                                      setValue(`subTests.${index}.price`, "");
+                                      setValue(`subTests.${index}.unit`, "");
+                                      setValue(`subTests.${index}.normalRange`, "");
+                                      setValue(`subTests.${index}.isListParameter`, false);
+                                    }
+                                    const currentValues = getValues("subTests");
+                                    if (index === currentValues.length - 1 && isRowComplete(currentValues[index])) {
+                                      append({ name: "", type: "parameter", price: "", unit: "", normalRange: "", isListParameter: false, allowedValues: [] });
+                                      setTimeout(() => {
+                                        inputRefs.current[index + 1]?.name?.focus();
+                                      }, 0);
+                                    }
+                                  }}
+                                />
+                                <label htmlFor={`isSection-${index}`} className="text-[10px] text-stone uppercase tracking-wider font-bold cursor-pointer">
+                                  Section Header
+                                </label>
+                              </div>
                             )}
                           </td>
+                          <td className="px-4 py-3 align-top">
+                            <input
+                              type="number"
+                              step="0.01"
+                              placeholder={isSection ? "-" : "0.00"}
+                              disabled={isReadOnly || isSection}
+                              className={`w-full min-w-[80px] text-sm ${errors?.subTests?.[index]?.price ? "border-red-500" : ""} ${isReadOnly ? "bg-transparent text-stone border-transparent" : (isSection ? "bg-slate-50 text-slate-400 cursor-not-allowed" : "")}`}
+                              {...register(`subTests.${index}.price`, { 
+                                validate: (val, formValues) => {
+                                  if (formValues.subTests[index].type === "section") return true;
+                                  if (isEmptyRow(formValues.subTests[index])) return true;
+                                  if (val === "" || val === null || val === undefined) return "Required";
+                                  if (parseFloat(val) < 0) return "Invalid";
+                                  return true;
+                                }
+                              })}
+                              onKeyDown={(e) => handleKeyDown(e, index, "price")}
+                              ref={(el) => {
+                                register(`subTests.${index}.price`).ref(el);
+                                inputRefs.current[index].price = el;
+                              }}
+                            />
+                            {!isReadOnly && !isSection && (
+                              <div className="mt-2 flex items-center">
+                                <input 
+                                  type="checkbox" 
+                                  id={`isListParameter-${index}`} 
+                                  className="mr-1.5 cursor-pointer"
+                                  {...register(`subTests.${index}.isListParameter`)}
+                                  onChange={(e) => {
+                                    setValue(`subTests.${index}.isListParameter`, e.target.checked);
+                                    if (e.target.checked) {
+                                      setValue(`subTests.${index}.normalRange`, "");
+                                      // initialize allowed values with empty if empty
+                                      const currentAllowed = getValues(`subTests.${index}.allowedValues`);
+                                      if (!currentAllowed || currentAllowed.length === 0) {
+                                        setValue(`subTests.${index}.allowedValues`, [""]);
+                                      }
+                                    }
+                                  }}
+                                />
+                                <label htmlFor={`isListParameter-${index}`} className="text-[10px] text-stone uppercase tracking-wider font-bold cursor-pointer">
+                                  Convert to List
+                                </label>
+                              </div>
+                            )}
+                          </td>
+                          <td className="px-4 py-3 align-top">
+                            <input
+                              type="text"
+                              placeholder={isSection || watch(`subTests.${index}.isListParameter`) ? "-" : "e.g. g/dL"}
+                              disabled={isReadOnly || isSection || watch(`subTests.${index}.isListParameter`)}
+                              className={`w-full min-w-[80px] text-sm ${errors?.subTests?.[index]?.unit ? "border-red-500" : ""} ${isReadOnly ? "bg-transparent text-stone border-transparent" : (isSection || watch(`subTests.${index}.isListParameter`) ? "bg-slate-50 text-slate-400 cursor-not-allowed" : "")}`}
+                              {...register(`subTests.${index}.unit`)}
+                              onKeyDown={(e) => handleKeyDown(e, index, "unit")}
+                              ref={(el) => {
+                                register(`subTests.${index}.unit`).ref(el);
+                                inputRefs.current[index].unit = el;
+                              }}
+                            />
+                          </td>
+                          <td className="px-4 py-3 align-top">
+                            <input
+                              type="text"
+                              placeholder={isSection || watch(`subTests.${index}.isListParameter`) ? "-" : "e.g. 13-17"}
+                              disabled={isReadOnly || isSection || watch(`subTests.${index}.isListParameter`)}
+                              className={`w-full min-w-[100px] text-sm ${errors?.subTests?.[index]?.normalRange ? "border-red-500" : ""} ${isReadOnly ? "bg-transparent text-stone border-transparent" : (isSection || watch(`subTests.${index}.isListParameter`) ? "bg-slate-50 text-slate-400 cursor-not-allowed" : "")}`}
+                              {...register(`subTests.${index}.normalRange`)}
+                              onKeyDown={(e) => handleKeyDown(e, index, "normalRange")}
+                              onBlur={() => handleBlur(index, "normalRange")}
+                              ref={(el) => {
+                                register(`subTests.${index}.normalRange`).ref(el);
+                                inputRefs.current[index].normalRange = el;
+                              }}
+                            />
+                          </td>
+                          {!isReadOnly && (
+                            <td className="px-4 py-3 align-top text-right">
+                              {index !== fields.length - 1 && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    remove(index);
+                                    const currentValues = watch("subTests");
+                                    if (currentValues.length <= 1 && !isReadOnly) {
+                                      append({ name: "", type: "parameter", price: "", unit: "", normalRange: "", isListParameter: false, allowedValues: [] });
+                                    }
+                                  }}
+                                  className="text-red-600 hover:text-red-800 p-2 rounded-full hover:bg-red-50 transition-colors"
+                                  title="Delete Parameter"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </button>
+                              )}
+                            </td>
+                          )}
+                        </tr>
+                        {watch(`subTests.${index}.isListParameter`) && !isSection && (
+                          <tr key={`${item.id}-list`} className="bg-slate-50 border-t border-cream-border">
+                            <td colSpan={isReadOnly ? "4" : "5"} className="px-4 py-4">
+                              <div className="flex flex-col max-w-sm pl-4 border-l-2 border-electric-cobalt">
+                                <span className="text-xs font-bold text-charcoal uppercase mb-2">Available Values</span>
+                                {(watch(`subTests.${index}.allowedValues`) || []).map((val, vIndex) => (
+                                  <div key={vIndex} className="flex items-center space-x-2 mb-2">
+                                    <input
+                                      type="text"
+                                      disabled={isReadOnly}
+                                      className={`flex-1 text-sm border border-cream-border rounded-inputs px-2 py-1 ${isReadOnly ? "bg-transparent text-stone border-transparent" : ""}`}
+                                      placeholder="Value (e.g. Positive)"
+                                      {...register(`subTests.${index}.allowedValues.${vIndex}`)}
+                                    />
+                                    {!isReadOnly && (
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          const vals = [...getValues(`subTests.${index}.allowedValues`)];
+                                          vals.splice(vIndex, 1);
+                                          setValue(`subTests.${index}.allowedValues`, vals);
+                                        }}
+                                        className="text-stone hover:text-red-600 p-1 rounded-full transition-colors"
+                                      >
+                                        <Trash2 className="h-3 w-3" />
+                                      </button>
+                                    )}
+                                  </div>
+                                ))}
+                                {!isReadOnly && (
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const vals = getValues(`subTests.${index}.allowedValues`) || [];
+                                      setValue(`subTests.${index}.allowedValues`, [...vals, ""]);
+                                    }}
+                                    className="text-electric-cobalt text-xs font-bold self-start mt-1 hover:underline"
+                                  >
+                                    + Add Value
+                                  </button>
+                                )}
+                                {errors?.subTests?.[index]?.allowedValues && !isReadOnly && (
+                                  <p className="text-xs text-red-500 mt-2">Required at least 2 distinct values</p>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
                         )}
-                      </tr>
+                        </React.Fragment>
                     )})}
                   </tbody>
                 </table>

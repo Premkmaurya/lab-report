@@ -13,12 +13,11 @@ const subTestSchema = new mongoose.Schema(
       enum: ['parameter', 'section'],
       default: 'parameter',
     },
-    resultType: {
-      type: String,
-      enum: ['Numeric', 'Positive/Negative', 'Text', 'Selection', 'Boolean', 'Custom'],
-      default: 'Numeric',
+    isListParameter: {
+      type: Boolean,
+      default: false,
     },
-    options: {
+    allowedValues: {
       type: [String],
       default: [],
     },
