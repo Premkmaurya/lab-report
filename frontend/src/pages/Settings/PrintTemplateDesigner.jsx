@@ -85,14 +85,21 @@ const DEFAULT_ELEMENT_STYLES = {
     color: "",
   },
   barcode: {
-    show: true,
-    width: "1.5",
-    height: "40",
-    position: "top-right",
-    alignment: "right",
-    marginTop: "0px",
-    marginBottom: "0px",
+    enabled: true,
     displayValue: true,
+    format: "CODE128",
+    width: 2,
+    height: 50,
+    marginTop: 8,
+    marginBottom: 0,
+    marginLeft: 0,
+    marginRight: 0,
+    alignment: "right",
+    rotation: 0,
+    x: 620,
+    y: 30,
+    lineColor: "#000000",
+    background: "transparent",
   },
 };
 
@@ -138,6 +145,19 @@ export const PrintTemplateDesigner = () => {
     }));
   };
 
+  const updateBarcodeSetting = (key, value) => {
+    setTemplate((prev) => ({
+      ...prev,
+      elements: {
+        ...prev.elements,
+        barcode: {
+          ...prev.elements.barcode,
+          [key]: value,
+        },
+      },
+    }));
+  };
+
   // Initialize local state with context template and merge with defaults
   useEffect(() => {
     if (!loading) {
@@ -155,6 +175,15 @@ export const PrintTemplateDesigner = () => {
             ...(initialTemplate.elements[elementKey] || {}),
           };
         });
+        const savedBarcode = savedTemplate.elements?.barcode || {};
+        if (savedBarcode.show !== undefined)
+          initialTemplate.elements.barcode.enabled = savedBarcode.show;
+        if (savedBarcode.barcodeType)
+          initialTemplate.elements.barcode.format = savedBarcode.barcodeType;
+        if (savedBarcode.x === undefined)
+          initialTemplate.elements.barcode.x = 620;
+        if (savedBarcode.y === undefined)
+          initialTemplate.elements.barcode.y = 30;
 
         setTemplate(initialTemplate);
         setError(null);
@@ -267,7 +296,7 @@ export const PrintTemplateDesigner = () => {
     age: 45,
     gender: "Male",
     referredDoctor: "Smith",
-    visitId: "VST-2023-001",
+    visitId: "1234",
     createdAt: new Date().toISOString(),
   };
 
@@ -944,9 +973,9 @@ export const PrintTemplateDesigner = () => {
                 <input
                   type="checkbox"
                   id="showBarcode"
-                  checked={getBarcodeValue("show") !== false}
+                  checked={template.elements.barcode.enabled}
                   onChange={(e) =>
-                    handleElementChange("show", e.target.checked, "barcode")
+                    updateBarcodeSetting("enabled", e.target.checked)
                   }
                   className="rounded border-slate-300 text-electric-cobalt focus:ring-electric-cobalt"
                 />
@@ -961,9 +990,9 @@ export const PrintTemplateDesigner = () => {
                 <input
                   type="checkbox"
                   id="displayValue"
-                  checked={getBarcodeValue("displayValue") !== false}
+                  checked={template.elements.barcode.displayValue}
                   onChange={(e) =>
-                    handleElementChange("displayValue", e.target.checked, "barcode")
+                    updateBarcodeSetting("displayValue", e.target.checked)
                   }
                   className="rounded border-slate-300 text-electric-cobalt focus:ring-electric-cobalt"
                 />
@@ -981,12 +1010,21 @@ export const PrintTemplateDesigner = () => {
                   </label>
                   <input
                     type="number"
+                    min="1"
+                    max="6"
                     step="0.1"
                     className="w-full text-sm border-slate-300 rounded"
-                    value={getBarcodeValue("width")}
+                    value={template.elements.barcode.width}
                     onChange={(e) =>
-                      handleElementChange("width", e.target.value, "barcode")
+                      updateBarcodeSetting("width", e.target.value)
                     }
+                    onBlur={(e) => {
+                      let val = Number(e.target.value);
+                      if (val < 1) val = 1;
+                      if (val > 6) val = 6;
+                      if (isNaN(val)) val = 2;
+                      updateBarcodeSetting("width", val);
+                    }}
                   />
                 </div>
                 <div>
@@ -995,11 +1033,20 @@ export const PrintTemplateDesigner = () => {
                   </label>
                   <input
                     type="number"
+                    min="20"
+                    max="150"
                     className="w-full text-sm border-slate-300 rounded"
-                    value={getBarcodeValue("height")}
+                    value={template.elements.barcode.height}
                     onChange={(e) =>
-                      handleElementChange("height", e.target.value, "barcode")
+                      updateBarcodeSetting("height", e.target.value)
                     }
+                    onBlur={(e) => {
+                      let val = Number(e.target.value);
+                      if (val < 20) val = 20;
+                      if (val > 150) val = 150;
+                      if (isNaN(val)) val = 50;
+                      updateBarcodeSetting("height", val);
+                    }}
                   />
                 </div>
               </div>
@@ -1009,9 +1056,9 @@ export const PrintTemplateDesigner = () => {
                 </label>
                 <select
                   className="w-full text-sm border-slate-300 rounded"
-                  value={getBarcodeValue("alignment")}
+                  value={template.elements.barcode.alignment}
                   onChange={(e) =>
-                    handleElementChange("alignment", e.target.value, "barcode")
+                    updateBarcodeSetting("alignment", e.target.value)
                   }
                 >
                   <option value="left">Left</option>
@@ -1025,12 +1072,21 @@ export const PrintTemplateDesigner = () => {
                     Margin Top
                   </label>
                   <input
-                    type="text"
+                    type="number"
+                    min="0"
+                    max="100"
                     className="w-full text-sm border-slate-300 rounded"
-                    value={getBarcodeValue("marginTop")}
+                    value={template.elements.barcode.marginTop}
                     onChange={(e) =>
-                      handleElementChange("marginTop", e.target.value, "barcode")
+                      updateBarcodeSetting("marginTop", e.target.value)
                     }
+                    onBlur={(e) => {
+                      let val = Number(e.target.value);
+                      if (val < 0) val = 0;
+                      if (val > 100) val = 100;
+                      if (isNaN(val)) val = 8;
+                      updateBarcodeSetting("marginTop", val);
+                    }}
                   />
                 </div>
                 <div>
@@ -1038,12 +1094,67 @@ export const PrintTemplateDesigner = () => {
                     Margin Bottom
                   </label>
                   <input
-                    type="text"
+                    type="number"
+                    min="0"
+                    max="100"
                     className="w-full text-sm border-slate-300 rounded"
-                    value={getBarcodeValue("marginBottom")}
+                    value={template.elements.barcode.marginBottom}
                     onChange={(e) =>
-                      handleElementChange("marginBottom", e.target.value, "barcode")
+                      updateBarcodeSetting("marginBottom", e.target.value)
                     }
+                    onBlur={(e) => {
+                      let val = Number(e.target.value);
+                      if (val < 0) val = 0;
+                      if (val > 100) val = 100;
+                      if (isNaN(val)) val = 0;
+                      updateBarcodeSetting("marginBottom", val);
+                    }}
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
+                    Margin Left
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    className="w-full text-sm border-slate-300 rounded"
+                    value={template.elements.barcode.marginLeft}
+                    onChange={(e) =>
+                      updateBarcodeSetting("marginLeft", e.target.value)
+                    }
+                    onBlur={(e) => {
+                      let val = Number(e.target.value);
+                      if (val < 0) val = 0;
+                      if (val > 100) val = 100;
+                      if (isNaN(val)) val = 0;
+                      updateBarcodeSetting("marginLeft", val);
+                    }}
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
+                    Margin Right
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    className="w-full text-sm border-slate-300 rounded"
+                    value={template.elements.barcode.marginRight}
+                    onChange={(e) =>
+                      updateBarcodeSetting("marginRight", e.target.value)
+                    }
+                    onBlur={(e) => {
+                      let val = Number(e.target.value);
+                      if (val < 0) val = 0;
+                      if (val > 100) val = 100;
+                      if (isNaN(val)) val = 0;
+                      updateBarcodeSetting("marginRight", val);
+                    }}
                   />
                 </div>
               </div>
@@ -1125,6 +1236,7 @@ export const PrintTemplateDesigner = () => {
                 patient={mockPatient}
                 report={mockReport}
                 customTemplate={template}
+                zoom={zoomLevel}
               />
             </div>
           </div>

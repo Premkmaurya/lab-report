@@ -12,9 +12,9 @@
   "dependencies": {
     "@tanstack/react-query": "^5.101.2",
     "axios": "^1.18.0",
+    "jsbarcode": "^3.12.3",
     "lucide-react": "^1.21.0",
     "react": "^19.2.6",
-    "react-barcode": "^1.6.1",
     "react-dom": "^19.2.6",
     "react-hook-form": "^7.79.0",
     "react-rnd": "^10.5.3",

@@ -40,10 +40,10 @@ const elementStyleSchema = new mongoose.Schema(
 
 const printTemplateSchema = new mongoose.Schema(
   {
-    // Use a singleton approach by enforcing a specific field
-    singletonIdentifier: {
-      type: String,
-      default: "DEFAULT",
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
       unique: true,
     },
 
@@ -135,14 +135,25 @@ const printTemplateSchema = new mongoose.Schema(
         }),
       },
       barcode: {
-        show: { type: Boolean, default: true },
-        width: { type: String, default: "1.5" },
-        height: { type: String, default: "40" },
-        position: { type: String, default: "top-right" },
+        enabled: { type: Boolean, default: true },
+        format: { type: String, default: "CODE128" },
+        valueSource: { type: String, default: "visitId" },
+        // Unscaled A4 CSS-pixel coordinates (794 x 1123).
+        x: { type: Number, default: 620 },
+        y: { type: Number, default: 30 },
+        width: { type: Number, default: 2 },
+        height: { type: Number, default: 50 },
+        margin: { type: Number, default: 0 },
+        marginTop: { type: Number, default: 8 },
+        marginBottom: { type: Number, default: 0 },
+        marginLeft: { type: Number, default: 0 },
+        marginRight: { type: Number, default: 0 },
         alignment: { type: String, default: "right" },
-        marginTop: { type: String, default: "0px" },
-        marginBottom: { type: String, default: "0px" },
-        displayValue: { type: Boolean, default: true }
+        displayValue: { type: Boolean, default: true },
+        fontSize: { type: Number, default: 12 },
+        rotation: { type: Number, default: 0 },
+        lineColor: { type: String, default: "#000000" },
+        background: { type: String, default: "transparent" },
       },
       tableHeader: {
         type: elementStyleSchema,

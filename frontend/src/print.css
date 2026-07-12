@@ -16,10 +16,9 @@
     }
 
     .report-page {
-        min-height: 100%;
+        min-height: 0;
         display: flex;
         flex-direction: column;
-        padding: 20mm; /* Re-introduce safe print margins inside the container */
         box-sizing: border-box;
     }
 

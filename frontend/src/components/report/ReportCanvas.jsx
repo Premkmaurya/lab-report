@@ -1,9 +1,9 @@
 import React from 'react';
-import Barcode from 'react-barcode';
 import { PatientInfo } from './PatientInfo';
 import { SignatureSection } from './SignatureSection';
 import { usePrintTemplate } from '../../context/PrintTemplateContext';
 import { paginateReport } from '../../utils/paginationEngine';
+import { BarcodeElement } from '../print/BarcodeElement';
 
 const RowRenderer = ({ row, template }) => {
   const deptHeadingStyles = template?.elements?.departmentHeading || {};
@@ -74,7 +74,7 @@ const RowRenderer = ({ row, template }) => {
   return null;
 };
 
-export const ReportCanvas = ({ patient, report, customTemplate }) => {
+export const ReportCanvas = ({ patient, report, customTemplate, zoom = 1 }) => {
   const context = usePrintTemplate();
   const template = customTemplate || (context ? context.template : null);
 
@@ -95,14 +95,7 @@ export const ReportCanvas = ({ patient, report, customTemplate }) => {
 
   const pages = paginateReport(report, template);
 
-  const barcodeStyles = template?.elements?.barcode || { show: true };
-  const barcodeAlignment = barcodeStyles.alignment || "right";
-  const barcodePositionClass =
-    barcodeAlignment === "left"
-      ? "justify-start"
-      : barcodeAlignment === "center"
-      ? "justify-center"
-      : "justify-end";
+  const barcodeSettings = template?.elements?.barcode || { enabled: true };
 
   return (
     <div className="report-container flex flex-col gap-8 bg-gray-100 print:bg-white print:gap-0 print:block">
@@ -111,39 +104,19 @@ export const ReportCanvas = ({ patient, report, customTemplate }) => {
           key={index} 
           className="report-page page bg-white font-sans text-[#0F172A] mx-auto shadow-md border border-gray-200 print:border-none print:shadow-none print:mx-0 box-border"
           style={{ 
-            width: '210mm',
-            height: '297mm',
+            width: '794px',
+            height: '1123px',
             display: 'flex',
             flexDirection: 'column',
             overflow: 'hidden',
+            position: 'relative',
             ...pageStyles, 
             ...typoStyles,
             pageBreakAfter: index < pages.length - 1 ? 'always' : 'auto'
           }}
         >
           <div className="page-header shrink-0">
-            {barcodeStyles.show && patient.visitId && (
-              <div
-                className={`flex w-full ${barcodePositionClass} mb-3`}
-                style={{
-                  marginTop: barcodeStyles.marginTop || "0px",
-                  marginBottom: barcodeStyles.marginBottom || "0px",
-                  textAlign: barcodeAlignment,
-                }}
-              >
-                <div>
-                  <Barcode
-                    value={patient.visitId}
-                    width={parseFloat(barcodeStyles.width) || 1.5}
-                    height={parseInt(barcodeStyles.height, 10) || 40}
-                    displayValue={barcodeStyles.displayValue !== false}
-                    fontSize={12}
-                    margin={0}
-                    background="transparent"
-                  />
-                </div>
-              </div>
-            )}
+            {index === 0 && <BarcodeElement value={patient.visitId} settings={barcodeSettings} zoom={zoom} />}
             <PatientInfo patient={patient} report={report} template={template} />
             <table className="w-full text-caption text-slate-900 border-collapse mt-6" style={typoStyles}>
               <thead className="bg-[#F8FAFC]">
