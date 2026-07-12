@@ -5,10 +5,14 @@ export const buildRows = (report) => {
     return rows;
   }
 
+  const isValueValid = (val) => {
+    return val !== null && val !== undefined && String(val).trim() !== "";
+  };
+
   const hasCompletedResults = (test) => {
     if (!test.result || test.result.length === 0) return false;
     return test.result.some(res => 
-      res.type !== 'section' && res.value !== null && res.value !== undefined && res.value !== ""
+      res.type !== 'section' && isValueValid(res.value)
     );
   };
 
@@ -31,13 +35,34 @@ export const buildRows = (report) => {
       rows.push({ type: 'test', content: test.testName || (test.testId && test.testId.name) || "Unnamed Test", isRepeat: false });
 
       if (test.result && test.result.length > 0) {
+        let currentSection = null;
+        let sectionParams = [];
+
+        const commitSection = () => {
+           if (currentSection && sectionParams.length > 0) {
+              rows.push({ type: 'section', content: currentSection.parameter });
+              sectionParams.forEach(p => rows.push({ type: 'parameter', content: p }));
+           }
+           currentSection = null;
+           sectionParams = [];
+        };
+
         test.result.forEach((res) => {
           if (res.type === 'section') {
-            rows.push({ type: 'section', content: res.parameter });
+            commitSection();
+            currentSection = res;
           } else {
-            rows.push({ type: 'parameter', content: res });
+            if (isValueValid(res.value)) {
+               if (currentSection) {
+                  sectionParams.push(res);
+               } else {
+                  rows.push({ type: 'parameter', content: res });
+               }
+            }
           }
         });
+        
+        commitSection();
       }
     });
   });

@@ -124,31 +124,41 @@ export const InlineTestEditor = ({
       const reportData = await reportService.getReportAndTestTemplate(reportId, testIdStr);
       const fullReport = reportData.patientTest;
       
+      let hasAnyValue = false;
       const updatedTests = fullReport.tests.map((t) => {
         if ((t.testId?._id || t.testId).toString() === testIdStr.toString()) {
-          return {
-            ...t,
-            result: data.results.map(r => {
-              if (r.type === "section") {
-                return {
-                  parameter: r.parameter,
-                  type: "section"
-                };
-              }
-              return {
-                parameter: r.parameter,
-                value: r.value,
-                unit: r.unit,
-                normalRange: r.normalRange,
-                type: r.type || "parameter",
-                isListParameter: r.isListParameter,
-                allowedValues: r.allowedValues,
-              };
-            })
-          };
+          const updatedResult = data.results.map(r => {
+            if (r.type === "section") {
+              return { parameter: r.parameter, type: "section" };
+            }
+            if (r.value && r.value.trim() !== '') {
+               hasAnyValue = true;
+            }
+            return {
+              parameter: r.parameter,
+              value: r.value,
+              unit: r.unit,
+              normalRange: r.normalRange,
+              type: r.type || "parameter",
+              isListParameter: r.isListParameter,
+              allowedValues: r.allowedValues,
+            };
+          });
+          return { ...t, result: updatedResult };
+        }
+        
+        // Check other tests to see if they have any values
+        if (t.result && t.result.some(r => r.type !== 'section' && r.value && r.value.trim() !== '')) {
+           hasAnyValue = true;
         }
         return t;
       });
+
+      if (!hasAnyValue) {
+         setErrorMsg("Please enter at least one parameter value to approve the report.");
+         setSaving(false);
+         return;
+      }
 
       const updatedReportRes = await reportService.updatePatientTest(reportId, { tests: updatedTests });
       

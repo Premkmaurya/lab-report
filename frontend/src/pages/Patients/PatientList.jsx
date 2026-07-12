@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { reportService } from "../../services/reportService";
+import { formatDateTime } from "../../utils/dateFormatter";
 import {
   Plus,
   Search,
@@ -267,9 +268,7 @@ export const PatientList = () => {
                             </span>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-stone font-mono">
-                            {new Date(
-                              report.date || report.createdAt,
-                            ).toLocaleDateString()}
+                            {formatDateTime(report.date || report.createdAt)}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-charcoal font-semibold">
                             ₹{report.totalPrice || 0}

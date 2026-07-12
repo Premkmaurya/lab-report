@@ -6,12 +6,13 @@ import { patientService } from "../../services/patientService";
 import { reportService } from "../../services/reportService";
 import { testService } from "../../services/testService";
 import { handlePrint } from "../../utils/printUtils";
-import { ArrowLeft, ShieldAlert, Plus, FileText, ChevronRight, Edit, X, Printer } from "lucide-react";
+import { ArrowLeft, ShieldAlert, Plus, FileText, ChevronRight, Edit, X, Printer, Trash2, Search, Download } from "lucide-react";
 import { ReportCanvas, PrintableReport } from "../../components/report/ReportCanvas";
 import { PrintWarningModal } from "../../components/report/PrintWarningModal";
 import { InlineTestEditor } from "../../components/report/InlineTestEditor";
 import SearchableTestSelector from "../../components/SearchableTestSelector";
 import { toast } from "../../lib/toast";
+import { formatDateTime } from "../../utils/dateFormatter";
 
 export const PatientDetails = () => {
   const { id } = useParams();
@@ -219,7 +220,7 @@ export const PatientDetails = () => {
                   Registered Date
                 </p>
                 <p className="text-base font-semibold text-charcoal font-mono">
-                  {new Date(patient.createdAt || patient.date).toLocaleDateString()}
+                  {formatDateTime(patient.createdAt || patient.date)}
                 </p>
               </div>
               <div>
@@ -285,7 +286,7 @@ export const PatientDetails = () => {
                             Report #{report._id.substring(18)}
                           </span>
                           <span className="text-xs text-stone font-mono">
-                            • {new Date(report.createdAt || report.date).toLocaleDateString()}
+                            • {formatDateTime(report.createdAt || report.date)}
                           </span>
                         </div>
                       </div>

@@ -36,8 +36,8 @@ const validateCreatePatientTest = [
   body("tests.*.result.*.value")
     .optional()
     .trim()
-    .isLength({ min: 1, max: 100 })
-    .withMessage("Value must be between 1 and 100 characters"),
+    .isLength({ min: 0, max: 100 })
+    .withMessage("Value must not exceed 100 characters"),
   
   body("tests.*.result.*.unit")
     .optional()
@@ -96,8 +96,8 @@ const validateUpdatePatientTest = [
   body("tests.*.result.*.value")
     .optional()
     .trim()
-    .isLength({ min: 1, max: 100 })
-    .withMessage("Value must be between 1 and 100 characters"),
+    .isLength({ min: 0, max: 100 })
+    .withMessage("Value must not exceed 100 characters"),
   
   body("tests.*.result.*.unit")
     .optional()

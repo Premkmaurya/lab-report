@@ -40,6 +40,9 @@ const patientSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    registeredAt: {
+      type: Date,
+    },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

@@ -1,35 +1,12 @@
 import React from "react";
+import { formatDate, formatDateTime } from "../../utils/dateFormatter";
 
 export const PatientInfo = ({ patient, report, template }) => {
-  const reportDateObj = new Date(report.createdAt || report.date);
-  const reportDate = reportDateObj
-    .toLocaleDateString("en-GB", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    })
-    .replace(/ /g, "-");
+  // Report Date is the exact print timestamp
+  const reportDate = formatDateTime(new Date());
     
-  const regDate = new Date(patient.createdAt || patient.date)
-    .toLocaleDateString("en-GB", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    })
-    .replace(/ /g, "-");
-
-  const visitTimeRaw = patient.visitTime || report.createdAt || report.date;
-  const visitTimeObj = new Date(visitTimeRaw);
-  let visitTime = "N/A";
-  if (!isNaN(visitTimeObj.getTime())) {
-    visitTime = visitTimeObj.toLocaleTimeString("en-US", {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true
-    });
-  } else if (typeof patient.visitTime === 'string') {
-    visitTime = patient.visitTime;
-  }
+  // Reg Date prioritizes the exact registration timestamp
+  const regDate = formatDateTime(patient.registeredAt || patient.createdAt || patient.date);
 
   const nameStyles = template?.elements?.patientName || {};
 
@@ -67,10 +44,6 @@ export const PatientInfo = ({ patient, report, template }) => {
           <div className="grid grid-cols-[100px_auto] text-lg gap-2">
             <span className="text-black font-semibold">Reg. Date:</span>
             <span>{regDate}</span>
-          </div>
-          <div className="grid grid-cols-[100px_auto] text-lg gap-2">
-            <span className="text-black font-semibold">Visit Time:</span>
-            <span>{visitTime}</span>
           </div>
           <div className="grid grid-cols-[100px_auto] text-lg gap-2">
             <span className="text-black font-semibold whitespace-nowrap">

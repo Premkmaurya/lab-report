@@ -66,6 +66,7 @@ const createPatient = asyncHandler(async (req, res) => {
     age,
     gender,
     date: date || new Date(),
+    registeredAt: new Date(),
     referredDoctor,
     createdBy: req.user.id,
   });

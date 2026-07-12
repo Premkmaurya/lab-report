@@ -66,7 +66,7 @@ export const PrintablePage = ({
     if (row.type === 'section') {
       return (
         <tr key={i} className="bg-white no-break">
-          <td colSpan="1" className="pt-6 pb-2 px-3 text-left">
+          <td colSpan="1" className="pt-6 pb-0 px-3 text-left">
             <span className="section-header text-lg font-extrabold text-[#0F172A] uppercase tracking-wider block" style={{
               whiteSpace: 'normal',
               overflowWrap: 'anywhere',
