@@ -53,7 +53,6 @@ export const BarcodeElement = ({ value, settings, editable = false, zoom = 1, on
       background: options.background,
       margin: 0,
     });
-    console.log(barcode)
   }, [value, options.enabled, options.format, options.width, options.height, options.displayValue, options.lineColor, options.background]);
 
   if (!options.enabled || !value) return null;

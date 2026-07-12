@@ -242,13 +242,19 @@ export const InlineTestEditor = ({
             isEditing ? (
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse min-w-[600px]">
+                  <table className="w-full text-left border-collapse min-w-[600px]" style={{ tableLayout: 'fixed' }}>
+                    <colgroup>
+                      <col style={{ width: '45%' }} />
+                      <col style={{ width: '20%' }} />
+                      <col style={{ width: '15%' }} />
+                      <col style={{ width: '20%' }} />
+                    </colgroup>
                     <thead>
                       <tr className="border-b border-cream-border text-xs text-stone uppercase tracking-wider bg-warm-canvas/50">
-                        <th className="py-2 px-3 font-medium rounded-tl-md">Parameter</th>
-                        <th className="py-2 px-3 font-medium text-electric-cobalt">Result</th>
-                        <th className="py-2 px-3 font-medium">Unit</th>
-                        <th className="py-2 px-3 font-medium rounded-tr-md">Normal Range</th>
+                        <th className="py-2 px-3 font-medium rounded-tl-md text-left">Parameter</th>
+                        <th className="py-2 px-3 font-medium text-electric-cobalt text-left">Result</th>
+                        <th className="py-2 px-3 font-medium text-center">Unit</th>
+                        <th className="py-2 px-3 font-medium rounded-tr-md text-left">Normal Range</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-cream-border">
@@ -256,21 +262,23 @@ export const InlineTestEditor = ({
                         if (item.type === "section") {
                           return (
                             <tr key={item.id} className="bg-warm-canvas/50 border-y border-cream-border">
-                              <td colSpan="4" className="py-3 px-3 align-middle">
+                              <td colSpan="1" className="py-3 px-3 align-middle">
                                 <input
                                   type="text"
                                   className="w-full text-base font-bold text-black uppercase tracking-wider block bg-transparent border-none outline-none focus:ring-1 focus:ring-electric-cobalt rounded px-2"
+                                  style={{ whiteSpace: 'normal', overflowWrap: 'anywhere', wordBreak: 'break-word', maxWidth: '100%' }}
                                   {...register(`results.${index}.parameter`)}
                                 />
                                 <input type="hidden" value="section" {...register(`results.${index}.type`)} />
                               </td>
+                              <td colSpan="3"></td>
                             </tr>
                           );
                         }
 
                         return (
                           <tr key={item.id} className="hover:bg-warm-canvas/30 transition-colors">
-                            <td className="py-3 px-3 align-middle pl-6 border-l-4 border-l-transparent">
+                            <td className="py-3 px-3 align-middle pl-6 border-l-4 border-l-transparent" style={{ wordBreak: 'break-word', overflowWrap: 'anywhere', whiteSpace: 'normal' }}>
                               <span className="w-full text-sm font-medium text-charcoal block px-2">
                                 {item.parameter}
                               </span>
@@ -317,7 +325,7 @@ export const InlineTestEditor = ({
                                 );
                               })()}
                             </td>
-                            <td className="py-3 px-3 align-middle">
+                            <td className="py-3 px-3 align-middle text-center">
                               {item.unit ? (
                                 <span className="text-xs text-stone px-2 py-1 bg-warm-canvas rounded border border-cream-border inline-block">
                                   {item.unit}
@@ -377,13 +385,19 @@ export const InlineTestEditor = ({
               </form>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse min-w-[600px]">
+                <table className="w-full text-left border-collapse min-w-[600px]" style={{ tableLayout: 'fixed' }}>
+                  <colgroup>
+                    <col style={{ width: '45%' }} />
+                    <col style={{ width: '20%' }} />
+                    <col style={{ width: '15%' }} />
+                    <col style={{ width: '20%' }} />
+                  </colgroup>
                   <thead>
                     <tr className="border-b border-cream-border text-xs text-stone uppercase tracking-wider">
-                      <th className="py-2 px-3 font-medium">Parameter</th>
-                      <th className="py-2 px-3 font-medium">Result</th>
-                      <th className="py-2 px-3 font-medium">Unit</th>
-                      <th className="py-2 px-3 font-medium">Normal Range</th>
+                      <th className="py-2 px-3 font-medium text-left">Parameter</th>
+                      <th className="py-2 px-3 font-medium text-left">Result</th>
+                      <th className="py-2 px-3 font-medium text-center">Unit</th>
+                      <th className="py-2 px-3 font-medium text-left">Normal Range</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-cream-border">
@@ -392,16 +406,17 @@ export const InlineTestEditor = ({
                         if (item.type === "section") {
                           return (
                             <tr key={index} className="bg-warm-canvas/50 border-y border-cream-border">
-                              <td colSpan="4" className="py-3 px-3 text-base uppercase font-bold text-black tracking-wider uppercase">
+                              <td colSpan="1" className="py-3 px-3 text-base font-bold text-black tracking-wider uppercase" style={{ whiteSpace: 'normal', overflowWrap: 'anywhere', wordBreak: 'break-word', maxWidth: '100%' }}>
                                 {item.parameter}
                               </td>
+                              <td colSpan="3"></td>
                             </tr>
                           );
                         }
 
                         return (
                           <tr key={index} className="hover:bg-warm-canvas/20">
-                            <td className="py-2 px-3 text-sm font-medium text-charcoal pl-6 border-l-4 border-l-transparent">{item.parameter}</td>
+                            <td className="py-2 px-3 text-sm font-medium text-charcoal pl-6 border-l-4 border-l-transparent" style={{ wordBreak: 'break-word', overflowWrap: 'anywhere', whiteSpace: 'normal' }}>{item.parameter}</td>
                             <td className="py-2 px-3 text-sm text-charcoal">
                               {item.value ? (
                                 <span className="font-semibold">{item.value}</span>
@@ -409,7 +424,7 @@ export const InlineTestEditor = ({
                                 <span className="text-stone italic text-xs">Not recorded</span>
                               )}
                             </td>
-                            <td className="py-2 px-3 text-xs text-stone">
+                            <td className="py-2 px-3 text-xs text-stone text-center">
                               {item.unit || "-"}
                             </td>
                             <td className="py-2 px-3 text-xs text-stone">

@@ -42,24 +42,35 @@ export const TestResultTable = ({ test, rowSpacing = 4, template }) => {
           if (res.type === 'section') {
             return (
               <tr key={index} className="bg-white">
-                <td colSpan="4" className="pt-6 pb-2">
+                <td colSpan="1" className="pt-6 pb-2 px-3 text-left">
                   <span
-                    className="text-lg font-extrabold text-left text-[#0F172A] uppercase tracking-wider block"
-                    style={{ ...sectionHeaderStyles }}
+                    className="section-header text-wrap text-lg font-extrabold text-[#0F172A] uppercase tracking-wider block"
+                    style={{
+                      whiteSpace: 'normal',
+                      overflowWrap: 'anywhere',
+                      wordBreak: 'break-word',
+                      lineHeight: 1.2,
+                      maxWidth: '100%',
+                      ...sectionHeaderStyles
+                    }}
                   >
                     {res.parameter}
                   </span>
                 </td>
+                <td colSpan="3"></td>
               </tr>
             );
           }
           return (
             <tr key={index} className="bg-white">
               <td
-                className="px-3 text-left"
+                className="px-3 text-left text-wrap"
                 style={{
                   paddingTop: `${rowSpacing}px`,
                   paddingBottom: `${rowSpacing}px`,
+                  wordBreak: 'break-word', 
+                  overflowWrap: 'anywhere', 
+                  whiteSpace: 'normal',
                   ...parameterStyles,
                 }}
               >
@@ -76,7 +87,7 @@ export const TestResultTable = ({ test, rowSpacing = 4, template }) => {
                 {res.value}
               </td>
               <td
-                className="px-3 text-left text-[#475569]"
+                className="px-3 text-center text-[#475569]"
                 style={{
                   paddingTop: `${rowSpacing}px`,
                   paddingBottom: `${rowSpacing}px`,

@@ -1,14 +1,19 @@
 import React, { useState } from 'react';
 import { X, AlertCircle } from 'lucide-react';
 
-export const PrintWarningModal = ({ onContinue, onCancel }) => {
+export const PrintWarningModal = ({ onContinue, onConfirm, onCancel }) => {
   const [dontShowAgain, setDontShowAgain] = useState(false);
 
   const handleContinue = () => {
     if (dontShowAgain) {
       localStorage.setItem('hidePrintWarning', 'true');
     }
-    onContinue();
+
+    if (typeof onContinue === 'function') {
+      onContinue();
+    } else if (typeof onConfirm === 'function') {
+      onConfirm();
+    }
   };
 
   return (

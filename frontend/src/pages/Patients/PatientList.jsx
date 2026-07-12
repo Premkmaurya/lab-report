@@ -316,7 +316,7 @@ export const PatientList = () => {
 
       {showWarningModal && selectedReportForPrint && (
         <PrintWarningModal
-          onConfirm={() => executePrint(selectedReportForPrint)}
+          onContinue={() => executePrint(selectedReportForPrint)}
           onCancel={() => {
             setShowWarningModal(false);
             setSelectedReportForPrint(null);
