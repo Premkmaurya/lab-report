@@ -50,14 +50,19 @@ const deletePatient = asyncHandler(async (req, res) => {
 });
 
 const createPatient = asyncHandler(async (req, res) => {
-  const { name, age, gender, date, referredDoctor } = req.body;
+  const { name, firstName, lastName, title, age, gender, date, referredDoctor } = req.body;
 
-  if (!name || !age || !gender || !referredDoctor) {
+  const fullName = name?.trim() || [title, firstName, lastName].filter(Boolean).join(" ").trim();
+
+  if (!fullName || !age || !gender || !referredDoctor) {
     throw new BadRequestError("Please provide name, age, gender, and referred doctor");
   }
 
   const patient = await Patient.create({
-    name,
+    title: title || "",
+    firstName: firstName?.trim() || "",
+    lastName: lastName?.trim() || "",
+    name: fullName,
     age,
     gender,
     date: date || new Date(),

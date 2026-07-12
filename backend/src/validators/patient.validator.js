@@ -6,9 +6,16 @@ const { body, param } = require("express-validator");
  */
 const validateCreatePatient = [
   body("name")
+    .optional({ values: "falsy" })
     .trim()
     .isLength({ min: 1, max: 100 })
     .withMessage("Patient name must be between 1 and 100 characters"),
+
+  body(["firstName", "lastName"])
+    .optional({ values: "falsy" })
+    .trim()
+    .isLength({ min: 1, max: 100 })
+    .withMessage("Patient first and last names must be between 1 and 100 characters"),
   
   body("age")
     .isInt({ min: 1, max: 150 })

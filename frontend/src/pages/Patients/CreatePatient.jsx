@@ -69,10 +69,11 @@ export const CreatePatient = () => {
   const onSubmit = async (data) => {
     setIsSubmitting(true);
     
-    // Cast age to number
     const payload = {
       ...data,
       age: parseInt(data.age, 10),
+      name: [data.title, data.firstName, data.lastName].filter(Boolean).join(" ").trim(),
+      date: data.date ? new Date(data.date).toISOString() : new Date().toISOString(),
     };
 
     toast.promise(patientService.createPatient(payload), {
