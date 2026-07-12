@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { reportService } from "../../services/reportService";
 import { Save, ShieldAlert, ChevronDown, ChevronRight, Edit2, X } from "lucide-react";
 import { useForm, useFieldArray } from "react-hook-form";
+import { checkAbnormalResult } from "../../utils/resultUtils";
 
 export const InlineTestEditor = ({
   reportId,
@@ -298,7 +299,6 @@ export const InlineTestEditor = ({
                                         ref(e);
                                         inputRefs.current[index] = e;
                                       }}
-                                      value={item.value || ""}
                                       onKeyDown={(e) => handleKeyDown(e, index)}
                                     >
                                       <option value="">Select...</option>
@@ -419,7 +419,14 @@ export const InlineTestEditor = ({
                             <td className="py-2 px-3 text-sm font-medium text-charcoal pl-6 border-l-4 border-l-transparent" style={{ wordBreak: 'break-word', overflowWrap: 'anywhere', whiteSpace: 'normal' }}>{item.parameter}</td>
                             <td className="py-2 px-3 text-sm text-charcoal">
                               {item.value ? (
-                                <span className="font-semibold">{item.value}</span>
+                                (() => {
+                                  const { isAbnormal, formattedValue } = checkAbnormalResult(item.value, item.normalRange);
+                                  return (
+                                    <span className={`font-semibold ${isAbnormal ? 'font-bold' : ''}`}>
+                                      {formattedValue}
+                                    </span>
+                                  );
+                                })()
                               ) : (
                                 <span className="text-stone italic text-xs">Not recorded</span>
                               )}

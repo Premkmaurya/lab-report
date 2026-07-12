@@ -1,0 +1,31 @@
+/* Print styles for A4 dimensions */
+.page {
+  width: 210mm;
+  min-height: 297mm;
+  margin: 0 auto;
+  background: white;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  position: relative;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+@media print {
+  .page {
+    margin: 0;
+    box-shadow: none;
+    border: none;
+    width: 210mm;
+    min-height: 297mm;
+    page-break-after: always;
+    break-after: page;
+  }
+  
+  /* Prevent browser auto breaking inside these specific elements just in case */
+  .no-break {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+}
