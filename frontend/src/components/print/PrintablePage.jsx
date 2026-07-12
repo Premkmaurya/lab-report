@@ -175,11 +175,9 @@ export const PrintablePage = ({
         </table>
       </div>
       
-      {isLastPage && (
-        <div className="page-footer shrink-0" style={{ marginTop: 'auto' }}>
-          <SignatureSection patient={patient} template={template} />
-        </div>
-      )}
+      <div className="page-footer shrink-0" style={{ marginTop: 'auto' }}>
+        <SignatureSection patient={patient} template={template} />
+      </div>
     </div>
   );
 };

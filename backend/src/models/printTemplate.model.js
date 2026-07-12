@@ -84,26 +84,6 @@ const printTemplateSchema = new mongoose.Schema(
       },
     },
     elements: {
-      patientName: {
-        type: elementStyleSchema,
-        default: () => ({
-          fontSize: "16px",
-          fontWeight: "600",
-          textAlign: "left",
-          textTransform: "capitalize",
-          textDecoration: "none",
-        }),
-      },
-      profileName: {
-        type: elementStyleSchema,
-        default: () => ({
-          fontSize: "14px",
-          fontWeight: "600",
-          textAlign: "left",
-          textTransform: "capitalize",
-          textDecoration: "none",
-        }),
-      },
       testHeading: {
         type: elementStyleSchema,
         default: () => ({
@@ -158,7 +138,7 @@ const printTemplateSchema = new mongoose.Schema(
       tableHeader: {
         type: elementStyleSchema,
          default: () => ({
-          fontSize: "20px",
+          fontSize: "16px",
           fontWeight: "500",
           textAlign: "center",
           textTransform: "uppercase",
@@ -168,7 +148,7 @@ const printTemplateSchema = new mongoose.Schema(
       parameter: {
         type: elementStyleSchema,
          default: () => ({
-          fontSize: "20px",
+          fontSize: "14px",
           fontWeight: "500",
           textAlign: "left",
           textTransform: "capitalize",
@@ -178,7 +158,7 @@ const printTemplateSchema = new mongoose.Schema(
       result: {
         type: elementStyleSchema,
          default: () => ({
-          fontSize: "20px",
+          fontSize: "14px",
           fontWeight: "400",
           textAlign: "center",
           textTransform: "uppercase",
@@ -188,7 +168,7 @@ const printTemplateSchema = new mongoose.Schema(
       unit: {
         type: elementStyleSchema,
          default: () => ({
-          fontSize: "20px",
+          fontSize: "14px",
           fontWeight: "400",
           textAlign: "center",
           textTransform: "capitalize",
