@@ -40,6 +40,13 @@ export const PatientDetails = () => {
     return () => window.removeEventListener('afterprint', handleAfterPrint);
   }, []);
 
+  // Trigger print AFTER React has committed the PrintableReport to the DOM.
+  // This is the correct pattern to avoid pagedjs measuring elements before they exist.
+  useEffect(() => {
+    if (!reportToPrint) return;
+    handlePrint(null, null);
+  }, [reportToPrint]);
+
   const triggerPrintRequest = (report) => {
     const hideWarning = localStorage.getItem('hidePrintWarning');
     if (hideWarning === 'true') {
@@ -53,11 +60,9 @@ export const PatientDetails = () => {
   const executePrint = (report) => {
     setShowWarningModal(false);
     setSelectedReportForPrint(null);
-    
-    handlePrint(
-      () => setReportToPrint(report),
-      null
-    );
+    // Setting reportToPrint mounts <PrintableReport> in the DOM.
+    // The useEffect above will then call handlePrint once React commits the update.
+    setReportToPrint(report);
   };
 
   const openAddTestModal = async (report) => {

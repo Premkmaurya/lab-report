@@ -3,15 +3,27 @@ const { invalidateCacheKey } = require("../services/cache.service");
 
 exports.getTemplate = async (req, res, next) => {
   try {
-    let template = await PrintTemplate.findOne({ userId: req.user._id });
-    
-    // If no template exists yet, create the default one for this user
-    if (!template) {
-      template = await PrintTemplate.create({ userId: req.user._id });
-    }
-    
+    // Use atomic upsert to avoid race-condition duplicate-key errors.
+    // setOnInsert only writes defaults when no document exists yet,
+    // so existing user settings are never overwritten.
+    const template = await PrintTemplate.findOneAndUpdate(
+      { userId: req.user._id },
+      { $setOnInsert: { userId: req.user._id } },
+      { new: true, upsert: true, runValidators: false }
+    );
+
     res.status(200).json({ success: true, data: template });
   } catch (error) {
+    // If a duplicate-key error still slips through (e.g. concurrent cold-start)
+    // fall back to a plain findOne so the request still succeeds.
+    if (error.code === 11000) {
+      try {
+        const template = await PrintTemplate.findOne({ userId: req.user._id });
+        return res.status(200).json({ success: true, data: template });
+      } catch (fallbackError) {
+        return next(fallbackError);
+      }
+    }
     next(error);
   }
 };

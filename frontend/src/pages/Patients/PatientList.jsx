@@ -40,6 +40,13 @@ export const PatientList = () => {
     return () => window.removeEventListener("afterprint", handleAfterPrint);
   }, []);
 
+  // Fire print AFTER React commits the PrintableReport to the DOM.
+  // Avoids pagedjs getBoundingClientRect crash on unmounted elements.
+  useEffect(() => {
+    if (!reportToPrint) return;
+    handlePrint(null, null);
+  }, [reportToPrint]);
+
   const triggerPrintRequest = (e, report) => {
     e.stopPropagation(); // prevent row click navigation
     const hideWarning = localStorage.getItem("hidePrintWarning");
@@ -54,8 +61,9 @@ export const PatientList = () => {
   const executePrint = (report) => {
     setShowWarningModal(false);
     setSelectedReportForPrint(null);
-
-    handlePrint(() => setReportToPrint(report), null);
+    // Setting reportToPrint mounts <PrintableReport> in the DOM.
+    // The useEffect above will call handlePrint once React commits the update.
+    setReportToPrint(report);
   };
 
   const tzOffset = new Date().getTimezoneOffset();

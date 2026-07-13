@@ -13,8 +13,8 @@ const cacheMiddleware = (ttl = 3600, keyGenerator = null) => {
       return next();
     }
 
+    let cacheKey;
     try {
-      let cacheKey;
       if (keyGenerator) {
         cacheKey = keyGenerator(req);
       } else {
@@ -26,33 +26,41 @@ const cacheMiddleware = (ttl = 3600, keyGenerator = null) => {
       }
 
       req.cacheKey = cacheKey; // Expose to controller if needed
-
-      const cachedData = await redisClient.get(cacheKey);
-
-      if (cachedData) {
-        logger.debug(`Cache hit for key: ${cacheKey}`);
-        return res.status(200).json(JSON.parse(cachedData));
-      }
-
-      logger.debug(`Cache miss for key: ${cacheKey}`);
-
-      // Overwrite res.json to cache the response before sending it
-      const originalJson = res.json.bind(res);
-      res.json = (body) => {
-        // Only cache successful responses (status 200-299)
-        if (res.statusCode >= 200 && res.statusCode < 300) {
-          redisClient.setEx(cacheKey, ttl, JSON.stringify(body)).catch((err) => {
-            logger.error(`Redis SetEx Error for key ${cacheKey}: ${err.message}`);
-          });
-        }
-        originalJson(body);
-      };
-
-      next();
-    } catch (error) {
-      logger.error(`Cache Middleware Error: ${error.message}`);
-      next(); // Continue using MongoDB on Redis failure
+    } catch (keyError) {
+      logger.error(`Cache key generation error: ${keyError.message}`);
+      return next();
     }
+
+    // Isolate the Redis GET so a mid-reconnect error never propagates
+    // as a 500 to the client — we simply fall through to the controller.
+    let cachedData = null;
+    try {
+      cachedData = await redisClient.get(cacheKey);
+    } catch (redisError) {
+      logger.error(`Cache GET error for key ${cacheKey}: ${redisError.message}`);
+      return next();
+    }
+
+    if (cachedData) {
+      logger.debug(`Cache hit for key: ${cacheKey}`);
+      return res.status(200).json(JSON.parse(cachedData));
+    }
+
+    logger.debug(`Cache miss for key: ${cacheKey}`);
+
+    // Overwrite res.json to cache the response before sending it
+    const originalJson = res.json.bind(res);
+    res.json = (body) => {
+      // Only cache successful responses (status 200-299)
+      if (res.statusCode >= 200 && res.statusCode < 300 && redisClient.isReady) {
+        redisClient.setEx(cacheKey, ttl, JSON.stringify(body)).catch((err) => {
+          logger.error(`Redis SetEx Error for key ${cacheKey}: ${err.message}`);
+        });
+      }
+      originalJson(body);
+    };
+
+    next();
   };
 };
 
