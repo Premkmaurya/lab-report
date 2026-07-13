@@ -45,7 +45,7 @@ export const BarcodeElement = ({ value, settings, editable = false, zoom = 1, on
     barcodeRef.current.replaceChildren();
     const barcode = JsBarcode(barcodeRef.current, String(value), {
       format: options.format,
-      width: Number(options.width),
+      width: 1,
       height: Number(options.height),
       displayValue: Boolean(options.displayValue),
       fontSize: 12,

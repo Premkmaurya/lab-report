@@ -1,3 +1,10 @@
+/**
+ * @deprecated
+ * This module is superseded by `components/print/PaginationPage.js`.
+ * Do NOT use for new code.  Kept only to avoid breaking any stale imports
+ * during the migration period.  Will be removed in a future cleanup.
+ */
+
 export const paginateReport = (report, template) => {
   // A4 dimensions at 96 DPI
   const PAGE_HEIGHT = 1123;

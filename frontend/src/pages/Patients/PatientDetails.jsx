@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { canManagePatients, canManageReports, canPrintReports } from "../../config/permissions";
 import { patientService } from "../../services/patientService";
 import { reportService } from "../../services/reportService";
 import { testService } from "../../services/testService";
-import { handlePrint } from "../../utils/printUtils";
+import { openPrintWindow } from "../../utils/printWindow";
 import { ArrowLeft, ShieldAlert, Plus, FileText, ChevronRight, Edit, X, Printer, Trash2, Search, Download } from "lucide-react";
-import { ReportCanvas, PrintableReport } from "../../components/report/ReportCanvas";
+import { PrintOrchestrator } from "../../components/print/PrintOrchestrator";
 import { PrintWarningModal } from "../../components/report/PrintWarningModal";
 import { InlineTestEditor } from "../../components/report/InlineTestEditor";
 import SearchableTestSelector from "../../components/SearchableTestSelector";
@@ -32,20 +32,9 @@ export const PatientDetails = () => {
   const [editingTestId, setEditingTestId] = useState(null);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const handleAfterPrint = () => {
-      setReportToPrint(null);
-    };
-    window.addEventListener('afterprint', handleAfterPrint);
-    return () => window.removeEventListener('afterprint', handleAfterPrint);
-  }, []);
-
-  // Trigger print AFTER React has committed the PrintableReport to the DOM.
-  // This is the correct pattern to avoid pagedjs measuring elements before they exist.
-  useEffect(() => {
-    if (!reportToPrint) return;
-    handlePrint(null, null);
-  }, [reportToPrint]);
+  // Holds the reference to the dedicated print window opened by executePrint().
+  // useRef (not useState) — changes to this must NOT trigger re-renders.
+  const printWindowRef = useRef(null);
 
   const triggerPrintRequest = (report) => {
     const hideWarning = localStorage.getItem('hidePrintWarning');
@@ -60,9 +49,23 @@ export const PatientDetails = () => {
   const executePrint = (report) => {
     setShowWarningModal(false);
     setSelectedReportForPrint(null);
-    // Setting reportToPrint mounts <PrintableReport> in the DOM.
-    // The useEffect above will then call handlePrint once React commits the update.
+
+    // openPrintWindow() MUST be called here (synchronously within the user-gesture
+    // chain) so the browser does not classify it as a popup and block it.
+    const win = openPrintWindow();
+    if (!win) {
+      toast.error('Popup was blocked. Please allow popups for this site and try again.');
+      return;
+    }
+    printWindowRef.current = win;
+
+    // Mounting PrintOrchestrator triggers the measure → paginate → inject pipeline.
     setReportToPrint(report);
+  };
+
+  const handlePrintComplete = () => {
+    setReportToPrint(null);
+    printWindowRef.current = null;
   };
 
   const openAddTestModal = async (report) => {
@@ -154,7 +157,7 @@ export const PatientDetails = () => {
 
   return (
     <>
-      <div className={`space-y-6 ${reportToPrint ? 'hidden print:hidden' : 'print:hidden'}`}>
+      <div className="space-y-6">
         {/* Back Link */}
       <div>
         <Link
@@ -419,8 +422,15 @@ export const PatientDetails = () => {
       />
     )}
 
-    {reportToPrint && (
-      <PrintableReport patient={patient} report={reportToPrint} />
+    {/* PrintOrchestrator: hidden, off-screen component that measures → paginates
+        → renders → serializes → injects into the dedicated print window. */}
+    {reportToPrint && patient && (
+      <PrintOrchestrator
+        patient={patient}
+        report={reportToPrint}
+        printWindowRef={printWindowRef}
+        onComplete={handlePrintComplete}
+      />
     )}
     </>
   );

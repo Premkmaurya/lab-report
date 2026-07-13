@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { reportService } from "../../services/reportService";
 import { formatDateTime } from "../../utils/dateFormatter";
@@ -12,12 +12,10 @@ import {
 } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { canManagePatients, canPrintReports } from "../../config/permissions";
-import { handlePrint } from "../../utils/printUtils";
-import {
-  ReportCanvas,
-  PrintableReport,
-} from "../../components/report/ReportCanvas";
+import { openPrintWindow } from "../../utils/printWindow";
+import { PrintOrchestrator } from "../../components/print/PrintOrchestrator";
 import { PrintWarningModal } from "../../components/report/PrintWarningModal";
+import { toast } from "../../lib/toast";
 
 import { useQuery } from "@tanstack/react-query";
 
@@ -32,20 +30,8 @@ export const PatientList = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const handleAfterPrint = () => {
-      setReportToPrint(null);
-    };
-    window.addEventListener("afterprint", handleAfterPrint);
-    return () => window.removeEventListener("afterprint", handleAfterPrint);
-  }, []);
-
-  // Fire print AFTER React commits the PrintableReport to the DOM.
-  // Avoids pagedjs getBoundingClientRect crash on unmounted elements.
-  useEffect(() => {
-    if (!reportToPrint) return;
-    handlePrint(null, null);
-  }, [reportToPrint]);
+  // Holds the dedicated print window opened synchronously in executePrint().
+  const printWindowRef = useRef(null);
 
   const triggerPrintRequest = (e, report) => {
     e.stopPropagation(); // prevent row click navigation
@@ -61,9 +47,20 @@ export const PatientList = () => {
   const executePrint = (report) => {
     setShowWarningModal(false);
     setSelectedReportForPrint(null);
-    // Setting reportToPrint mounts <PrintableReport> in the DOM.
-    // The useEffect above will call handlePrint once React commits the update.
+
+    // Must be called synchronously (user-gesture chain) to avoid popup blocking.
+    const win = openPrintWindow();
+    if (!win) {
+      toast.error('Popup was blocked. Please allow popups for this site and try again.');
+      return;
+    }
+    printWindowRef.current = win;
     setReportToPrint(report);
+  };
+
+  const handlePrintComplete = () => {
+    setReportToPrint(null);
+    printWindowRef.current = null;
   };
 
   const tzOffset = new Date().getTimezoneOffset();
@@ -314,10 +311,12 @@ export const PatientList = () => {
         </div>
       </div>
 
-      {reportToPrint && (
-        <PrintableReport
-          report={reportToPrint}
+      {reportToPrint && reportToPrint.patientId && (
+        <PrintOrchestrator
           patient={reportToPrint.patientId}
+          report={reportToPrint}
+          printWindowRef={printWindowRef}
+          onComplete={handlePrintComplete}
         />
       )}
 

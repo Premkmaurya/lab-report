@@ -41,7 +41,7 @@ export const SignatureSection = ({ patient, template }) => {
           ) : null}
         </div>
         <div className="border-t border-slate-900 pt-1">
-          <p className="font-semibold text-lg whitespace-nowrap">
+          <p className="font-semibold text-lg text-center whitespace-wrap">
             {path.name || `Dr. ${patient.referredDoctor || "Admin"}`}
           </p>
           <p className="text-[#475569] text-base">{path.designation || "Pathologist"}</p>

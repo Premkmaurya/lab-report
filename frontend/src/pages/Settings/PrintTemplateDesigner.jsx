@@ -103,6 +103,13 @@ const DEFAULT_ELEMENT_STYLES = {
   },
 };
 
+const DEFAULT_PAGE_SETTINGS = {
+  marginTop: 60,
+  marginBottom: 15,
+  marginLeft: 15,
+  marginRight: 15,
+};
+
 export const PrintTemplateDesigner = () => {
   const navigate = useNavigate();
   const {
@@ -175,6 +182,13 @@ export const PrintTemplateDesigner = () => {
             ...(initialTemplate.elements[elementKey] || {}),
           };
         });
+
+        // Apply page defaults for print margins
+        initialTemplate.page = {
+          ...DEFAULT_PAGE_SETTINGS,
+          ...(initialTemplate.page || {}),
+        };
+
         const savedBarcode = savedTemplate.elements?.barcode || {};
         if (savedBarcode.show !== undefined)
           initialTemplate.elements.barcode.enabled = savedBarcode.show;
