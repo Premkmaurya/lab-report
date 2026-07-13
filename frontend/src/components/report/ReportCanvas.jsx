@@ -1,4 +1,3 @@
-import React from 'react';
 import { PageRenderer } from '../print/PageRenderer';
 
 // We export ReportCanvas for the PrintTemplateDesigner to render the preview
@@ -10,7 +9,7 @@ export const ReportCanvas = ({ patient, report, customTemplate, zoom = 1 }) => {
 // and absolute-positioned for the print overlay, delegating rendering to the new PageRenderer.
 export const PrintableReport = ({ patient, report, customTemplate }) => {
   return (
-    <div className="hidden print:block absolute top-0 left-0 w-full bg-white z-50">
+    <div className="print-source-wrapper absolute top-0 left-0 w-full bg-white z-50">
       <PageRenderer patient={patient} report={report} customTemplate={customTemplate} />
     </div>
   );
