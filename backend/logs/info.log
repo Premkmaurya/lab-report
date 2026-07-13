@@ -2165,3 +2165,74 @@
 {"level":"info","message":"\u001b[0mGET /api/patient-tests/patient/6a53b045b8f347030114ca15 \u001b[36m304\u001b[0m 461.274 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-12 23:58:13"}
 {"level":"info","message":"\u001b[0mGET /api/patient-tests?date=today&timezoneOffset=-330 \u001b[36m304\u001b[0m 818.387 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-12 23:58:40"}
 {"level":"info","message":"\u001b[0mGET /api/patient-tests?date=today&timezoneOffset=-330 \u001b[36m304\u001b[0m 431.822 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-12 23:59:41"}
+{"level":"info","message":"Server is running on port 3000 in development mode","service":"laboratory-management-system","timestamp":"2026-07-13 00:14:42"}
+{"level":"info","message":"Redis client connected","service":"laboratory-management-system","timestamp":"2026-07-13 00:14:42"}
+{"level":"info","message":"Redis client ready","service":"laboratory-management-system","timestamp":"2026-07-13 00:14:42"}
+{"level":"info","message":"Database connected successfully","service":"laboratory-management-system","timestamp":"2026-07-13 00:14:43"}
+{"level":"info","message":"\u001b[0mGET /api/auth/me \u001b[36m304\u001b[0m 311.700 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-13 00:14:54"}
+{"level":"info","message":"\u001b[0mGET /api/auth/me \u001b[36m304\u001b[0m 74.067 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-13 00:14:55"}
+{"level":"debug","message":"Cache hit for key: settings:print-template:6a33b86c4526357475b1d8ac","service":"laboratory-management-system","timestamp":"2026-07-13 00:14:57"}
+{"level":"info","message":"\u001b[0mGET /api/settings/print-template \u001b[36m304\u001b[0m 899.218 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-13 00:14:57"}
+{"level":"debug","message":"Cache hit for key: tests:all","service":"laboratory-management-system","timestamp":"2026-07-13 00:14:59"}
+{"level":"info","message":"\u001b[0mGET /api/tests \u001b[36m304\u001b[0m 898.052 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-13 00:15:00"}
+{"level":"debug","message":"Cache hit for key: doctors:all","service":"laboratory-management-system","timestamp":"2026-07-13 00:15:00"}
+{"level":"debug","message":"Cache miss for key: dashboard:stats:today:-330","service":"laboratory-management-system","timestamp":"2026-07-13 00:15:00"}
+{"level":"info","message":"\u001b[0mGET /api/doctors \u001b[36m304\u001b[0m 904.801 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-13 00:15:00"}
+{"level":"info","message":"\u001b[0mGET /api/patients \u001b[36m304\u001b[0m 1123.751 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-13 00:15:00"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests?date=today&timezoneOffset=-330 \u001b[32m200\u001b[0m 1243.290 ms - 34\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-13 00:15:00"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests \u001b[36m304\u001b[0m 1691.679 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-13 00:15:00"}
+{"level":"info","message":"\u001b[0mGET /api/patients/summary/today?timezoneOffset=-330 \u001b[32m200\u001b[0m 2061.758 ms - 82\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-13 00:15:01"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests?date=today&timezoneOffset=-330 \u001b[36m304\u001b[0m 208.570 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-13 00:15:01"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests?date=today&timezoneOffset=-330 \u001b[36m304\u001b[0m 615.047 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-13 00:15:10"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests?date=yesterday&timezoneOffset=-330 \u001b[32m200\u001b[0m 635.124 ms - 30857\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-13 00:15:12"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests?date=yesterday&timezoneOffset=-330 \u001b[36m304\u001b[0m 332.718 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-13 00:18:50"}
+{"level":"info","message":"\u001b[0mGET /api/auth/me \u001b[36m304\u001b[0m 91.386 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-13 00:18:52"}
+{"level":"info","message":"\u001b[0mGET /api/auth/me \u001b[36m304\u001b[0m 73.146 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-13 00:18:53"}
+{"level":"debug","message":"Cache hit for key: settings:print-template:6a33b86c4526357475b1d8ac","service":"laboratory-management-system","timestamp":"2026-07-13 00:18:55"}
+{"level":"info","message":"\u001b[0mGET /api/settings/print-template \u001b[36m304\u001b[0m 780.795 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-13 00:18:55"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests?date=today&timezoneOffset=-330 \u001b[36m304\u001b[0m 151.250 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-13 00:18:56"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests?date=yesterday&timezoneOffset=-330 \u001b[36m304\u001b[0m 357.913 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-13 00:19:06"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests?date=yesterday&timezoneOffset=-330 \u001b[36m304\u001b[0m 431.149 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-13 00:20:53"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests?date=week&timezoneOffset=-330 \u001b[32m200\u001b[0m 312.536 ms - 30857\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-13 00:21:23"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests?date=month&timezoneOffset=-330 \u001b[32m200\u001b[0m 474.010 ms - 132482\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-13 00:21:26"}
+{"level":"info","message":"\u001b[0mGET /api/patients/6a538df61e0ba1a07ea7b754 \u001b[36m304\u001b[0m 262.479 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-13 00:22:16"}
+{"level":"info","message":"\u001b[0mGET /api/patients/6a538df61e0ba1a07ea7b754 \u001b[36m304\u001b[0m 248.619 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-13 00:22:17"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/patient/6a538df61e0ba1a07ea7b754 \u001b[32m200\u001b[0m 367.866 ms - 9305\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-13 00:22:17"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/patient/6a538df61e0ba1a07ea7b754 \u001b[36m304\u001b[0m 718.403 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-13 00:22:18"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/6a538df61e0ba1a07ea7b756/test/6a4ea2f4a538d2ed3bb1c537 \u001b[36m304\u001b[0m 373.020 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-13 00:22:21"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/6a538df61e0ba1a07ea7b756/test/6a43ece0fae39fcdf318db95 \u001b[32m200\u001b[0m 317.170 ms - 7386\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-13 00:22:24"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/6a538df61e0ba1a07ea7b756/test/6a4bc759b2c83681c5591adb \u001b[32m200\u001b[0m 309.809 ms - 1260\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-13 00:22:27"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests?date=yesterday&timezoneOffset=-330 \u001b[36m304\u001b[0m 347.470 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-13 00:24:13"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests?date=yesterday&timezoneOffset=-330 \u001b[36m304\u001b[0m 369.115 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-13 00:31:13"}
+{"level":"error","message":"Redis Client Error: read ECONNRESET","service":"laboratory-management-system","timestamp":"2026-07-13 00:57:53"}
+{"level":"error","message":"Redis Client Error: Connection timeout","service":"laboratory-management-system","timestamp":"2026-07-13 00:57:58"}
+{"level":"error","message":"Redis Client Error: Connection timeout","service":"laboratory-management-system","timestamp":"2026-07-13 00:58:03"}
+{"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-07-13 00:58:04"}
+{"level":"info","message":"Redis client connected","service":"laboratory-management-system","timestamp":"2026-07-13 00:58:07"}
+{"level":"info","message":"Redis client ready","service":"laboratory-management-system","timestamp":"2026-07-13 00:58:08"}
+{"level":"error","message":"Redis Client Error: read ECONNRESET","service":"laboratory-management-system","timestamp":"2026-07-13 01:00:57"}
+{"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-07-13 01:00:58"}
+{"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-07-13 01:00:58"}
+{"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-07-13 01:00:59"}
+{"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-07-13 01:00:59"}
+{"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-07-13 01:00:59"}
+{"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-07-13 01:01:00"}
+{"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-07-13 01:01:00"}
+{"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-07-13 01:01:00"}
+{"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-07-13 01:01:01"}
+{"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-07-13 01:01:01"}
+{"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-07-13 01:01:02"}
+{"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-07-13 01:01:03"}
+{"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-07-13 01:01:04"}
+{"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-07-13 01:01:04"}
+{"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-07-13 01:01:05"}
+{"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-07-13 01:01:06"}
+{"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-07-13 01:01:07"}
+{"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-07-13 01:01:09"}
+{"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-07-13 01:01:11"}
+{"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-07-13 01:01:13"}
+{"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-07-13 01:01:16"}
+{"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-07-13 01:01:20"}
+{"level":"info","message":"Redis client connected","service":"laboratory-management-system","timestamp":"2026-07-13 01:01:25"}
+{"level":"info","message":"Redis client ready","service":"laboratory-management-system","timestamp":"2026-07-13 01:01:26"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests?date=yesterday&timezoneOffset=-330 \u001b[36m304\u001b[0m 3114.111 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-13 01:01:58"}
