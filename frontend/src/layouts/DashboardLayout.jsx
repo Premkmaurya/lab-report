@@ -17,7 +17,7 @@ import {
   FileText,
   LogOut,
   User,
-  Menu,
+  ChartNoAxesColumnIncreasing,
   X,
 } from "lucide-react";
 
@@ -120,19 +120,19 @@ export const DashboardLayout = () => {
 
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-[256px] bg-paper-white border-r border-cream-border flex flex-col transform transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 w-3xs bg-paper-white border-r border-cream-border flex flex-col transform transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 ${
           isSidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         {/* Brand Logo / Name */}
-        <div className="border-b border-cream-border relative flex items-start justify-start">
-          <div className="flex place-items-start justify-center w-full h-36 px-4 flex-col">
+        <div className="border-b border-cream-border relative flex items-start mb-4 justify-start">
+          <div className="flex place-items-start justify-center w-full h-30 px-4 flex-col">
             <img
               src="/logo.png"
               alt="UltraPath Logo"
               className="h-14 object-cover"
             />
-            <div className="logo-header absolute -bottom-6 text-lg md:text-xl text-charcoal text-center">
+            <div className="logo-header absolute -bottom-6 text-lg text-charcoal text-left">
               Laboratory information system
             </div>
           </div>
@@ -211,7 +211,7 @@ export const DashboardLayout = () => {
             onClick={() => setIsSidebarOpen(true)}
             className="p-1 text-charcoal hover:bg-warm-canvas rounded-md"
           >
-            <Menu className="h-6 w-6" />
+            <ChartNoAxesColumnIncreasing className="h-6 w-6 -rotate-90"/>
           </button>
         </header>
 
