@@ -14,21 +14,21 @@ export const PatientInfo = ({ patient, report, template }) => {
     <div className="border border-slate-300 p-4 mb-6 text-[13px] text-slate-900 bg-white">
       <div className="grid grid-cols-2 gap-2">
         <div className="space-y-1 relative z-20">
-          <div className="grid grid-cols-[110px_auto] text-lg gap-4">
+          <div className="grid grid-cols-[120px_auto] text-lg gap-2">
             <span className="text-black font-semibold whitespace-nowrap">
               Patient Name:
             </span>
             <span className="capitalize" style={{ ...nameStyles }}>{patient.name}</span>
           </div>
-          <div className="grid grid-cols-[110px_auto] text-lg gap-2">
+          <div className="grid grid-cols-[120px_auto] text-lg gap-2">
             <span className="text-black font-semibold whitespace-nowrap">
               Age/Gender:
             </span>
-            <span className=" capitalize">
+            <span className="capitalize">
               {patient.age} Years / {patient.gender}
             </span>
           </div>
-          <div className="grid grid-cols-[100px_auto] text-lg gap-2">
+          <div className="grid grid-cols-[120px_auto] text-lg gap-2">
             <span className="text-black font-semibold whitespace-nowrap">
               Ref. Doctor:
             </span>
@@ -37,15 +37,15 @@ export const PatientInfo = ({ patient, report, template }) => {
         </div>
 
         <div className="space-y-1">
-          <div className="grid grid-cols-[100px_auto] text-lg gap-2">
-            <span className="text-black font-semibold">Visit ID:</span>
+          <div className="grid grid-cols-[120px_auto] text-lg gap-2">
+            <span className="text-black font-semibold whitespace-nowrap">Visit ID:</span>
             <span>{patient.visitId || "N/A"}</span>
           </div>
-          <div className="grid grid-cols-[100px_auto] text-lg gap-2">
-            <span className="text-black font-semibold">Reg. Date:</span>
+          <div className="grid grid-cols-[120px_auto] text-lg gap-2">
+            <span className="text-black font-semibold whitespace-nowrap">Reg. Date:</span>
             <span>{regDate}</span>
           </div>
-          <div className="grid grid-cols-[100px_auto] text-lg gap-2">
+          <div className="grid grid-cols-[120px_auto] text-lg gap-2">
             <span className="text-black font-semibold whitespace-nowrap">
               Report Date:
             </span>

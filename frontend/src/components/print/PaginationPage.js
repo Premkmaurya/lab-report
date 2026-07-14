@@ -107,8 +107,8 @@ export const paginateRows = (rows, measurements, template) => {
     let height = rowHeights[startIndex] || 20;
     const row  = rows[startIndex];
 
-    // Parameters and blanks only need their own height.
-    if (row.type === 'parameter' || row.type === 'blank') return height;
+    // Parameters, text blocks, and blanks only need their own height.
+    if (row.type === 'parameter' || row.type === 'text_block' || row.type === 'blank') return height;
 
     // For headings: accumulate until the first parameter is found.
     for (let i = startIndex + 1; i < rows.length; i++) {
