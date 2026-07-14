@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { reportService } from "../../services/reportService";
-import { Save, ShieldAlert, ChevronDown, ChevronRight, Edit2, X } from "lucide-react";
+import { Save, ShieldAlert, ChevronDown, ChevronRight, Edit2 } from "lucide-react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { checkAbnormalResult } from "../../utils/resultUtils";
 
@@ -22,7 +22,7 @@ export const InlineTestEditor = ({
   const inputRefs = useRef([]);
   const saveButtonRef = useRef(null);
 
-  const { register, handleSubmit, control, reset, setValue, watch, formState: { isDirty } } = useForm({
+  const { register, handleSubmit, control, reset, setValue, getValues, formState: { isDirty } } = useForm({
     defaultValues: {
       results: [],
     },
@@ -35,22 +35,22 @@ export const InlineTestEditor = ({
 
   const testIdStr = test.testId?._id || test.testId;
 
-  const resultsValues = watch("results");
-
-  useEffect(() => {
-    if (!resultsValues || resultsValues.length === 0) return;
+  const recalculateFormulas = () => {
+    // Get the absolute latest state from react-hook-form
+    const currentResults = getValues("results");
+    if (!currentResults || currentResults.length === 0) return;
     
-    resultsValues.forEach((res, index) => {
+    currentResults.forEach((res, index) => {
       if (res.isCalculated && res.formula && res.formula.leftParameterId && res.formula.rightParameterId) {
-        const leftParam = resultsValues.find(r => r._id === res.formula.leftParameterId);
-        const rightParam = resultsValues.find(r => r._id === res.formula.rightParameterId);
+        const leftParam = currentResults.find(r => r._id === res.formula.leftParameterId);
+        const rightParam = currentResults.find(r => r._id === res.formula.rightParameterId);
         
         let calculatedValue = "";
         
         if (leftParam && rightParam && leftParam.value && rightParam.value && !isNaN(parseFloat(leftParam.value)) && !isNaN(parseFloat(rightParam.value))) {
            const leftNum = parseFloat(leftParam.value);
            const rightNum = parseFloat(rightParam.value);
-           let resultNum = 0;
+           let resultNum;
            switch(res.formula.operator) {
              case '+': resultNum = leftNum + rightNum; break;
              case '-': resultNum = leftNum - rightNum; break;
@@ -66,7 +66,7 @@ export const InlineTestEditor = ({
         }
       }
     });
-  }, [resultsValues, setValue]);
+  };
 
   useEffect(() => {
     if (isExpanded && !testTemplate && !loadingTemplate) {
@@ -155,6 +155,7 @@ export const InlineTestEditor = ({
       window.addEventListener("keydown", handleEscape);
       return () => window.removeEventListener("keydown", handleEscape);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isEditing, isDirty]);
 
   const onSubmit = async (data) => {
@@ -339,12 +340,22 @@ export const InlineTestEditor = ({
                                 <span className="w-full text-sm font-bold text-charcoal block mb-2 tracking-wider uppercase" style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
                                   {item.parameter}
                                 </span>
-                                <textarea
-                                  className="w-full bg-white border border-electric-cobalt focus:border-ink-navy focus:ring-1 focus:ring-ink-navy rounded-inputs px-3 py-2 text-sm text-charcoal transition-colors resize-y"
-                                  rows={item.textBlockSettings?.rows || 3}
-                                  placeholder={item.textBlockSettings?.placeholder || "Enter text..."}
-                                  {...register(`results.${index}.value`)}
-                                />
+                                {(() => {
+                                  const { ref, onChange, ...rest } = register(`results.${index}.value`);
+                                  return (
+                                    <textarea
+                                      className="w-full bg-white border border-electric-cobalt focus:border-ink-navy focus:ring-1 focus:ring-ink-navy rounded-inputs px-3 py-2 text-sm text-charcoal transition-colors resize-y"
+                                      rows={item.textBlockSettings?.rows || 3}
+                                      placeholder={item.textBlockSettings?.placeholder || "Enter text..."}
+                                      {...rest}
+                                      onChange={(e) => {
+                                        onChange(e);
+                                        recalculateFormulas();
+                                      }}
+                                      ref={ref}
+                                    />
+                                  );
+                                })()}
                                 <input type="hidden" value={item.parameter} {...register(`results.${index}.parameter`)} />
                                 <input type="hidden" value="text_block" {...register(`results.${index}.type`)} />
                               </td>
@@ -363,7 +374,7 @@ export const InlineTestEditor = ({
                             </td>
                             <td className="py-3 px-3 align-middle">
                               {(() => {
-                                const { ref, ...rest } = register(`results.${index}.value`);
+                                const { ref, onChange, ...rest } = register(`results.${index}.value`);
                                 
                                 if (item.isCalculated) {
                                   return (
@@ -373,6 +384,7 @@ export const InlineTestEditor = ({
                                       readOnly
                                       className="w-full min-w-[120px] bg-slate-50 border border-cream-border text-slate-500 rounded-inputs px-3 py-1.5 text-sm font-medium transition-colors cursor-not-allowed"
                                       {...rest}
+                                      onChange={onChange}
                                       ref={(e) => {
                                         ref(e);
                                         inputRefs.current[index] = e;
@@ -386,6 +398,10 @@ export const InlineTestEditor = ({
                                     <select
                                       className="w-full min-w-[120px] bg-white border border-electric-cobalt focus:border-ink-navy focus:ring-1 focus:ring-ink-navy rounded-inputs px-3 py-1.5 text-sm font-medium text-charcoal transition-colors"
                                       {...rest}
+                                      onChange={(e) => {
+                                        onChange(e);
+                                        recalculateFormulas();
+                                      }}
                                       ref={(e) => {
                                         ref(e);
                                         inputRefs.current[index] = e;
@@ -406,6 +422,10 @@ export const InlineTestEditor = ({
                                     placeholder="Value"
                                     className="w-full min-w-[120px] bg-white border border-electric-cobalt focus:border-ink-navy focus:ring-1 focus:ring-ink-navy rounded-inputs px-3 py-1.5 text-sm font-medium text-charcoal transition-colors"
                                     {...rest}
+                                    onChange={(e) => {
+                                      onChange(e);
+                                      recalculateFormulas();
+                                    }}
                                     ref={(e) => {
                                       ref(e);
                                       inputRefs.current[index] = e;
