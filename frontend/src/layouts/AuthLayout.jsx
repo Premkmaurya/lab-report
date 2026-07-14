@@ -11,18 +11,23 @@ export const AuthLayout = () => {
   }
 
   return (
-    <div className="min-h-screen bg-warm-canvas flex flex-col justify-center py-12 sm:px-6 lg:px-8 transition-colors duration-300">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
-        <h1 className="font-martinaplantijn text-4xl text-ink-navy tracking-tight">
-          Balaji <span className="italic font-light text-electric-cobalt">Labs</span>
-        </h1>
-        <p className="mt-2 font-abcfavoritvariable text-sm text-graphite tracking-tight uppercase tracking-widest">
-          Laboratory Management System
-        </p>
+    <div className="min-h-screen flex w-full">
+      {/* Left side - Background Image (fixed on desktop) */}
+      <div
+        className="hidden md:block md:fixed md:inset-y-0 md:left-0 md:w-1/2 bg-cover bg-center z-0"
+        style={{ backgroundImage: 'url("/lab_bg.jpg")' }}
+        aria-hidden="true"
+      >
+        {/* Optional slight dark overlay for better aesthetics */}
+        <div className="absolute inset-0 bg-slate-900/10"></div>
       </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-paper-white py-8 px-4 border border-cream-border rounded-cards sm:rounded-cards sm:px-10 transition-shadow duration-300">
+      {/* Right side - Form (scrolls independently) */}
+      <div className="w-full md:w-1/2 md:ml-[50%] flex flex-col items-center justify-center bg-paper-white px-8 py-12 lg:px-16 border-l border-cream-border md:h-screen md:overflow-y-auto relative z-10">
+        <div className="w-full max-w-md">
+          <div className="flex justify-center mb-8">
+            <img src="/logo.png" alt="UltraPath Logo" className="h-30 object-cover" />
+          </div>
           <Outlet />
         </div>
       </div>

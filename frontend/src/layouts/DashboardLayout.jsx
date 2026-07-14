@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { Link, NavLink, Outlet, useNavigate, useLocation } from "react-router-dom";
+import {
+  Link,
+  NavLink,
+  Outlet,
+  useNavigate,
+  useLocation,
+} from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import {
   LayoutDashboard,
@@ -12,7 +18,7 @@ import {
   LogOut,
   User,
   Menu,
-  X
+  X,
 } from "lucide-react";
 
 export const DashboardLayout = () => {
@@ -34,22 +40,22 @@ export const DashboardLayout = () => {
   // Prevent body scroll when sidebar is open on mobile
   useEffect(() => {
     if (isSidebarOpen) {
-      document.body.style.overflow = 'hidden';
+      document.body.style.overflow = "hidden";
     } else {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = "unset";
     }
     return () => {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = "unset";
     };
   }, [isSidebarOpen]);
 
   // Handle escape key
   useEffect(() => {
     const handleEsc = (e) => {
-      if (e.key === 'Escape') setIsSidebarOpen(false);
+      if (e.key === "Escape") setIsSidebarOpen(false);
     };
-    window.addEventListener('keydown', handleEsc);
-    return () => window.removeEventListener('keydown', handleEsc);
+    window.addEventListener("keydown", handleEsc);
+    return () => window.removeEventListener("keydown", handleEsc);
   }, []);
 
   const isAdmin = user?.role === "admin";
@@ -91,8 +97,8 @@ export const DashboardLayout = () => {
       name: "Settings",
       path: "/settings",
       icon: Settings,
-      roles: ["admin","user"],
-      permission: "manage_settings"
+      roles: ["admin", "user"],
+      permission: "manage_settings",
     },
   ];
 
@@ -106,30 +112,29 @@ export const DashboardLayout = () => {
     <div className="flex h-screen overflow-hidden bg-warm-canvas">
       {/* Mobile Sidebar Overlay */}
       {isSidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-ink-navy/50 z-40 lg:hidden"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
 
       {/* Sidebar */}
-      <aside 
+      <aside
         className={`fixed inset-y-0 left-0 z-50 w-[256px] bg-paper-white border-r border-cream-border flex flex-col transform transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 ${
           isSidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         {/* Brand Logo / Name */}
-        <div className="p-6 border-b border-cream-border flex items-center justify-between">
-          <div className="flex items-center space-x-3 overflow-hidden">
-            <div className="h-9 w-9 bg-ink-navy text-paper-white rounded-2xl flex items-center justify-center font-bold text-lg shrink-0">
-              <img src="/logo.png" alt="something" />
-            </div>
-            <span className="font-martinaplantijn text-xl font-bold text-ink-navy truncate">
-              Balaji <span className="italic font-light text-electric-cobalt">Labs</span>
-            </span>
+        <div className="border-b border-cream-border flex items-start justify-start">
+          <div className="flex place-items-start justify-center w-full h-28">
+            <img
+              src="/logo.png"
+              alt="UltraPath Logo"
+              className="h-35 object-cover"
+            />
           </div>
           {/* Mobile close button */}
-          <button 
+          <button
             className="lg:hidden p-1 text-stone hover:text-charcoal"
             onClick={() => setIsSidebarOpen(false)}
           >
@@ -191,15 +196,17 @@ export const DashboardLayout = () => {
         {/* Mobile Header */}
         <header className="lg:hidden bg-paper-white border-b border-cream-border px-4 py-3 flex items-center justify-between shrink-0">
           <div className="flex items-center space-x-3">
-            <button 
+            <button
               onClick={() => setIsSidebarOpen(true)}
-              className="p-1 -ml-1 text-charcoal hover:bg-warm-canvas rounded-md"
+              className="p-1 text-charcoal hover:bg-warm-canvas rounded-md"
             >
               <Menu className="h-6 w-6" />
             </button>
-            <span className="font-martinaplantijn text-lg font-bold text-ink-navy">
-              Balaji <span className="italic font-light text-electric-cobalt">Labs</span>
-            </span>
+            <img
+              src="/logo.png"
+              alt="UltraPath Logo"
+              className="h-30 object-contain"
+            />
           </div>
         </header>
 
