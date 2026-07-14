@@ -10,12 +10,21 @@ const subTestSchema = new mongoose.Schema(
     },
     type: {
       type: String,
-      enum: ['parameter', 'section'],
+      enum: ['parameter', 'section', 'text_block'],
       default: 'parameter',
     },
     isListParameter: {
       type: Boolean,
       default: false,
+    },
+    isCalculated: {
+      type: Boolean,
+      default: false,
+    },
+    formula: {
+      leftParameterId: { type: String },
+      operator: { type: String, enum: ['+', '-', '*', '/'] },
+      rightParameterId: { type: String }
     },
     allowedValues: {
       type: [String],
@@ -33,6 +42,11 @@ const subTestSchema = new mongoose.Schema(
     unit: {
       type: String,
       // optional: unit may be omitted
+    },
+    textBlockSettings: {
+      defaultText: { type: String, default: "" },
+      placeholder: { type: String, default: "" },
+      rows: { type: Number, default: 3 },
     },
   },
   {

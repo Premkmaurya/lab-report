@@ -63,6 +63,15 @@ export const estimateRowHeights = (rows, template) => {
       const paramLen  = row.content?.parameter ? row.content.parameter.length : 0;
       const paramLines = Math.max(1, Math.ceil(paramLen / 46));
       h = (paramLines * baseFontSize * 1.5) + rowPaddingPx;
+    } else if (row.type === 'text_block') {
+      // Text block spans full width ≈ 764px. At 13px font, ~109 chars/line.
+      const val = row.content?.value || "";
+      const textLines = val.split('\n').reduce((sum, line) => {
+        return sum + Math.max(1, Math.ceil(line.length / 109));
+      }, 0);
+      const titleHeight = Math.max(14, baseFontSize) * 1.5;
+      const bodyHeight = textLines * baseFontSize * 1.5;
+      h = titleHeight + 8 + bodyHeight + 32; // title + marginBottom + text + padding(16x2)
     } else if (row.type === 'blank') {
       h = row.height || 16;
     }

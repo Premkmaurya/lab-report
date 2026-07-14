@@ -125,13 +125,16 @@ export const DashboardLayout = () => {
         }`}
       >
         {/* Brand Logo / Name */}
-        <div className="border-b border-cream-border flex items-start justify-start">
-          <div className="flex place-items-start justify-center w-full h-28">
+        <div className="border-b border-cream-border relative flex items-start justify-start">
+          <div className="flex place-items-start justify-center w-full h-36 px-4 flex-col">
             <img
               src="/logo.png"
               alt="UltraPath Logo"
-              className="h-35 object-cover"
+              className="h-14 object-cover"
             />
+            <div className="logo-header absolute -bottom-6 text-lg md:text-xl text-charcoal text-center">
+              Laboratory information system
+            </div>
           </div>
           {/* Mobile close button */}
           <button
@@ -194,20 +197,22 @@ export const DashboardLayout = () => {
       {/* Main content wrapper */}
       <main className="flex-1 flex flex-col overflow-hidden w-full h-full">
         {/* Mobile Header */}
-        <header className="lg:hidden bg-paper-white border-b border-cream-border px-4 py-3 flex items-center justify-between shrink-0">
+        <header className="lg:hidden border-b border-cream-border px-4 flex items-center justify-between shrink-0">
           <div className="flex items-center space-x-3">
-            <button
-              onClick={() => setIsSidebarOpen(true)}
-              className="p-1 text-charcoal hover:bg-warm-canvas rounded-md"
-            >
-              <Menu className="h-6 w-6" />
-            </button>
-            <img
-              src="/logo.png"
-              alt="UltraPath Logo"
-              className="h-30 object-contain"
-            />
+            <div className="flex relative w-full flex-col items-start">
+              <img
+                src="/logo.png"
+                alt="UltraPath Logo"
+                className="h-14 object-cover"
+              />
+            </div>
           </div>
+          <button
+            onClick={() => setIsSidebarOpen(true)}
+            className="p-1 text-charcoal hover:bg-warm-canvas rounded-md"
+          >
+            <Menu className="h-6 w-6" />
+          </button>
         </header>
 
         {/* Main scrollable viewport */}

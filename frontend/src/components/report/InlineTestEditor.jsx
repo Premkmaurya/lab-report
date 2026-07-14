@@ -22,7 +22,7 @@ export const InlineTestEditor = ({
   const inputRefs = useRef([]);
   const saveButtonRef = useRef(null);
 
-  const { register, handleSubmit, control, reset, formState: { isDirty } } = useForm({
+  const { register, handleSubmit, control, reset, setValue, watch, formState: { isDirty } } = useForm({
     defaultValues: {
       results: [],
     },
@@ -34,6 +34,39 @@ export const InlineTestEditor = ({
   });
 
   const testIdStr = test.testId?._id || test.testId;
+
+  const resultsValues = watch("results");
+
+  useEffect(() => {
+    if (!resultsValues || resultsValues.length === 0) return;
+    
+    resultsValues.forEach((res, index) => {
+      if (res.isCalculated && res.formula && res.formula.leftParameterId && res.formula.rightParameterId) {
+        const leftParam = resultsValues.find(r => r._id === res.formula.leftParameterId);
+        const rightParam = resultsValues.find(r => r._id === res.formula.rightParameterId);
+        
+        let calculatedValue = "";
+        
+        if (leftParam && rightParam && leftParam.value && rightParam.value && !isNaN(parseFloat(leftParam.value)) && !isNaN(parseFloat(rightParam.value))) {
+           const leftNum = parseFloat(leftParam.value);
+           const rightNum = parseFloat(rightParam.value);
+           let resultNum = 0;
+           switch(res.formula.operator) {
+             case '+': resultNum = leftNum + rightNum; break;
+             case '-': resultNum = leftNum - rightNum; break;
+             case '*': resultNum = leftNum * rightNum; break;
+             case '/': resultNum = rightNum !== 0 ? leftNum / rightNum : 0; break;
+             default: resultNum = 0; break;
+           }
+           calculatedValue = String(Math.round(resultNum * 1000) / 1000);
+        }
+        
+        if (res.value !== calculatedValue) {
+           setValue(`results.${index}.value`, calculatedValue, { shouldDirty: true });
+        }
+      }
+    });
+  }, [resultsValues, setValue]);
 
   useEffect(() => {
     if (isExpanded && !testTemplate && !loadingTemplate) {
@@ -60,13 +93,17 @@ export const InlineTestEditor = ({
         // Match by index to preserve customized parameter names instead of strictly matching by template name
         const existingResult = test.result?.[index];
         return {
+          _id: sub._id,
           parameter: existingResult ? existingResult.parameter : sub.name,
-          value: existingResult ? existingResult.value : "",
+          value: existingResult ? existingResult.value : (sub.type === 'text_block' ? (sub.textBlockSettings?.defaultText || "") : ""),
           unit: sub.unit,
           normalRange: sub.normalRange,
           type: sub.type || "parameter",
           isListParameter: sub.isListParameter || false,
+          isCalculated: sub.isCalculated || false,
+          formula: sub.formula || null,
           allowedValues: sub.allowedValues || [],
+          textBlockSettings: sub.textBlockSettings || null,
         };
       });
       reset({ results: mergedResults });
@@ -90,13 +127,17 @@ export const InlineTestEditor = ({
       const mergedResults = testTemplate.subTests.map((sub, index) => {
         const existingResult = test.result?.[index];
         return {
+          _id: sub._id,
           parameter: existingResult ? existingResult.parameter : sub.name,
-          value: existingResult ? existingResult.value : "",
+          value: existingResult ? existingResult.value : (sub.type === 'text_block' ? (sub.textBlockSettings?.defaultText || "") : ""),
           unit: sub.unit,
           normalRange: sub.normalRange,
           type: sub.type || "parameter",
           isListParameter: sub.isListParameter || false,
+          isCalculated: sub.isCalculated || false,
+          formula: sub.formula || null,
           allowedValues: sub.allowedValues || [],
+          textBlockSettings: sub.textBlockSettings || null,
         };
       });
       reset({ results: mergedResults });
@@ -130,6 +171,10 @@ export const InlineTestEditor = ({
           const updatedResult = data.results.map(r => {
             if (r.type === "section") {
               return { parameter: r.parameter, type: "section" };
+            }
+            if (r.type === "text_block") {
+              if (r.value && r.value.trim() !== '') hasAnyValue = true;
+              return { parameter: r.parameter, value: r.value, type: "text_block" };
             }
             if (r.value && r.value.trim() !== '') {
                hasAnyValue = true;
@@ -287,6 +332,26 @@ export const InlineTestEditor = ({
                           );
                         }
 
+                        if (item.type === "text_block") {
+                          return (
+                            <tr key={item.id} className="bg-white border-y border-cream-border hover:bg-warm-canvas/20 transition-colors">
+                              <td colSpan="4" className="py-4 px-4 align-top">
+                                <span className="w-full text-sm font-bold text-charcoal block mb-2 tracking-wider uppercase" style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
+                                  {item.parameter}
+                                </span>
+                                <textarea
+                                  className="w-full bg-white border border-electric-cobalt focus:border-ink-navy focus:ring-1 focus:ring-ink-navy rounded-inputs px-3 py-2 text-sm text-charcoal transition-colors resize-y"
+                                  rows={item.textBlockSettings?.rows || 3}
+                                  placeholder={item.textBlockSettings?.placeholder || "Enter text..."}
+                                  {...register(`results.${index}.value`)}
+                                />
+                                <input type="hidden" value={item.parameter} {...register(`results.${index}.parameter`)} />
+                                <input type="hidden" value="text_block" {...register(`results.${index}.type`)} />
+                              </td>
+                            </tr>
+                          );
+                        }
+
                         return (
                           <tr key={item.id} className="hover:bg-warm-canvas/30 transition-colors">
                             <td className="py-3 px-3 align-middle pl-6 border-l-4 border-l-transparent" style={{ wordBreak: 'break-word', overflowWrap: 'anywhere', whiteSpace: 'normal' }}>
@@ -299,6 +364,22 @@ export const InlineTestEditor = ({
                             <td className="py-3 px-3 align-middle">
                               {(() => {
                                 const { ref, ...rest } = register(`results.${index}.value`);
+                                
+                                if (item.isCalculated) {
+                                  return (
+                                    <input
+                                      type="text"
+                                      placeholder="Auto-calculated"
+                                      readOnly
+                                      className="w-full min-w-[120px] bg-slate-50 border border-cream-border text-slate-500 rounded-inputs px-3 py-1.5 text-sm font-medium transition-colors cursor-not-allowed"
+                                      {...rest}
+                                      ref={(e) => {
+                                        ref(e);
+                                        inputRefs.current[index] = e;
+                                      }}
+                                    />
+                                  );
+                                }
                                 
                                 if (item.isListParameter) {
                                   return (
@@ -420,6 +501,25 @@ export const InlineTestEditor = ({
                                 {item.parameter}
                               </td>
                               <td colSpan="3"></td>
+                            </tr>
+                          );
+                        }
+
+                        if (item.type === "text_block") {
+                          return (
+                            <tr key={index} className="bg-white border-y border-cream-border hover:bg-warm-canvas/20 transition-colors">
+                              <td colSpan="4" className="py-4 px-4">
+                                <span className="text-sm font-bold text-charcoal block mb-2 tracking-wider uppercase" style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
+                                  {item.parameter}
+                                </span>
+                                {item.value ? (
+                                  <div className="text-sm text-charcoal whitespace-pre-wrap font-medium">
+                                    {item.value}
+                                  </div>
+                                ) : (
+                                  <span className="text-stone italic text-xs">Not recorded</span>
+                                )}
+                              </td>
                             </tr>
                           );
                         }

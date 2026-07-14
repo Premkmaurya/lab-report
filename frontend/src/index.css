@@ -19,6 +19,13 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+.logo-header {
+  font-family: var(--font-martinaplantijn);
+  font-weight: semi-bold;
+  word-spacing: 2px;
+  color: #0C1754;
+  text-align: center;
+}
 
 /* Custom scrollbars */
 ::-webkit-scrollbar {

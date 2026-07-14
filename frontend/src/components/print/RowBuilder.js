@@ -41,7 +41,7 @@ export const buildRows = (report) => {
         const commitSection = () => {
            if (currentSection && sectionParams.length > 0) {
               rows.push({ type: 'section', content: currentSection.parameter });
-              sectionParams.forEach(p => rows.push({ type: 'parameter', content: p }));
+              sectionParams.forEach(p => rows.push({ type: p.type || 'parameter', content: p }));
            }
            currentSection = null;
            sectionParams = [];
@@ -56,7 +56,7 @@ export const buildRows = (report) => {
                if (currentSection) {
                   sectionParams.push(res);
                } else {
-                  rows.push({ type: 'parameter', content: res });
+                  rows.push({ type: res.type || 'parameter', content: res });
                }
             }
           }

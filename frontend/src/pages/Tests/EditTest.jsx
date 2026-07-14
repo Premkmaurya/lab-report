@@ -5,6 +5,64 @@ import { testService } from "../../services/testService";
 import { departmentService } from "../../services/departmentService";
 import { ArrowLeft, ShieldAlert, Trash2, Search, ChevronDown } from "lucide-react";
 import { toast } from "../../lib/toast";
+import { generateObjectId } from "../../utils/objectId";
+
+const ParameterSelect = ({ index, field, watch, setValue, register, errors, disabled }) => {
+  const [isOpen, setIsOpen] = React.useState(false);
+  const [search, setSearch] = React.useState("");
+  const currentId = watch(`subTests.${index}.formula.${field}`);
+  
+  const options = watch("subTests").filter((f, i) => i !== index && f.name && f.type !== "section");
+  
+  React.useEffect(() => {
+    const matched = options.find(o => o._id === currentId);
+    if (matched && !isOpen) {
+      setSearch(matched.name);
+    }
+  }, [currentId, options, isOpen]);
+
+  return (
+    <div className="relative flex-1">
+      <input 
+        type="text" 
+        value={search}
+        disabled={disabled}
+        onChange={(e) => {
+           setSearch(e.target.value);
+           setIsOpen(true);
+           if (e.target.value === "") {
+             setValue(`subTests.${index}.formula.${field}`, "");
+           }
+        }}
+        onFocus={() => !disabled && setIsOpen(true)}
+        onBlur={() => setTimeout(() => setIsOpen(false), 200)}
+        placeholder={`-- ${field === 'leftParameterId' ? 'Left' : 'Right'} Parameter --`}
+        className={`w-full text-sm border border-cream-border rounded-inputs px-2 py-2 focus:outline-none focus:border-electric-cobalt ${errors?.subTests?.[index]?.formula?.[field] ? "border-red-500" : ""} ${disabled ? "bg-transparent text-stone border-transparent" : ""}`}
+      />
+      <input type="hidden" {...register(`subTests.${index}.formula.${field}`, { required: "Required" })} />
+      {isOpen && !disabled && (
+        <div className="absolute z-10 w-full mt-1 bg-white border border-cream-border rounded shadow-lg max-h-40 overflow-y-auto">
+          {options.filter(o => o.name.toLowerCase().includes(search.toLowerCase())).map(o => (
+            <div 
+              key={o._id} 
+              className="px-2 py-1.5 text-sm hover:bg-warm-canvas cursor-pointer"
+              onClick={() => {
+                setValue(`subTests.${index}.formula.${field}`, o._id, { shouldValidate: true });
+                setSearch(o.name);
+                setIsOpen(false);
+              }}
+            >
+              {o.name}
+            </div>
+          ))}
+          {options.filter(o => o.name.toLowerCase().includes(search.toLowerCase())).length === 0 && (
+             <div className="px-2 py-1.5 text-sm text-stone italic">No parameters found</div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
 
 export const EditTest = () => {
   const { id } = useParams();
@@ -53,7 +111,7 @@ export const EditTest = () => {
 
   const isEmptyRow = (st) => {
     if (!st) return true;
-    if (st.type === "section") {
+    if (st.type === "section" || st.type === "text_block") {
       return !st.name;
     }
     return !st.name && !st.unit && !st.normalRange && (st.price === "" || st.price === null || st.price === undefined);
@@ -61,7 +119,7 @@ export const EditTest = () => {
 
   const isRowComplete = (st) => {
     if (!st) return false;
-    if (st.type === "section") {
+    if (st.type === "section" || st.type === "text_block") {
       return !!st.name;
     }
     return (
@@ -79,6 +137,7 @@ export const EditTest = () => {
     const fieldIndex = fieldsOrder.indexOf(fieldName);
     const currentValues = getValues("subTests");
     const isSection = currentValues[index]?.type === "section";
+    const isTextBlock = currentValues[index]?.type === "text_block";
     
     if (e.key === "Enter") {
       e.preventDefault();
@@ -90,11 +149,11 @@ export const EditTest = () => {
           inputRefs.current[index - 1]?.[prevIsSection ? "name" : fieldsOrder[fieldsOrder.length - 1]]?.focus();
         }
       } else {
-        if (fieldIndex < fieldsOrder.length - 1 && !isSection) {
+        if (fieldIndex < fieldsOrder.length - 1 && (!isSection && !isTextBlock)) {
           inputRefs.current[index]?.[fieldsOrder[fieldIndex + 1]]?.focus();
         } else {
           if (index === fields.length - 1 && isRowComplete(currentValues[index])) {
-            append({ name: "", type: "parameter", price: "", unit: "", normalRange: "", isListParameter: false, allowedValues: [] });
+            append({ _id: generateObjectId(), name: "", type: "parameter", price: "", unit: "", normalRange: "", isListParameter: false, allowedValues: [], isCalculated: false, formula: { leftParameterId: "", operator: "+", rightParameterId: "" }, textBlockSettings: { defaultText: "", placeholder: "", rows: 3 } });
             setTimeout(() => {
               inputRefs.current[index + 1]?.name?.focus();
             }, 0);
@@ -126,7 +185,7 @@ export const EditTest = () => {
       }
       if (isAtEnd) {
         e.preventDefault();
-        if (fieldIndex < fieldsOrder.length - 1 && !isSection) {
+        if (fieldIndex < fieldsOrder.length - 1 && (!isSection && !isTextBlock)) {
           inputRefs.current[index]?.[fieldsOrder[fieldIndex + 1]]?.focus();
         } else if (index < fields.length - 1) {
           inputRefs.current[index + 1]?.[fieldsOrder[0]]?.focus();
@@ -159,9 +218,10 @@ export const EditTest = () => {
       setTimeout(() => {
         const currentValues = getValues("subTests");
         const isSection = currentValues[index]?.type === "section";
+    const isTextBlock = currentValues[index]?.type === "text_block";
         if ((fieldName === "normalRange" || (isSection && fieldName === "name")) && isRowComplete(currentValues[index])) {
           if (isRowComplete(currentValues[currentValues.length - 1])) {
-            append({ name: "", type: "parameter", price: "", unit: "", normalRange: "", isListParameter: false, allowedValues: [] });
+            append({ _id: generateObjectId(), name: "", type: "parameter", price: "", unit: "", normalRange: "", isListParameter: false, allowedValues: [], isCalculated: false, formula: { leftParameterId: "", operator: "+", rightParameterId: "" }, textBlockSettings: { defaultText: "", placeholder: "", rows: 3 } });
           }
         }
       }, 100);
@@ -223,7 +283,7 @@ export const EditTest = () => {
           
           let tests = t.subTests || [];
           if (!isReadOnly && (tests.length === 0 || !isEmptyRow(tests[tests.length - 1]))) {
-             tests = [...tests, { name: "", type: "parameter", price: "", unit: "", normalRange: "", isListParameter: false, allowedValues: [] }];
+             tests = [...tests, { _id: generateObjectId(), name: "", type: "parameter", price: "", unit: "", normalRange: "", isListParameter: false, allowedValues: [], isCalculated: false, formula: { leftParameterId: "", operator: "+", rightParameterId: "" }, textBlockSettings: { defaultText: "", placeholder: "", rows: 3 } }];
           }
 
           reset({
@@ -270,7 +330,7 @@ export const EditTest = () => {
       subTests: validSubTests.map((st) => {
         return {
           ...st,
-          price: st.type === "section" ? 0 : (parseFloat(st.price) || 0),
+          price: (st.type === "section" || st.type === "text_block") ? 0 : (parseFloat(st.price) || 0),
           isListParameter: !!st.isListParameter,
           allowedValues: st.allowedValues || [],
         };
@@ -497,13 +557,14 @@ export const EditTest = () => {
                     {fields.map((item, index) => {
                       if (!inputRefs.current[index]) inputRefs.current[index] = {};
                       const isSection = watchedTypes[index] === "section";
+                      const isTextBlock = watchedTypes[index] === "text_block";
                       return (
                         <React.Fragment key={item.id}>
                         <tr className="bg-paper-white">
                           <td className="px-4 py-3 align-top">
                             <input
                               type="text"
-                              placeholder={isSection ? "e.g. DIFFERENTIAL LEUKOCYTE COUNT" : "e.g. Hemoglobin"}
+                              placeholder={isSection ? "e.g. DIFFERENTIAL LEUKOCYTE COUNT" : isTextBlock ? "e.g. Microscopic Findings" : "e.g. Hemoglobin"}
                               className={`w-full min-w-[150px] text-sm ${errors?.subTests?.[index]?.name ? "border-red-500" : ""} ${isReadOnly ? "bg-transparent text-stone border-transparent" : ""}`}
                               disabled={isReadOnly}
                               {...register(`subTests.${index}.name`, { 
@@ -516,8 +577,8 @@ export const EditTest = () => {
                               }}
                             />
                             {!isReadOnly && (
-                              <div className="mt-2 flex items-center">
-                                <input type="hidden" {...register(`subTests.${index}.type`)} />
+                                                          <div className="mt-2 flex items-center space-x-4">
+                              <div className="flex items-center">
                                 <input 
                                   type="checkbox" 
                                   id={`isSection-${index}`} 
@@ -530,10 +591,11 @@ export const EditTest = () => {
                                       setValue(`subTests.${index}.unit`, "");
                                       setValue(`subTests.${index}.normalRange`, "");
                                       setValue(`subTests.${index}.isListParameter`, false);
+                                      setValue(`subTests.${index}.isCalculated`, false);
                                     }
                                     const currentValues = getValues("subTests");
                                     if (index === currentValues.length - 1 && isRowComplete(currentValues[index])) {
-                                      append({ name: "", type: "parameter", price: "", unit: "", normalRange: "", isListParameter: false, allowedValues: [] });
+                                      append({ _id: generateObjectId(), name: "", type: "parameter", price: "", unit: "", normalRange: "", isListParameter: false, allowedValues: [], isCalculated: false, formula: { leftParameterId: "", operator: "+", rightParameterId: "" }, textBlockSettings: { defaultText: "", placeholder: "", rows: 3 } });
                                       setTimeout(() => {
                                         inputRefs.current[index + 1]?.name?.focus();
                                       }, 0);
@@ -544,6 +606,35 @@ export const EditTest = () => {
                                   Section Header
                                 </label>
                               </div>
+                              <div className="flex items-center">
+                                <input 
+                                  type="checkbox" 
+                                  id={`isTextBlock-${index}`} 
+                                  className="mr-1.5 cursor-pointer"
+                                  checked={isTextBlock}
+                                  onChange={(e) => {
+                                    setValue(`subTests.${index}.type`, e.target.checked ? 'text_block' : 'parameter');
+                                    if (e.target.checked) {
+                                      setValue(`subTests.${index}.price`, "");
+                                      setValue(`subTests.${index}.unit`, "");
+                                      setValue(`subTests.${index}.normalRange`, "");
+                                      setValue(`subTests.${index}.isListParameter`, false);
+                                      setValue(`subTests.${index}.isCalculated`, false);
+                                    }
+                                    const currentValues = getValues("subTests");
+                                    if (index === currentValues.length - 1 && isRowComplete(currentValues[index])) {
+                                      append({ _id: generateObjectId(), name: "", type: "parameter", price: "", unit: "", normalRange: "", isListParameter: false, allowedValues: [], isCalculated: false, formula: { leftParameterId: "", operator: "+", rightParameterId: "" }, textBlockSettings: { defaultText: "", placeholder: "", rows: 3 } });
+                                      setTimeout(() => {
+                                        inputRefs.current[index + 1]?.name?.focus();
+                                      }, 0);
+                                    }
+                                  }}
+                                />
+                                <label htmlFor={`isTextBlock-${index}`} className="text-[10px] text-stone uppercase tracking-wider font-bold cursor-pointer">
+                                  Text Block
+                                </label>
+                              </div>
+                            </div>
                             )}
                           </td>
                           <td className="px-4 py-3 align-top">
@@ -555,7 +646,7 @@ export const EditTest = () => {
                               className={`w-full min-w-[80px] text-sm ${errors?.subTests?.[index]?.price ? "border-red-500" : ""} ${isReadOnly ? "bg-transparent text-stone border-transparent" : (isSection ? "bg-slate-50 text-slate-400 cursor-not-allowed" : "")}`}
                               {...register(`subTests.${index}.price`, { 
                                 validate: (val, formValues) => {
-                                  if (formValues.subTests[index].type === "section") return true;
+                                  if (formValues.subTests[index].type === "section" || formValues.subTests[index].type === "text_block") return true;
                                   if (isEmptyRow(formValues.subTests[index])) return true;
                                   if (val === "" || val === null || val === undefined) return "Required";
                                   if (parseFloat(val) < 0) return "Invalid";
@@ -568,28 +659,47 @@ export const EditTest = () => {
                                 inputRefs.current[index].price = el;
                               }}
                             />
-                            {!isReadOnly && !isSection && (
-                              <div className="mt-2 flex items-center">
-                                <input 
-                                  type="checkbox" 
-                                  id={`isListParameter-${index}`} 
-                                  className="mr-1.5 cursor-pointer"
-                                  {...register(`subTests.${index}.isListParameter`)}
-                                  onChange={(e) => {
-                                    setValue(`subTests.${index}.isListParameter`, e.target.checked);
-                                    if (e.target.checked) {
-                                      setValue(`subTests.${index}.normalRange`, "");
-                                      // initialize allowed values with empty if empty
-                                      const currentAllowed = getValues(`subTests.${index}.allowedValues`);
-                                      if (!currentAllowed || currentAllowed.length === 0) {
-                                        setValue(`subTests.${index}.allowedValues`, [""]);
+                            {!isReadOnly && (!isSection && !isTextBlock) && (
+                              <div className="mt-2 flex flex-col space-y-2">
+                                <div className="flex items-center">
+                                  <input 
+                                    type="checkbox" 
+                                    id={`isListParameter-${index}`} 
+                                    className="mr-1.5 cursor-pointer"
+                                    {...register(`subTests.${index}.isListParameter`)}
+                                    onChange={(e) => {
+                                      setValue(`subTests.${index}.isListParameter`, e.target.checked);
+                                      if (e.target.checked) {
+                                        setValue(`subTests.${index}.normalRange`, "");
+                                        setValue(`subTests.${index}.isCalculated`, false);
+                                        const currentAllowed = getValues(`subTests.${index}.allowedValues`);
+                                        if (!currentAllowed || currentAllowed.length === 0) {
+                                          setValue(`subTests.${index}.allowedValues`, [""]);
+                                        }
                                       }
-                                    }
-                                  }}
-                                />
-                                <label htmlFor={`isListParameter-${index}`} className="text-[10px] text-stone uppercase tracking-wider font-bold cursor-pointer">
-                                  Convert to List
-                                </label>
+                                    }}
+                                  />
+                                  <label htmlFor={`isListParameter-${index}`} className="text-[10px] text-stone uppercase tracking-wider font-bold cursor-pointer">
+                                    Convert to List
+                                  </label>
+                                </div>
+                                <div className="flex items-center">
+                                  <input 
+                                    type="checkbox" 
+                                    id={`isCalculated-${index}`} 
+                                    className="mr-1.5 cursor-pointer"
+                                    {...register(`subTests.${index}.isCalculated`)}
+                                    onChange={(e) => {
+                                      setValue(`subTests.${index}.isCalculated`, e.target.checked);
+                                      if (e.target.checked) {
+                                        setValue(`subTests.${index}.isListParameter`, false);
+                                      }
+                                    }}
+                                  />
+                                  <label htmlFor={`isCalculated-${index}`} className="text-[10px] text-stone uppercase tracking-wider font-bold cursor-pointer">
+                                    Calculated
+                                  </label>
+                                </div>
                               </div>
                             )}
                           </td>
@@ -610,7 +720,7 @@ export const EditTest = () => {
                           <td className="px-4 py-3 align-top">
                             <input
                               type="text"
-                              placeholder={isSection || watch(`subTests.${index}.isListParameter`) ? "-" : "e.g. 13-17"}
+                              placeholder={(isSection || isTextBlock || watch(`subTests.${index}.isListParameter`)) ? "-" : "e.g. 13-17"}
                               disabled={isReadOnly || isSection || watch(`subTests.${index}.isListParameter`)}
                               className={`w-full min-w-[100px] text-sm ${errors?.subTests?.[index]?.normalRange ? "border-red-500" : ""} ${isReadOnly ? "bg-transparent text-stone border-transparent" : (isSection || watch(`subTests.${index}.isListParameter`) ? "bg-slate-50 text-slate-400 cursor-not-allowed" : "")}`}
                               {...register(`subTests.${index}.normalRange`)}
@@ -631,7 +741,7 @@ export const EditTest = () => {
                                     remove(index);
                                     const currentValues = watch("subTests");
                                     if (currentValues.length <= 1 && !isReadOnly) {
-                                      append({ name: "", type: "parameter", price: "", unit: "", normalRange: "", isListParameter: false, allowedValues: [] });
+                                      append({ _id: generateObjectId(), name: "", type: "parameter", price: "", unit: "", normalRange: "", isListParameter: false, allowedValues: [], isCalculated: false, formula: { leftParameterId: "", operator: "+", rightParameterId: "" }, textBlockSettings: { defaultText: "", placeholder: "", rows: 3 } });
                                     }
                                   }}
                                   className="text-red-600 hover:text-red-800 p-2 rounded-full hover:bg-red-50 transition-colors"
@@ -643,7 +753,7 @@ export const EditTest = () => {
                             </td>
                           )}
                         </tr>
-                        {watch(`subTests.${index}.isListParameter`) && !isSection && (
+                        {watch(`subTests.${index}.isListParameter`) && (!isSection && !isTextBlock) && (
                           <tr key={`${item.id}-list`} className="bg-slate-50 border-t border-cream-border">
                             <td colSpan={isReadOnly ? "4" : "5"} className="px-4 py-4">
                               <div className="flex flex-col max-w-sm pl-4 border-l-2 border-electric-cobalt">
@@ -687,6 +797,92 @@ export const EditTest = () => {
                                 {errors?.subTests?.[index]?.allowedValues && !isReadOnly && (
                                   <p className="text-xs text-red-500 mt-2">Required at least 2 distinct values</p>
                                 )}
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                        {watch(`subTests.${index}.isCalculated`) && (!isSection && !isTextBlock) && (
+                          <tr key={`${item.id}-calc`} className="bg-slate-50 border-t border-cream-border">
+                            <td colSpan={isReadOnly ? "4" : "5"} className="px-4 py-4">
+                              <div className="flex flex-col max-w-2xl pl-4 border-l-2 border-electric-cobalt">
+                                <span className="text-xs font-bold text-charcoal uppercase mb-2">Formula Builder</span>
+                                <div className="flex items-center space-x-4 mb-2">
+                                  <ParameterSelect 
+                                    index={index} 
+                                    field="leftParameterId" 
+                                    watch={watch} 
+                                    setValue={setValue} 
+                                    register={register} 
+                                    errors={errors} 
+                                    disabled={isReadOnly}
+                                  />
+
+                                  <select 
+                                    className={`w-20 text-sm border border-cream-border rounded-inputs px-2 py-2 text-center focus:outline-none font-bold ${isReadOnly ? "bg-transparent text-stone border-transparent" : ""}`}
+                                    disabled={isReadOnly}
+                                    {...register(`subTests.${index}.formula.operator`, { required: "Required" })}
+                                  >
+                                    <option value="+">+</option>
+                                    <option value="-">-</option>
+                                    <option value="*">*</option>
+                                    <option value="/">/</option>
+                                  </select>
+
+                                  <ParameterSelect 
+                                    index={index} 
+                                    field="rightParameterId" 
+                                    watch={watch} 
+                                    setValue={setValue} 
+                                    register={register} 
+                                    errors={errors} 
+                                    disabled={isReadOnly}
+                                  />
+                                </div>
+                                {!isReadOnly && (errors?.subTests?.[index]?.formula?.leftParameterId || errors?.subTests?.[index]?.formula?.rightParameterId) && (
+                                  <p className="text-xs text-red-500 mt-1">Please select both parameters to calculate.</p>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                                                {isTextBlock && (
+                          <tr key={`${item.id}-textblock`} className="bg-slate-50 border-t border-cream-border">
+                            <td colSpan="5" className="px-4 py-4">
+                              <div className="flex flex-col max-w-2xl pl-4 border-l-2 border-electric-cobalt space-y-4">
+                                <span className="text-xs font-bold text-charcoal uppercase mb-2">Text Block Configuration</span>
+                                
+                                <div className="grid grid-cols-2 gap-4">
+                                  <div>
+                                    <label className="block text-xs font-semibold text-stone uppercase tracking-wide mb-1">Placeholder (Hint)</label>
+                                    <input
+                                      type="text"
+                                      className="w-full text-sm border border-cream-border rounded-inputs px-3 py-2 focus:outline-none focus:border-electric-cobalt"
+                                      placeholder="e.g. Enter clinical findings here..."
+                                      {...register(`subTests.${index}.textBlockSettings.placeholder`)}
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="block text-xs font-semibold text-stone uppercase tracking-wide mb-1">Rows (Height)</label>
+                                    <input
+                                      type="number"
+                                      className="w-full text-sm border border-cream-border rounded-inputs px-3 py-2 focus:outline-none focus:border-electric-cobalt"
+                                      min="1"
+                                      max="20"
+                                      placeholder="3"
+                                      {...register(`subTests.${index}.textBlockSettings.rows`, { valueAsNumber: true })}
+                                    />
+                                  </div>
+                                </div>
+
+                                <div>
+                                  <label className="block text-xs font-semibold text-stone uppercase tracking-wide mb-1">Default Text</label>
+                                  <textarea
+                                    className="w-full text-sm border border-cream-border rounded-inputs px-3 py-2 focus:outline-none focus:border-electric-cobalt"
+                                    placeholder="Optional pre-filled text..."
+                                    rows="3"
+                                    {...register(`subTests.${index}.textBlockSettings.defaultText`)}
+                                  />
+                                </div>
                               </div>
                             </td>
                           </tr>

@@ -201,6 +201,37 @@ export const PrintablePage = ({
       );
     }
 
+    if (row.type === 'text_block') {
+      const res = row.content;
+      return (
+        <tr key={i} style={{ background: 'white' }}>
+          <td colSpan={4} style={{ padding: '16px 12px' }}>
+            <span style={{
+              fontSize:      '14px',
+              fontWeight:    '700',
+              textTransform: 'uppercase',
+              display:       'block',
+              marginBottom:  '8px',
+              wordBreak:     'break-word',
+              overflowWrap:  'anywhere',
+              whiteSpace:    'normal',
+              ...paramStyles,
+            }}>
+              {res.parameter || 'N/A'}
+            </span>
+            <div style={{
+              whiteSpace:   'pre-wrap',
+              wordBreak:    'break-word',
+              overflowWrap: 'anywhere',
+              ...resultStyles,
+            }}>
+              {res.value}
+            </div>
+          </td>
+        </tr>
+      );
+    }
+
     if (row.type === 'parameter') {
       const res = row.content;
       const { isAbnormal, formattedValue } = checkAbnormalResult(res.value, res.normalRange);

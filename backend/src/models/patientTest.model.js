@@ -21,7 +21,7 @@ const patientTestItemSchema = new mongoose.Schema(
         },
         type: {
           type: String,
-          enum: ['parameter', 'section'],
+          enum: ['parameter', 'section', 'text_block'],
           default: 'parameter',
         },
         isListParameter: {
