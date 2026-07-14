@@ -65,7 +65,7 @@ export const estimateRowHeights = (rows, template) => {
       h = (paramLines * baseFontSize * 1.5) + rowPaddingPx;
     } else if (row.type === 'text_block') {
       // Text block spans full width ≈ 764px. At 13px font, ~109 chars/line.
-      const val = row.content?.value || "";
+      const val = row.content?.textBlockValue !== undefined ? row.content.textBlockValue : (row.content?.value || "");
       const textLines = val.split('\n').reduce((sum, line) => {
         return sum + Math.max(1, Math.ceil(line.length / 109));
       }, 0);

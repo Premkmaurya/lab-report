@@ -207,17 +207,17 @@ export const PrintablePage = ({
         <tr key={i} style={{ background: 'white' }}>
           <td colSpan={4} style={{ padding: '16px 12px' }}>
             <span style={{
-              fontSize:      '14px',
+              fontSize:      '12px',
               fontWeight:    '700',
               textTransform: 'uppercase',
               display:       'block',
-              marginBottom:  '8px',
+              marginBottom:  '4px',
               wordBreak:     'break-word',
               overflowWrap:  'anywhere',
               whiteSpace:    'normal',
               ...paramStyles,
             }}>
-              {res.parameter || 'N/A'}
+              {res.isTextBlock ? "Remarks" : (res.parameter || 'N/A')}
             </span>
             <div style={{
               whiteSpace:   'pre-wrap',
@@ -225,7 +225,7 @@ export const PrintablePage = ({
               overflowWrap: 'anywhere',
               ...resultStyles,
             }}>
-              {res.value}
+              {res.textBlockValue !== undefined ? res.textBlockValue : res.value}
             </div>
           </td>
         </tr>

@@ -3588,3 +3588,413 @@
 {"level":"info","message":"\u001b[0mGET /api/patient-tests?date=today&timezoneOffset=-330 \u001b[36m304\u001b[0m 330.747 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 22:20:52"}
 {"level":"info","message":"\u001b[0mGET /api/auth/me \u001b[33m401\u001b[0m 0.317 ms - 38\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 22:20:53"}
 {"level":"info","message":"\u001b[0mGET /api/auth/me \u001b[33m401\u001b[0m 0.302 ms - 38\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 22:20:53"}
+{"level":"info","message":"Server is running on port 3000 in development mode","service":"laboratory-management-system","timestamp":"2026-07-14 22:39:45"}
+{"level":"info","message":"Redis client connected","service":"laboratory-management-system","timestamp":"2026-07-14 22:39:46"}
+{"level":"info","message":"Redis client ready","service":"laboratory-management-system","timestamp":"2026-07-14 22:39:46"}
+{"level":"info","message":"Database connected successfully","service":"laboratory-management-system","timestamp":"2026-07-14 22:39:46"}
+{"level":"info","message":"\u001b[0mGET /api/auth/me \u001b[32m200\u001b[0m 389.496 ms - 200\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 22:39:56"}
+{"level":"info","message":"\u001b[0mGET /api/auth/me \u001b[36m304\u001b[0m 71.167 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 22:39:56"}
+{"level":"debug","message":"Cache hit for key: settings:print-template:6a33b0f585318f16ac6b7081","service":"laboratory-management-system","timestamp":"2026-07-14 22:39:58"}
+{"level":"info","message":"\u001b[0mGET /api/settings/print-template \u001b[32m200\u001b[0m 847.137 ms - 28\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 22:39:58"}
+{"level":"info","message":"\u001b[0mGET /api/patients \u001b[32m200\u001b[0m 270.730 ms - 8374\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 22:40:00"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests?date=today&timezoneOffset=-330 \u001b[32m200\u001b[0m 307.766 ms - 9889\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 22:40:00"}
+{"level":"debug","message":"Cache hit for key: tests:all","service":"laboratory-management-system","timestamp":"2026-07-14 22:40:00"}
+{"level":"debug","message":"Cache hit for key: doctors:all","service":"laboratory-management-system","timestamp":"2026-07-14 22:40:00"}
+{"level":"info","message":"\u001b[0mGET /api/tests \u001b[32m200\u001b[0m 680.694 ms - 22521\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 22:40:00"}
+{"level":"info","message":"\u001b[0mGET /api/doctors \u001b[32m200\u001b[0m 676.930 ms - 29\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 22:40:00"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests?date=today&timezoneOffset=-330 \u001b[36m304\u001b[0m 604.104 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 22:40:01"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests \u001b[32m200\u001b[0m 1195.641 ms - 185691\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 22:40:01"}
+{"level":"info","message":"\u001b[0mGET /api/patients/6a5636ab99dc093189e1171e \u001b[32m200\u001b[0m 238.262 ms - 495\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 22:40:04"}
+{"level":"info","message":"\u001b[0mGET /api/patients/6a5636ab99dc093189e1171e \u001b[36m304\u001b[0m 333.885 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 22:40:05"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/patient/6a5636ab99dc093189e1171e \u001b[32m200\u001b[0m 398.257 ms - 9889\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 22:40:05"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/patient/6a5636ab99dc093189e1171e \u001b[36m304\u001b[0m 275.822 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 22:40:05"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/6a5636ad99dc093189e11720/test/6a55ec71506b88d76ae5c6de \u001b[32m200\u001b[0m 435.292 ms - 2235\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 22:40:08"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/6a5636ad99dc093189e11720/test/6a55ec71506b88d76ae5c6de \u001b[36m304\u001b[0m 349.692 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 22:40:23"}
+{"level":"info","message":"\u001b[0mPATCH /api/patient-tests/6a5636ad99dc093189e11720 \u001b[32m200\u001b[0m 508.894 ms - 12285\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 22:40:24"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/6a5636ad99dc093189e11720/test/6a55ec71506b88d76ae5c6de \u001b[32m200\u001b[0m 302.299 ms - 2651\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 22:40:55"}
+{"level":"info","message":"\u001b[0mPATCH /api/patient-tests/6a5636ad99dc093189e11720 \u001b[32m200\u001b[0m 355.549 ms - 12289\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 22:40:55"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/6a5636ad99dc093189e11720/test/6a55ec71506b88d76ae5c6de \u001b[32m200\u001b[0m 345.089 ms - 2655\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 22:41:11"}
+{"level":"info","message":"\u001b[0mPATCH /api/patient-tests/6a5636ad99dc093189e11720 \u001b[32m200\u001b[0m 333.356 ms - 12281\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 22:41:12"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/6a5636ad99dc093189e11720/test/6a55ec71506b88d76ae5c6de \u001b[32m200\u001b[0m 1256.633 ms - 2647\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 22:44:46"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/6a5636ad99dc093189e11720/test/6a55ec71506b88d76ae5c6de \u001b[36m304\u001b[0m 490.939 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 22:44:57"}
+{"level":"info","message":"\u001b[0mPATCH /api/patient-tests/6a5636ad99dc093189e11720 \u001b[32m200\u001b[0m 950.661 ms - 12331\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 22:44:59"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/6a5636ad99dc093189e11720/test/6a55ec71506b88d76ae5c6de \u001b[32m200\u001b[0m 360.564 ms - 2651\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 22:45:12"}
+{"level":"info","message":"\u001b[0mPATCH /api/patient-tests/6a5636ad99dc093189e11720 \u001b[32m200\u001b[0m 602.973 ms - 12335\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 22:45:13"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/6a5636ad99dc093189e11720/test/6a55ec71506b88d76ae5c6de \u001b[32m200\u001b[0m 357.814 ms - 2655\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 22:45:25"}
+{"level":"info","message":"\u001b[0mPATCH /api/patient-tests/6a5636ad99dc093189e11720 \u001b[32m200\u001b[0m 376.739 ms - 12327\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 22:45:26"}
+{"level":"debug","message":"Cache hit for key: settings:lab-details:6a33b0f585318f16ac6b7081","service":"laboratory-management-system","timestamp":"2026-07-14 22:52:33"}
+{"level":"info","message":"\u001b[0mGET /api/settings/lab-details \u001b[32m200\u001b[0m 488.269 ms - 348\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 22:52:33"}
+{"level":"debug","message":"Cache hit for key: settings:lab-details:6a33b0f585318f16ac6b7081","service":"laboratory-management-system","timestamp":"2026-07-14 22:52:34"}
+{"level":"info","message":"\u001b[0mGET /api/settings/lab-details \u001b[36m304\u001b[0m 1034.373 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 22:52:34"}
+{"level":"debug","message":"Cache hit for key: tests:all","service":"laboratory-management-system","timestamp":"2026-07-14 22:52:36"}
+{"level":"info","message":"\u001b[0mGET /api/tests \u001b[32m200\u001b[0m 746.400 ms - 22555\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 22:52:36"}
+{"level":"debug","message":"Cache hit for key: departments:all","service":"laboratory-management-system","timestamp":"2026-07-14 22:52:39"}
+{"level":"debug","message":"Cache hit for key: test:6a55ec71506b88d76ae5c6de","service":"laboratory-management-system","timestamp":"2026-07-14 22:52:39"}
+{"level":"info","message":"\u001b[0mGET /api/departments \u001b[32m200\u001b[0m 393.323 ms - 725\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 22:52:39"}
+{"level":"info","message":"\u001b[0mGET /api/tests/6a55ec71506b88d76ae5c6de \u001b[32m200\u001b[0m 380.654 ms - 1803\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 22:52:39"}
+{"level":"debug","message":"Cache hit for key: test:6a55ec71506b88d76ae5c6de","service":"laboratory-management-system","timestamp":"2026-07-14 22:52:39"}
+{"level":"debug","message":"Cache hit for key: departments:all","service":"laboratory-management-system","timestamp":"2026-07-14 22:52:39"}
+{"level":"info","message":"\u001b[0mGET /api/tests/6a55ec71506b88d76ae5c6de \u001b[36m304\u001b[0m 350.641 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 22:52:39"}
+{"level":"info","message":"\u001b[0mGET /api/departments \u001b[36m304\u001b[0m 358.728 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 22:52:39"}
+{"level":"debug","message":"Cache hit for key: doctors:all","service":"laboratory-management-system","timestamp":"2026-07-14 22:52:47"}
+{"level":"info","message":"\u001b[0mGET /api/doctors \u001b[36m304\u001b[0m 444.779 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 22:52:47"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests?date=today&timezoneOffset=-330 \u001b[32m200\u001b[0m 479.258 ms - 10421\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 22:52:48"}
+{"level":"info","message":"\u001b[0mGET /api/patients/6a5636ab99dc093189e1171e \u001b[36m304\u001b[0m 214.798 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 22:52:51"}
+{"level":"info","message":"\u001b[0mGET /api/patients/6a5636ab99dc093189e1171e \u001b[36m304\u001b[0m 249.368 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 22:52:52"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/patient/6a5636ab99dc093189e1171e \u001b[32m200\u001b[0m 300.403 ms - 10421\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 22:52:52"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/patient/6a5636ab99dc093189e1171e \u001b[36m304\u001b[0m 318.633 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 22:52:52"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/6a5636ad99dc093189e11720/test/6a55ec71506b88d76ae5c6de \u001b[32m200\u001b[0m 385.078 ms - 2647\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 22:53:13"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/6a5636ad99dc093189e11720/test/6a55ec71506b88d76ae5c6de \u001b[36m304\u001b[0m 308.867 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 22:53:21"}
+{"level":"info","message":"\u001b[0mPATCH /api/patient-tests/6a5636ad99dc093189e11720 \u001b[32m200\u001b[0m 450.785 ms - 12327\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 22:53:21"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/6a5636ad99dc093189e11720/test/6a55ec71506b88d76ae5c6de \u001b[32m200\u001b[0m 301.513 ms - 2647\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 22:53:25"}
+{"level":"info","message":"\u001b[0mPATCH /api/patient-tests/6a5636ad99dc093189e11720 \u001b[32m200\u001b[0m 329.507 ms - 12327\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 22:53:26"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/6a5636ad99dc093189e11720/test/6a55ec71506b88d76ae5c6de \u001b[32m200\u001b[0m 1163.502 ms - 2647\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 22:58:59"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/6a5636ad99dc093189e11720/test/6a55ec71506b88d76ae5c6de \u001b[36m304\u001b[0m 416.688 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 22:59:34"}
+{"level":"info","message":"\u001b[0mPATCH /api/patient-tests/6a5636ad99dc093189e11720 \u001b[32m200\u001b[0m 752.369 ms - 12332\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 22:59:35"}
+{"level":"debug","message":"Cache hit for key: tests:all","service":"laboratory-management-system","timestamp":"2026-07-14 23:00:47"}
+{"level":"info","message":"\u001b[0mGET /api/tests \u001b[36m304\u001b[0m 1261.993 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:00:47"}
+{"level":"debug","message":"Cache hit for key: departments:all","service":"laboratory-management-system","timestamp":"2026-07-14 23:01:05"}
+{"level":"debug","message":"Cache miss for key: test:6a4ea2f4a538d2ed3bb1c537","service":"laboratory-management-system","timestamp":"2026-07-14 23:01:05"}
+{"level":"info","message":"\u001b[0mGET /api/departments \u001b[36m304\u001b[0m 485.038 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:01:05"}
+{"level":"info","message":"\u001b[0mGET /api/tests/6a4ea2f4a538d2ed3bb1c537 \u001b[32m200\u001b[0m 862.851 ms - 866\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:01:05"}
+{"level":"debug","message":"Cache hit for key: departments:all","service":"laboratory-management-system","timestamp":"2026-07-14 23:01:06"}
+{"level":"info","message":"\u001b[0mGET /api/departments \u001b[36m304\u001b[0m 434.113 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:01:06"}
+{"level":"debug","message":"Cache hit for key: test:6a4ea2f4a538d2ed3bb1c537","service":"laboratory-management-system","timestamp":"2026-07-14 23:01:06"}
+{"level":"info","message":"\u001b[0mGET /api/tests/6a4ea2f4a538d2ed3bb1c537 \u001b[36m304\u001b[0m 578.894 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:01:06"}
+{"level":"debug","message":"Cache hit for key: test:6a55ec71506b88d76ae5c6de","service":"laboratory-management-system","timestamp":"2026-07-14 23:01:31"}
+{"level":"debug","message":"Cache hit for key: departments:all","service":"laboratory-management-system","timestamp":"2026-07-14 23:01:31"}
+{"level":"info","message":"\u001b[0mGET /api/tests/6a55ec71506b88d76ae5c6de \u001b[36m304\u001b[0m 347.621 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:01:31"}
+{"level":"info","message":"\u001b[0mGET /api/departments \u001b[36m304\u001b[0m 358.373 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:01:31"}
+{"level":"debug","message":"Cache hit for key: departments:all","service":"laboratory-management-system","timestamp":"2026-07-14 23:01:31"}
+{"level":"debug","message":"Cache hit for key: test:6a55ec71506b88d76ae5c6de","service":"laboratory-management-system","timestamp":"2026-07-14 23:01:31"}
+{"level":"info","message":"\u001b[0mGET /api/departments \u001b[36m304\u001b[0m 408.389 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:01:31"}
+{"level":"info","message":"\u001b[0mGET /api/tests/6a55ec71506b88d76ae5c6de \u001b[36m304\u001b[0m 437.899 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:01:31"}
+{"level":"info","message":"\u001b[0mPOST /api/auth/logout \u001b[32m200\u001b[0m 7.094 ms - 52\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:01:34"}
+{"level":"info","message":"\u001b[0mPOST /api/auth/login \u001b[32m200\u001b[0m 684.657 ms - 154\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:01:57"}
+{"level":"info","message":"\u001b[0mGET /api/patients \u001b[36m304\u001b[0m 280.820 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:01:58"}
+{"level":"debug","message":"Cache hit for key: settings:print-template:6a33b86c4526357475b1d8ac","service":"laboratory-management-system","timestamp":"2026-07-14 23:01:58"}
+{"level":"info","message":"\u001b[0mGET /api/settings/print-template \u001b[32m200\u001b[0m 359.047 ms - 2324\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:01:58"}
+{"level":"debug","message":"Cache hit for key: doctors:all","service":"laboratory-management-system","timestamp":"2026-07-14 23:01:58"}
+{"level":"info","message":"\u001b[0mGET /api/doctors \u001b[36m304\u001b[0m 401.343 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:01:58"}
+{"level":"debug","message":"Cache miss for key: dashboard:stats:today:-330","service":"laboratory-management-system","timestamp":"2026-07-14 23:01:58"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests?date=today&timezoneOffset=-330 \u001b[32m200\u001b[0m 432.123 ms - 10426\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:01:58"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests \u001b[32m200\u001b[0m 585.117 ms - 187668\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:01:58"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests?date=today&timezoneOffset=-330 \u001b[36m304\u001b[0m 450.133 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:01:58"}
+{"level":"info","message":"\u001b[0mGET /api/patients/summary/today?timezoneOffset=-330 \u001b[32m200\u001b[0m 1013.785 ms - 550\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:01:59"}
+{"level":"debug","message":"Cache hit for key: departments:all","service":"laboratory-management-system","timestamp":"2026-07-14 23:02:04"}
+{"level":"debug","message":"Cache hit for key: test:6a55ec71506b88d76ae5c6de","service":"laboratory-management-system","timestamp":"2026-07-14 23:02:04"}
+{"level":"info","message":"\u001b[0mGET /api/departments \u001b[36m304\u001b[0m 413.137 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:02:04"}
+{"level":"info","message":"\u001b[0mGET /api/tests/6a55ec71506b88d76ae5c6de \u001b[36m304\u001b[0m 415.058 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:02:04"}
+{"level":"debug","message":"Cache hit for key: departments:all","service":"laboratory-management-system","timestamp":"2026-07-14 23:02:04"}
+{"level":"debug","message":"Cache hit for key: test:6a55ec71506b88d76ae5c6de","service":"laboratory-management-system","timestamp":"2026-07-14 23:02:04"}
+{"level":"info","message":"\u001b[0mGET /api/departments \u001b[36m304\u001b[0m 345.955 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:02:04"}
+{"level":"info","message":"\u001b[0mGET /api/tests/6a55ec71506b88d76ae5c6de \u001b[36m304\u001b[0m 344.397 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:02:04"}
+{"level":"debug","message":"Invalidated cache key: tests:all","service":"laboratory-management-system","timestamp":"2026-07-14 23:03:59"}
+{"level":"debug","message":"Invalidated cache key: test:6a55ec71506b88d76ae5c6de","service":"laboratory-management-system","timestamp":"2026-07-14 23:03:59"}
+{"level":"info","message":"\u001b[0mPATCH /api/tests/6a55ec71506b88d76ae5c6de \u001b[32m200\u001b[0m 850.394 ms - 2021\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:03:59"}
+{"level":"info","message":"\u001b[0mGET /api/auth/users \u001b[32m200\u001b[0m 143.084 ms - 925\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:04:02"}
+{"level":"info","message":"\u001b[0mGET /api/auth/users \u001b[36m304\u001b[0m 147.131 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:04:02"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests?date=today&timezoneOffset=-330 \u001b[32m200\u001b[0m 349.933 ms - 10644\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:04:03"}
+{"level":"info","message":"\u001b[0mGET /api/patients/6a5636ab99dc093189e1171e \u001b[36m304\u001b[0m 231.475 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:04:04"}
+{"level":"info","message":"\u001b[0mGET /api/patients/6a5636ab99dc093189e1171e \u001b[36m304\u001b[0m 230.743 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:04:04"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/patient/6a5636ab99dc093189e1171e \u001b[32m200\u001b[0m 301.754 ms - 10644\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:04:04"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/patient/6a5636ab99dc093189e1171e \u001b[36m304\u001b[0m 397.728 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:04:05"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/6a5636ad99dc093189e11720/test/6a55ec71506b88d76ae5c6de \u001b[32m200\u001b[0m 430.536 ms - 2870\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:04:07"}
+{"level":"debug","message":"Cache hit for key: departments:all","service":"laboratory-management-system","timestamp":"2026-07-14 23:04:48"}
+{"level":"debug","message":"Cache miss for key: test:6a55ec71506b88d76ae5c6de","service":"laboratory-management-system","timestamp":"2026-07-14 23:04:48"}
+{"level":"info","message":"\u001b[0mGET /api/departments \u001b[36m304\u001b[0m 497.440 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:04:48"}
+{"level":"info","message":"\u001b[0mGET /api/tests/6a55ec71506b88d76ae5c6de \u001b[32m200\u001b[0m 669.067 ms - 2021\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:04:48"}
+{"level":"debug","message":"Cache hit for key: departments:all","service":"laboratory-management-system","timestamp":"2026-07-14 23:04:48"}
+{"level":"info","message":"\u001b[0mGET /api/departments \u001b[36m304\u001b[0m 468.777 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:04:48"}
+{"level":"debug","message":"Cache hit for key: test:6a55ec71506b88d76ae5c6de","service":"laboratory-management-system","timestamp":"2026-07-14 23:04:48"}
+{"level":"info","message":"\u001b[0mGET /api/tests/6a55ec71506b88d76ae5c6de \u001b[36m304\u001b[0m 425.741 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:04:48"}
+{"level":"debug","message":"Invalidated cache key: tests:all","service":"laboratory-management-system","timestamp":"2026-07-14 23:04:56"}
+{"level":"debug","message":"Invalidated cache key: test:6a55ec71506b88d76ae5c6de","service":"laboratory-management-system","timestamp":"2026-07-14 23:04:56"}
+{"level":"info","message":"\u001b[0mPATCH /api/tests/6a55ec71506b88d76ae5c6de \u001b[32m200\u001b[0m 1270.282 ms - 2020\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:04:56"}
+{"level":"info","message":"\u001b[0mGET /api/patients/6a5636ab99dc093189e1171e \u001b[36m304\u001b[0m 234.360 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:05:00"}
+{"level":"info","message":"\u001b[0mGET /api/patients/6a5636ab99dc093189e1171e \u001b[36m304\u001b[0m 233.439 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:05:01"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/patient/6a5636ab99dc093189e1171e \u001b[32m200\u001b[0m 283.165 ms - 10643\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:05:01"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/patient/6a5636ab99dc093189e1171e \u001b[36m304\u001b[0m 293.599 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:05:01"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/6a5636ad99dc093189e11720/test/6a55ec71506b88d76ae5c6de \u001b[32m200\u001b[0m 394.547 ms - 2869\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:05:07"}
+{"level":"info","message":"\u001b[0mGET /api/auth/me \u001b[32m200\u001b[0m 113.163 ms - 154\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:05:37"}
+{"level":"info","message":"\u001b[0mGET /api/auth/me \u001b[36m304\u001b[0m 726.052 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:05:43"}
+{"level":"debug","message":"Cache hit for key: settings:print-template:6a33b86c4526357475b1d8ac","service":"laboratory-management-system","timestamp":"2026-07-14 23:05:44"}
+{"level":"info","message":"\u001b[0mGET /api/settings/print-template \u001b[36m304\u001b[0m 2364.442 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:05:45"}
+{"level":"debug","message":"Cache hit for key: settings:print-template:6a33b86c4526357475b1d8ac","service":"laboratory-management-system","timestamp":"2026-07-14 23:05:46"}
+{"level":"info","message":"\u001b[0mGET /api/settings/print-template \u001b[36m304\u001b[0m 1056.737 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:05:47"}
+{"level":"info","message":"\u001b[0mGET /api/patients/6a5636ab99dc093189e1171e \u001b[36m304\u001b[0m 282.282 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:05:57"}
+{"level":"info","message":"\u001b[0mGET /api/patients/6a5636ab99dc093189e1171e \u001b[36m304\u001b[0m 242.199 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:05:58"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/patient/6a5636ab99dc093189e1171e \u001b[36m304\u001b[0m 919.217 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:05:59"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/patient/6a5636ab99dc093189e1171e \u001b[36m304\u001b[0m 454.253 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:06:00"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/6a5636ad99dc093189e11720/test/6a55ec71506b88d76ae5c6de \u001b[36m304\u001b[0m 320.527 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:06:03"}
+{"level":"debug","message":"Cache miss for key: tests:all","service":"laboratory-management-system","timestamp":"2026-07-14 23:06:33"}
+{"level":"info","message":"\u001b[0mGET /api/tests \u001b[32m200\u001b[0m 642.305 ms - 22772\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:06:33"}
+{"level":"debug","message":"Cache hit for key: departments:all","service":"laboratory-management-system","timestamp":"2026-07-14 23:06:35"}
+{"level":"debug","message":"Cache miss for key: test:6a55ec71506b88d76ae5c6de","service":"laboratory-management-system","timestamp":"2026-07-14 23:06:35"}
+{"level":"info","message":"\u001b[0mGET /api/departments \u001b[36m304\u001b[0m 471.269 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:06:35"}
+{"level":"info","message":"\u001b[0mGET /api/tests/6a55ec71506b88d76ae5c6de \u001b[32m200\u001b[0m 650.709 ms - 2020\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:06:35"}
+{"level":"debug","message":"Cache hit for key: departments:all","service":"laboratory-management-system","timestamp":"2026-07-14 23:06:35"}
+{"level":"info","message":"\u001b[0mGET /api/departments \u001b[36m304\u001b[0m 343.764 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:06:35"}
+{"level":"debug","message":"Cache hit for key: test:6a55ec71506b88d76ae5c6de","service":"laboratory-management-system","timestamp":"2026-07-14 23:06:35"}
+{"level":"info","message":"\u001b[0mGET /api/tests/6a55ec71506b88d76ae5c6de \u001b[36m304\u001b[0m 321.501 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:06:35"}
+{"level":"debug","message":"Invalidated cache key: tests:all","service":"laboratory-management-system","timestamp":"2026-07-14 23:07:03"}
+{"level":"debug","message":"Invalidated cache key: test:6a55ec71506b88d76ae5c6de","service":"laboratory-management-system","timestamp":"2026-07-14 23:07:03"}
+{"level":"info","message":"\u001b[0mPATCH /api/tests/6a55ec71506b88d76ae5c6de \u001b[32m200\u001b[0m 1017.614 ms - 2019\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:07:03"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests?date=today&timezoneOffset=-330 \u001b[32m200\u001b[0m 407.337 ms - 10642\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:07:16"}
+{"level":"info","message":"\u001b[0mGET /api/patients/6a5636ab99dc093189e1171e \u001b[36m304\u001b[0m 461.484 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:07:18"}
+{"level":"info","message":"\u001b[0mGET /api/patients/6a5636ab99dc093189e1171e \u001b[36m304\u001b[0m 202.230 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:07:19"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/patient/6a5636ab99dc093189e1171e \u001b[32m200\u001b[0m 302.702 ms - 10642\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:07:19"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/patient/6a5636ab99dc093189e1171e \u001b[36m304\u001b[0m 317.178 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:07:19"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/6a5636ad99dc093189e11720/test/6a55ec71506b88d76ae5c6de \u001b[32m200\u001b[0m 306.466 ms - 2868\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:07:23"}
+{"level":"debug","message":"Cache miss for key: test:6a55ec71506b88d76ae5c6de","service":"laboratory-management-system","timestamp":"2026-07-14 23:07:33"}
+{"level":"debug","message":"Cache hit for key: departments:all","service":"laboratory-management-system","timestamp":"2026-07-14 23:07:33"}
+{"level":"info","message":"\u001b[0mGET /api/departments \u001b[36m304\u001b[0m 373.579 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:07:33"}
+{"level":"info","message":"\u001b[0mGET /api/tests/6a55ec71506b88d76ae5c6de \u001b[32m200\u001b[0m 555.271 ms - 2019\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:07:33"}
+{"level":"debug","message":"Cache hit for key: departments:all","service":"laboratory-management-system","timestamp":"2026-07-14 23:07:33"}
+{"level":"info","message":"\u001b[0mGET /api/departments \u001b[36m304\u001b[0m 342.432 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:07:33"}
+{"level":"debug","message":"Cache hit for key: test:6a55ec71506b88d76ae5c6de","service":"laboratory-management-system","timestamp":"2026-07-14 23:07:33"}
+{"level":"info","message":"\u001b[0mGET /api/tests/6a55ec71506b88d76ae5c6de \u001b[36m304\u001b[0m 322.848 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:07:33"}
+{"level":"debug","message":"Cache hit for key: departments:all","service":"laboratory-management-system","timestamp":"2026-07-14 23:07:50"}
+{"level":"debug","message":"Cache hit for key: test:6a55ec71506b88d76ae5c6de","service":"laboratory-management-system","timestamp":"2026-07-14 23:07:50"}
+{"level":"info","message":"\u001b[0mGET /api/departments \u001b[36m304\u001b[0m 522.349 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:07:50"}
+{"level":"info","message":"\u001b[0mGET /api/tests/6a55ec71506b88d76ae5c6de \u001b[36m304\u001b[0m 520.697 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:07:50"}
+{"level":"debug","message":"Cache hit for key: departments:all","service":"laboratory-management-system","timestamp":"2026-07-14 23:07:51"}
+{"level":"debug","message":"Cache hit for key: test:6a55ec71506b88d76ae5c6de","service":"laboratory-management-system","timestamp":"2026-07-14 23:07:51"}
+{"level":"info","message":"\u001b[0mGET /api/departments \u001b[36m304\u001b[0m 438.090 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:07:51"}
+{"level":"info","message":"\u001b[0mGET /api/tests/6a55ec71506b88d76ae5c6de \u001b[36m304\u001b[0m 459.856 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:07:51"}
+{"level":"debug","message":"Cache hit for key: departments:all","service":"laboratory-management-system","timestamp":"2026-07-14 23:08:13"}
+{"level":"info","message":"\u001b[0mGET /api/departments \u001b[36m304\u001b[0m 453.061 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:08:13"}
+{"level":"debug","message":"Cache hit for key: departments:all","service":"laboratory-management-system","timestamp":"2026-07-14 23:08:14"}
+{"level":"info","message":"\u001b[0mGET /api/departments \u001b[36m304\u001b[0m 951.695 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:08:14"}
+{"level":"debug","message":"Invalidated cache key: tests:all","service":"laboratory-management-system","timestamp":"2026-07-14 23:31:44"}
+{"level":"info","message":"\u001b[0mPOST /api/tests \u001b[32m201\u001b[0m 720.213 ms - 1025\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:31:44"}
+{"level":"debug","message":"Cache miss for key: tests:all","service":"laboratory-management-system","timestamp":"2026-07-14 23:31:45"}
+{"level":"info","message":"\u001b[0mGET /api/tests \u001b[32m200\u001b[0m 2078.040 ms - 23773\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:31:47"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests?date=today&timezoneOffset=-330 \u001b[36m304\u001b[0m 322.952 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:31:52"}
+{"level":"info","message":"\u001b[0mGET /api/patients/6a5636ab99dc093189e1171e \u001b[36m304\u001b[0m 335.904 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:31:55"}
+{"level":"info","message":"\u001b[0mGET /api/patients/6a5636ab99dc093189e1171e \u001b[36m304\u001b[0m 258.454 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:31:56"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/patient/6a5636ab99dc093189e1171e \u001b[36m304\u001b[0m 320.537 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:31:56"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/patient/6a5636ab99dc093189e1171e \u001b[36m304\u001b[0m 323.706 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:31:57"}
+{"level":"debug","message":"Cache hit for key: tests:all","service":"laboratory-management-system","timestamp":"2026-07-14 23:32:00"}
+{"level":"info","message":"\u001b[0mGET /api/tests \u001b[36m304\u001b[0m 1457.252 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:32:00"}
+{"level":"info","message":"\u001b[0mPATCH /api/patient-tests/6a5636ad99dc093189e11720/add-test \u001b[32m200\u001b[0m 573.976 ms - 13459\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:32:03"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/6a5636ad99dc093189e11720/test/6a5679883fecb430a6453bc3 \u001b[32m200\u001b[0m 338.157 ms - 1946\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:32:07"}
+{"level":"debug","message":"Cache miss for key: test:6a5679883fecb430a6453bc3","service":"laboratory-management-system","timestamp":"2026-07-14 23:32:21"}
+{"level":"debug","message":"Cache hit for key: departments:all","service":"laboratory-management-system","timestamp":"2026-07-14 23:32:21"}
+{"level":"info","message":"\u001b[0mGET /api/departments \u001b[36m304\u001b[0m 356.710 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:32:21"}
+{"level":"info","message":"\u001b[0mGET /api/tests/6a5679883fecb430a6453bc3 \u001b[32m200\u001b[0m 535.352 ms - 1025\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:32:21"}
+{"level":"debug","message":"Cache hit for key: departments:all","service":"laboratory-management-system","timestamp":"2026-07-14 23:32:21"}
+{"level":"info","message":"\u001b[0mGET /api/departments \u001b[36m304\u001b[0m 356.962 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:32:21"}
+{"level":"debug","message":"Cache hit for key: test:6a5679883fecb430a6453bc3","service":"laboratory-management-system","timestamp":"2026-07-14 23:32:21"}
+{"level":"info","message":"\u001b[0mGET /api/tests/6a5679883fecb430a6453bc3 \u001b[36m304\u001b[0m 333.246 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:32:21"}
+{"level":"info","message":"\u001b[0mGET /api/auth/me \u001b[36m304\u001b[0m 83.114 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:33:10"}
+{"level":"info","message":"\u001b[0mGET /api/auth/me \u001b[36m304\u001b[0m 91.599 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:33:11"}
+{"level":"debug","message":"Cache hit for key: settings:print-template:6a33b86c4526357475b1d8ac","service":"laboratory-management-system","timestamp":"2026-07-14 23:33:14"}
+{"level":"info","message":"\u001b[0mGET /api/settings/print-template \u001b[36m304\u001b[0m 387.023 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:33:14"}
+{"level":"debug","message":"Cache hit for key: departments:all","service":"laboratory-management-system","timestamp":"2026-07-14 23:33:24"}
+{"level":"debug","message":"Cache hit for key: test:6a5679883fecb430a6453bc3","service":"laboratory-management-system","timestamp":"2026-07-14 23:33:24"}
+{"level":"info","message":"\u001b[0mGET /api/departments \u001b[36m304\u001b[0m 528.611 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:33:24"}
+{"level":"info","message":"\u001b[0mGET /api/tests/6a5679883fecb430a6453bc3 \u001b[36m304\u001b[0m 504.716 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:33:24"}
+{"level":"debug","message":"Cache hit for key: departments:all","service":"laboratory-management-system","timestamp":"2026-07-14 23:33:24"}
+{"level":"debug","message":"Cache hit for key: test:6a5679883fecb430a6453bc3","service":"laboratory-management-system","timestamp":"2026-07-14 23:33:24"}
+{"level":"info","message":"\u001b[0mGET /api/departments \u001b[36m304\u001b[0m 474.543 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:33:24"}
+{"level":"info","message":"\u001b[0mGET /api/tests/6a5679883fecb430a6453bc3 \u001b[36m304\u001b[0m 469.806 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:33:24"}
+{"level":"debug","message":"Invalidated cache key: tests:all","service":"laboratory-management-system","timestamp":"2026-07-14 23:33:52"}
+{"level":"debug","message":"Invalidated cache key: test:6a5679883fecb430a6453bc3","service":"laboratory-management-system","timestamp":"2026-07-14 23:33:53"}
+{"level":"info","message":"\u001b[0mPATCH /api/tests/6a5679883fecb430a6453bc3 \u001b[32m200\u001b[0m 905.298 ms - 1022\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:33:53"}
+{"level":"debug","message":"Cache miss for key: tests:all","service":"laboratory-management-system","timestamp":"2026-07-14 23:33:53"}
+{"level":"info","message":"\u001b[0mGET /api/tests \u001b[32m200\u001b[0m 741.814 ms - 23770\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:33:54"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests?date=today&timezoneOffset=-330 \u001b[32m200\u001b[0m 428.863 ms - 13068\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:33:55"}
+{"level":"info","message":"\u001b[0mGET /api/patients/6a5679e25ae41b4700377224 \u001b[32m200\u001b[0m 361.993 ms - 462\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:34:11"}
+{"level":"info","message":"\u001b[0mGET /api/patients/6a5679e25ae41b4700377224 \u001b[36m304\u001b[0m 250.778 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:34:12"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/patient/6a5679e25ae41b4700377224 \u001b[32m200\u001b[0m 304.581 ms - 1588\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:34:12"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/patient/6a5679e25ae41b4700377224 \u001b[36m304\u001b[0m 413.746 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:34:12"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/6a5679e35ae41b4700377226/test/6a5679883fecb430a6453bc3 \u001b[32m200\u001b[0m 376.634 ms - 1261\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:34:14"}
+{"level":"info","message":"\u001b[0mGET /api/patients/6a5636ab99dc093189e1171e \u001b[36m304\u001b[0m 192.796 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:34:28"}
+{"level":"info","message":"\u001b[0mGET /api/patients/6a5636ab99dc093189e1171e \u001b[36m304\u001b[0m 311.754 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:34:28"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/patient/6a5636ab99dc093189e1171e \u001b[32m200\u001b[0m 445.332 ms - 11513\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:34:28"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/patient/6a5636ab99dc093189e1171e \u001b[36m304\u001b[0m 313.326 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:34:29"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/6a5636ad99dc093189e11720/test/6a5679883fecb430a6453bc3 \u001b[32m200\u001b[0m 350.743 ms - 1943\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:34:31"}
+{"level":"info","message":"\u001b[0mGET /api/patients/6a5679e25ae41b4700377224 \u001b[36m304\u001b[0m 229.852 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:34:46"}
+{"level":"info","message":"\u001b[0mGET /api/patients/6a5679e25ae41b4700377224 \u001b[36m304\u001b[0m 290.122 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:34:46"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/patient/6a5679e25ae41b4700377224 \u001b[36m304\u001b[0m 323.867 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:34:46"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/patient/6a5679e25ae41b4700377224 \u001b[36m304\u001b[0m 310.986 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:34:46"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/6a5679e35ae41b4700377226/test/6a5679883fecb430a6453bc3 \u001b[36m304\u001b[0m 327.602 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:34:48"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/6a5679e35ae41b4700377226/test/6a5679883fecb430a6453bc3 \u001b[32m200\u001b[0m 272.242 ms - 1330\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:35:12"}
+{"level":"info","message":"\u001b[0mPATCH /api/patient-tests/6a5679e35ae41b4700377226 \u001b[32m200\u001b[0m 282.632 ms - 3275\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:35:13"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/6a5679e35ae41b4700377226/test/6a55ec71506b88d76ae5c6de \u001b[32m200\u001b[0m 316.678 ms - 2471\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:35:18"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/6a5679e35ae41b4700377226/test/6a55ec71506b88d76ae5c6de \u001b[36m304\u001b[0m 324.100 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:35:34"}
+{"level":"info","message":"\u001b[0mPATCH /api/patient-tests/6a5679e35ae41b4700377226 \u001b[32m200\u001b[0m 319.194 ms - 3691\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:35:34"}
+{"level":"debug","message":"Cache hit for key: departments:all","service":"laboratory-management-system","timestamp":"2026-07-14 23:36:02"}
+{"level":"debug","message":"Cache hit for key: test:6a55ec71506b88d76ae5c6de","service":"laboratory-management-system","timestamp":"2026-07-14 23:36:02"}
+{"level":"info","message":"\u001b[0mGET /api/departments \u001b[36m304\u001b[0m 549.514 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:36:02"}
+{"level":"info","message":"\u001b[0mGET /api/tests/6a55ec71506b88d76ae5c6de \u001b[36m304\u001b[0m 597.439 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:36:02"}
+{"level":"debug","message":"Cache hit for key: test:6a55ec71506b88d76ae5c6de","service":"laboratory-management-system","timestamp":"2026-07-14 23:36:03"}
+{"level":"debug","message":"Cache hit for key: departments:all","service":"laboratory-management-system","timestamp":"2026-07-14 23:36:03"}
+{"level":"info","message":"\u001b[0mGET /api/tests/6a55ec71506b88d76ae5c6de \u001b[36m304\u001b[0m 620.176 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:36:03"}
+{"level":"info","message":"\u001b[0mGET /api/departments \u001b[36m304\u001b[0m 667.497 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:36:03"}
+{"level":"debug","message":"Cache hit for key: test:6a55ec71506b88d76ae5c6de","service":"laboratory-management-system","timestamp":"2026-07-14 23:36:34"}
+{"level":"debug","message":"Cache hit for key: departments:all","service":"laboratory-management-system","timestamp":"2026-07-14 23:36:34"}
+{"level":"info","message":"\u001b[0mGET /api/tests/6a55ec71506b88d76ae5c6de \u001b[36m304\u001b[0m 432.009 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:36:34"}
+{"level":"info","message":"\u001b[0mGET /api/departments \u001b[36m304\u001b[0m 441.676 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:36:34"}
+{"level":"debug","message":"Cache hit for key: test:6a55ec71506b88d76ae5c6de","service":"laboratory-management-system","timestamp":"2026-07-14 23:36:34"}
+{"level":"debug","message":"Cache hit for key: departments:all","service":"laboratory-management-system","timestamp":"2026-07-14 23:36:34"}
+{"level":"info","message":"\u001b[0mGET /api/tests/6a55ec71506b88d76ae5c6de \u001b[36m304\u001b[0m 517.490 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:36:34"}
+{"level":"info","message":"\u001b[0mGET /api/departments \u001b[36m304\u001b[0m 515.508 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:36:34"}
+{"level":"info","message":"\u001b[0mGET /api/patients \u001b[32m200\u001b[0m 343.852 ms - 8810\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:37:43"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests?date=today&timezoneOffset=-330 \u001b[32m200\u001b[0m 397.097 ms - 15495\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:37:43"}
+{"level":"debug","message":"Cache miss for key: dashboard:stats:today:-330","service":"laboratory-management-system","timestamp":"2026-07-14 23:37:43"}
+{"level":"debug","message":"Cache hit for key: doctors:all","service":"laboratory-management-system","timestamp":"2026-07-14 23:37:43"}
+{"level":"info","message":"\u001b[0mGET /api/doctors \u001b[36m304\u001b[0m 517.751 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:37:43"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests \u001b[32m200\u001b[0m 692.624 ms - 192953\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:37:43"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests?date=today&timezoneOffset=-330 \u001b[36m304\u001b[0m 1174.530 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:37:44"}
+{"level":"info","message":"\u001b[0mGET /api/patients/summary/today?timezoneOffset=-330 \u001b[32m200\u001b[0m 1942.250 ms - 986\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:37:45"}
+{"level":"info","message":"\u001b[0mGET /api/patients/6a5679e25ae41b4700377224 \u001b[36m304\u001b[0m 248.349 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:37:46"}
+{"level":"info","message":"\u001b[0mGET /api/patients/6a5679e25ae41b4700377224 \u001b[36m304\u001b[0m 230.569 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:37:47"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/patient/6a5679e25ae41b4700377224 \u001b[32m200\u001b[0m 299.899 ms - 4015\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:37:47"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/patient/6a5679e25ae41b4700377224 \u001b[36m304\u001b[0m 399.058 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:37:47"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/6a5679e35ae41b4700377226/test/6a5679883fecb430a6453bc3 \u001b[32m200\u001b[0m 330.769 ms - 1891\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:39:12"}
+{"level":"debug","message":"Cache hit for key: tests:all","service":"laboratory-management-system","timestamp":"2026-07-14 23:39:18"}
+{"level":"info","message":"\u001b[0mGET /api/tests \u001b[36m304\u001b[0m 2064.618 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:39:18"}
+{"level":"debug","message":"Cache hit for key: departments:all","service":"laboratory-management-system","timestamp":"2026-07-14 23:39:20"}
+{"level":"info","message":"\u001b[0mGET /api/departments \u001b[36m304\u001b[0m 376.568 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:39:20"}
+{"level":"debug","message":"Cache miss for key: test:6a5679883fecb430a6453bc3","service":"laboratory-management-system","timestamp":"2026-07-14 23:39:20"}
+{"level":"info","message":"\u001b[0mGET /api/tests/6a5679883fecb430a6453bc3 \u001b[32m200\u001b[0m 540.262 ms - 1022\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:39:20"}
+{"level":"debug","message":"Cache hit for key: departments:all","service":"laboratory-management-system","timestamp":"2026-07-14 23:39:20"}
+{"level":"info","message":"\u001b[0mGET /api/departments \u001b[36m304\u001b[0m 363.491 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:39:20"}
+{"level":"debug","message":"Cache hit for key: test:6a5679883fecb430a6453bc3","service":"laboratory-management-system","timestamp":"2026-07-14 23:39:20"}
+{"level":"info","message":"\u001b[0mGET /api/tests/6a5679883fecb430a6453bc3 \u001b[36m304\u001b[0m 421.966 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:39:20"}
+{"level":"debug","message":"Invalidated cache key: tests:all","service":"laboratory-management-system","timestamp":"2026-07-14 23:39:25"}
+{"level":"debug","message":"Invalidated cache key: test:6a5679883fecb430a6453bc3","service":"laboratory-management-system","timestamp":"2026-07-14 23:39:26"}
+{"level":"info","message":"\u001b[0mPATCH /api/tests/6a5679883fecb430a6453bc3 \u001b[32m200\u001b[0m 892.924 ms - 1023\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:39:26"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests?date=today&timezoneOffset=-330 \u001b[32m200\u001b[0m 299.964 ms - 15497\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:39:28"}
+{"level":"info","message":"\u001b[0mGET /api/patients/6a5679e25ae41b4700377224 \u001b[36m304\u001b[0m 360.554 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:39:29"}
+{"level":"info","message":"\u001b[0mGET /api/patients/6a5679e25ae41b4700377224 \u001b[36m304\u001b[0m 228.294 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:39:30"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/patient/6a5679e25ae41b4700377224 \u001b[32m200\u001b[0m 272.921 ms - 4016\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:39:30"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/patient/6a5679e25ae41b4700377224 \u001b[36m304\u001b[0m 283.497 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:39:30"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/6a5679e35ae41b4700377226/test/6a5679883fecb430a6453bc3 \u001b[32m200\u001b[0m 299.049 ms - 1892\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:39:31"}
+{"level":"debug","message":"Cache miss for key: tests:all","service":"laboratory-management-system","timestamp":"2026-07-14 23:48:01"}
+{"level":"info","message":"\u001b[0mGET /api/tests \u001b[32m200\u001b[0m 793.431 ms - 23771\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:48:01"}
+{"level":"info","message":"\u001b[0mGET /api/auth/me \u001b[36m304\u001b[0m 67.388 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:48:04"}
+{"level":"info","message":"\u001b[0mGET /api/auth/me \u001b[36m304\u001b[0m 207.299 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:48:05"}
+{"level":"debug","message":"Cache hit for key: settings:print-template:6a33b86c4526357475b1d8ac","service":"laboratory-management-system","timestamp":"2026-07-14 23:48:07"}
+{"level":"info","message":"\u001b[0mGET /api/settings/print-template \u001b[36m304\u001b[0m 697.495 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:48:07"}
+{"level":"debug","message":"Cache hit for key: tests:all","service":"laboratory-management-system","timestamp":"2026-07-14 23:48:09"}
+{"level":"info","message":"\u001b[0mGET /api/tests \u001b[36m304\u001b[0m 858.369 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:48:09"}
+{"level":"debug","message":"Cache miss for key: test:6a5679883fecb430a6453bc3","service":"laboratory-management-system","timestamp":"2026-07-14 23:48:11"}
+{"level":"debug","message":"Cache hit for key: departments:all","service":"laboratory-management-system","timestamp":"2026-07-14 23:48:11"}
+{"level":"info","message":"\u001b[0mGET /api/departments \u001b[36m304\u001b[0m 518.811 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:48:11"}
+{"level":"info","message":"\u001b[0mGET /api/tests/6a5679883fecb430a6453bc3 \u001b[32m200\u001b[0m 658.481 ms - 1023\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:48:11"}
+{"level":"debug","message":"Cache hit for key: departments:all","service":"laboratory-management-system","timestamp":"2026-07-14 23:48:12"}
+{"level":"info","message":"\u001b[0mGET /api/departments \u001b[36m304\u001b[0m 463.961 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:48:12"}
+{"level":"debug","message":"Cache hit for key: test:6a5679883fecb430a6453bc3","service":"laboratory-management-system","timestamp":"2026-07-14 23:48:12"}
+{"level":"info","message":"\u001b[0mGET /api/tests/6a5679883fecb430a6453bc3 \u001b[36m304\u001b[0m 394.252 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:48:12"}
+{"level":"debug","message":"Invalidated cache key: tests:all","service":"laboratory-management-system","timestamp":"2026-07-14 23:48:16"}
+{"level":"debug","message":"Invalidated cache key: test:6a5679883fecb430a6453bc3","service":"laboratory-management-system","timestamp":"2026-07-14 23:48:16"}
+{"level":"info","message":"\u001b[0mPATCH /api/tests/6a5679883fecb430a6453bc3 \u001b[32m200\u001b[0m 995.540 ms - 1023\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:48:16"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests?date=today&timezoneOffset=-330 \u001b[32m200\u001b[0m 330.930 ms - 15497\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:48:19"}
+{"level":"info","message":"\u001b[0mGET /api/patients/6a5679e25ae41b4700377224 \u001b[36m304\u001b[0m 317.535 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:48:20"}
+{"level":"info","message":"\u001b[0mGET /api/patients/6a5679e25ae41b4700377224 \u001b[36m304\u001b[0m 241.200 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:48:21"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/patient/6a5679e25ae41b4700377224 \u001b[32m200\u001b[0m 274.061 ms - 4016\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:48:21"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/patient/6a5679e25ae41b4700377224 \u001b[36m304\u001b[0m 322.990 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:48:21"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/6a5679e35ae41b4700377226/test/6a5679883fecb430a6453bc3 \u001b[32m200\u001b[0m 324.457 ms - 1892\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:48:24"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/6a5679e35ae41b4700377226/test/6a5679883fecb430a6453bc3 \u001b[36m304\u001b[0m 316.547 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:48:48"}
+{"level":"info","message":"\u001b[0mPATCH /api/patient-tests/6a5679e35ae41b4700377226 \u001b[32m200\u001b[0m 382.988 ms - 3655\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-14 23:48:48"}
+{"level":"info","message":"Server is running on port 3000 in development mode","service":"laboratory-management-system","timestamp":"2026-07-14 23:55:30"}
+{"level":"info","message":"Redis client connected","service":"laboratory-management-system","timestamp":"2026-07-14 23:55:30"}
+{"level":"info","message":"Database connected successfully","service":"laboratory-management-system","timestamp":"2026-07-14 23:55:31"}
+{"level":"info","message":"Redis client ready","service":"laboratory-management-system","timestamp":"2026-07-14 23:55:31"}
+{"level":"info","message":"Server is running on port 3000 in development mode","service":"laboratory-management-system","timestamp":"2026-07-14 23:58:03"}
+{"level":"info","message":"Redis client connected","service":"laboratory-management-system","timestamp":"2026-07-14 23:58:04"}
+{"level":"info","message":"Redis client ready","service":"laboratory-management-system","timestamp":"2026-07-14 23:58:05"}
+{"level":"info","message":"Database connected successfully","service":"laboratory-management-system","timestamp":"2026-07-14 23:58:05"}
+{"level":"info","message":"\u001b[0mGET /api/auth/me \u001b[36m304\u001b[0m 898.287 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:00:55"}
+{"level":"info","message":"\u001b[0mGET /api/auth/me \u001b[36m304\u001b[0m 78.391 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:00:55"}
+{"level":"debug","message":"Cache hit for key: settings:print-template:6a33b86c4526357475b1d8ac","service":"laboratory-management-system","timestamp":"2026-07-15 00:00:57"}
+{"level":"info","message":"\u001b[0mGET /api/settings/print-template \u001b[36m304\u001b[0m 557.833 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:00:57"}
+{"level":"info","message":"\u001b[0mGET /api/patients/6a5679e25ae41b4700377224 \u001b[36m304\u001b[0m 348.431 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:01:02"}
+{"level":"info","message":"\u001b[0mGET /api/patients/6a5679e25ae41b4700377224 \u001b[36m304\u001b[0m 212.860 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:01:03"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/patient/6a5679e25ae41b4700377224 \u001b[32m200\u001b[0m 314.008 ms - 3979\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:01:03"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/patient/6a5679e25ae41b4700377224 \u001b[36m304\u001b[0m 295.159 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:01:03"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/6a5679e35ae41b4700377226/test/6a5679883fecb430a6453bc3 \u001b[32m200\u001b[0m 1469.338 ms - 1955\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:04:53"}
+{"level":"info","message":"\u001b[0mGET /api/auth/me \u001b[36m304\u001b[0m 65.091 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:04:57"}
+{"level":"info","message":"\u001b[0mGET /api/auth/me \u001b[36m304\u001b[0m 122.942 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:05:00"}
+{"level":"debug","message":"Cache hit for key: settings:print-template:6a33b86c4526357475b1d8ac","service":"laboratory-management-system","timestamp":"2026-07-15 00:05:02"}
+{"level":"info","message":"\u001b[0mGET /api/settings/print-template \u001b[36m304\u001b[0m 1522.271 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:05:02"}
+{"level":"debug","message":"Cache hit for key: settings:print-template:6a33b86c4526357475b1d8ac","service":"laboratory-management-system","timestamp":"2026-07-15 00:05:03"}
+{"level":"info","message":"\u001b[0mGET /api/settings/print-template \u001b[36m304\u001b[0m 735.906 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:05:03"}
+{"level":"info","message":"\u001b[0mGET /api/patients/6a5679e25ae41b4700377224 \u001b[36m304\u001b[0m 231.711 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:05:05"}
+{"level":"info","message":"\u001b[0mGET /api/patients/6a5679e25ae41b4700377224 \u001b[36m304\u001b[0m 342.932 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:05:05"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/patient/6a5679e25ae41b4700377224 \u001b[36m304\u001b[0m 601.587 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:05:06"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/patient/6a5679e25ae41b4700377224 \u001b[36m304\u001b[0m 461.944 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:05:09"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/6a5679e35ae41b4700377226/test/6a5679883fecb430a6453bc3 \u001b[36m304\u001b[0m 393.356 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:05:16"}
+{"level":"info","message":"\u001b[0mGET /api/auth/me \u001b[36m304\u001b[0m 69.670 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:05:32"}
+{"level":"info","message":"\u001b[0mGET /api/auth/me \u001b[36m304\u001b[0m 85.472 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:05:32"}
+{"level":"info","message":"\u001b[0mGET /api/patients/6a5679e25ae41b4700377224 \u001b[36m304\u001b[0m 216.366 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:05:32"}
+{"level":"debug","message":"Cache hit for key: settings:print-template:6a33b86c4526357475b1d8ac","service":"laboratory-management-system","timestamp":"2026-07-15 00:05:32"}
+{"level":"info","message":"\u001b[0mGET /api/settings/print-template \u001b[36m304\u001b[0m 338.564 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:05:32"}
+{"level":"info","message":"\u001b[0mGET /api/patients/6a5679e25ae41b4700377224 \u001b[36m304\u001b[0m 452.969 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:05:33"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/patient/6a5679e25ae41b4700377224 \u001b[36m304\u001b[0m 507.276 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:05:33"}
+{"level":"debug","message":"Cache hit for key: settings:print-template:6a33b86c4526357475b1d8ac","service":"laboratory-management-system","timestamp":"2026-07-15 00:05:33"}
+{"level":"info","message":"\u001b[0mGET /api/settings/print-template \u001b[36m304\u001b[0m 549.291 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:05:33"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/patient/6a5679e25ae41b4700377224 \u001b[36m304\u001b[0m 298.355 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:05:33"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/6a5679e35ae41b4700377226/test/6a5679883fecb430a6453bc3 \u001b[36m304\u001b[0m 291.324 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:05:35"}
+{"level":"info","message":"\u001b[0mGET /api/auth/me \u001b[36m304\u001b[0m 320.676 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:05:36"}
+{"level":"info","message":"\u001b[0mGET /api/auth/me \u001b[36m304\u001b[0m 72.566 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:05:36"}
+{"level":"info","message":"\u001b[0mGET /api/patients/6a5679e25ae41b4700377224 \u001b[36m304\u001b[0m 216.738 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:05:36"}
+{"level":"debug","message":"Cache hit for key: settings:print-template:6a33b86c4526357475b1d8ac","service":"laboratory-management-system","timestamp":"2026-07-15 00:05:36"}
+{"level":"info","message":"\u001b[0mGET /api/settings/print-template \u001b[36m304\u001b[0m 394.321 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:05:36"}
+{"level":"info","message":"\u001b[0mGET /api/patients/6a5679e25ae41b4700377224 \u001b[36m304\u001b[0m 845.627 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:05:37"}
+{"level":"debug","message":"Cache hit for key: settings:print-template:6a33b86c4526357475b1d8ac","service":"laboratory-management-system","timestamp":"2026-07-15 00:05:37"}
+{"level":"info","message":"\u001b[0mGET /api/settings/print-template \u001b[36m304\u001b[0m 1454.107 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:05:38"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/patient/6a5679e25ae41b4700377224 \u001b[36m304\u001b[0m 1726.486 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:05:38"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/patient/6a5679e25ae41b4700377224 \u001b[36m304\u001b[0m 909.548 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:05:39"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/6a5679e35ae41b4700377226/test/6a5679883fecb430a6453bc3 \u001b[36m304\u001b[0m 675.015 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:11:04"}
+{"level":"info","message":"\u001b[0mGET /api/auth/me \u001b[36m304\u001b[0m 1366.797 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:14:18"}
+{"level":"info","message":"\u001b[0mGET /api/auth/me \u001b[36m304\u001b[0m 121.687 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:14:19"}
+{"level":"debug","message":"Cache hit for key: settings:print-template:6a33b86c4526357475b1d8ac","service":"laboratory-management-system","timestamp":"2026-07-15 00:14:29"}
+{"level":"info","message":"\u001b[0mGET /api/settings/print-template \u001b[36m304\u001b[0m 1919.477 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:14:29"}
+{"level":"info","message":"\u001b[0mGET /api/patients/6a5679e25ae41b4700377224 \u001b[36m304\u001b[0m 535.096 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:14:36"}
+{"level":"info","message":"\u001b[0mGET /api/patients/6a5679e25ae41b4700377224 \u001b[36m304\u001b[0m 341.600 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:14:37"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/patient/6a5679e25ae41b4700377224 \u001b[36m304\u001b[0m 419.850 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:14:37"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/patient/6a5679e25ae41b4700377224 \u001b[36m304\u001b[0m 350.637 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:14:38"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/6a5679e35ae41b4700377226/test/6a5679883fecb430a6453bc3 \u001b[36m304\u001b[0m 591.334 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:14:45"}
+{"level":"info","message":"\u001b[0mGET /api/auth/me \u001b[36m304\u001b[0m 175.527 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:15:55"}
+{"level":"info","message":"\u001b[0mGET /api/auth/me \u001b[36m304\u001b[0m 71.573 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:15:55"}
+{"level":"info","message":"\u001b[0mGET /api/patients/6a5679e25ae41b4700377224 \u001b[36m304\u001b[0m 196.686 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:16:00"}
+{"level":"debug","message":"Cache hit for key: settings:print-template:6a33b86c4526357475b1d8ac","service":"laboratory-management-system","timestamp":"2026-07-15 00:16:00"}
+{"level":"info","message":"\u001b[0mGET /api/settings/print-template \u001b[36m304\u001b[0m 324.450 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:16:00"}
+{"level":"info","message":"\u001b[0mGET /api/patients/6a5679e25ae41b4700377224 \u001b[36m304\u001b[0m 263.782 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:16:01"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/patient/6a5679e25ae41b4700377224 \u001b[36m304\u001b[0m 329.476 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:16:01"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/patient/6a5679e25ae41b4700377224 \u001b[36m304\u001b[0m 297.422 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:16:01"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/6a5679e35ae41b4700377226/test/6a5679883fecb430a6453bc3 \u001b[36m304\u001b[0m 362.746 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:17:05"}
+{"level":"info","message":"\u001b[0mGET /api/auth/me \u001b[32m200\u001b[0m 113.764 ms - 154\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:17:53"}
+{"level":"info","message":"\u001b[0mGET /api/auth/me \u001b[36m304\u001b[0m 381.382 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:17:53"}
+{"level":"debug","message":"Cache hit for key: settings:print-template:6a33b86c4526357475b1d8ac","service":"laboratory-management-system","timestamp":"2026-07-15 00:17:53"}
+{"level":"info","message":"\u001b[0mGET /api/settings/print-template \u001b[36m304\u001b[0m 341.084 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:17:53"}
+{"level":"debug","message":"Cache hit for key: settings:print-template:6a33b86c4526357475b1d8ac","service":"laboratory-management-system","timestamp":"2026-07-15 00:17:54"}
+{"level":"info","message":"\u001b[0mGET /api/settings/print-template \u001b[36m304\u001b[0m 415.485 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:17:54"}
+{"level":"info","message":"\u001b[0mGET /api/patients/6a5679e25ae41b4700377224 \u001b[36m304\u001b[0m 250.511 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:17:55"}
+{"level":"info","message":"\u001b[0mGET /api/patients/6a5679e25ae41b4700377224 \u001b[36m304\u001b[0m 336.441 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:17:56"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/patient/6a5679e25ae41b4700377224 \u001b[36m304\u001b[0m 368.894 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:17:56"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/patient/6a5679e25ae41b4700377224 \u001b[36m304\u001b[0m 266.932 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:17:56"}
+{"level":"debug","message":"Cache hit for key: tests:all","service":"laboratory-management-system","timestamp":"2026-07-15 00:18:00"}
+{"level":"info","message":"\u001b[0mGET /api/tests \u001b[32m200\u001b[0m 758.285 ms - 23771\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:18:00"}
+{"level":"debug","message":"Cache hit for key: departments:all","service":"laboratory-management-system","timestamp":"2026-07-15 00:18:05"}
+{"level":"debug","message":"Cache miss for key: test:6a5679883fecb430a6453bc3","service":"laboratory-management-system","timestamp":"2026-07-15 00:18:05"}
+{"level":"info","message":"\u001b[0mGET /api/departments \u001b[36m304\u001b[0m 486.367 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:18:05"}
+{"level":"info","message":"\u001b[0mGET /api/tests/6a5679883fecb430a6453bc3 \u001b[32m200\u001b[0m 651.454 ms - 1043\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:18:05"}
+{"level":"debug","message":"Cache hit for key: departments:all","service":"laboratory-management-system","timestamp":"2026-07-15 00:18:06"}
+{"level":"info","message":"\u001b[0mGET /api/departments \u001b[36m304\u001b[0m 469.942 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:18:06"}
+{"level":"debug","message":"Cache hit for key: test:6a5679883fecb430a6453bc3","service":"laboratory-management-system","timestamp":"2026-07-15 00:18:06"}
+{"level":"info","message":"\u001b[0mGET /api/tests/6a5679883fecb430a6453bc3 \u001b[36m304\u001b[0m 330.678 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:18:06"}
+{"level":"debug","message":"Invalidated cache key: tests:all","service":"laboratory-management-system","timestamp":"2026-07-15 00:18:28"}
+{"level":"debug","message":"Invalidated cache key: test:6a5679883fecb430a6453bc3","service":"laboratory-management-system","timestamp":"2026-07-15 00:18:29"}
+{"level":"info","message":"\u001b[0mPATCH /api/tests/6a5679883fecb430a6453bc3 \u001b[32m200\u001b[0m 1146.110 ms - 1041\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:18:29"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests?date=today&timezoneOffset=-330 \u001b[32m200\u001b[0m 253.529 ms - 34\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:18:32"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests?date=yesterday&timezoneOffset=-330 \u001b[32m200\u001b[0m 322.299 ms - 15496\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:18:33"}
+{"level":"info","message":"\u001b[0mGET /api/patients/6a5679e25ae41b4700377224 \u001b[36m304\u001b[0m 228.032 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:18:34"}
+{"level":"info","message":"\u001b[0mGET /api/patients/6a5679e25ae41b4700377224 \u001b[36m304\u001b[0m 353.001 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:18:35"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/patient/6a5679e25ae41b4700377224 \u001b[32m200\u001b[0m 420.740 ms - 3997\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:18:35"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/patient/6a5679e25ae41b4700377224 \u001b[36m304\u001b[0m 299.805 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:18:35"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/6a5679e35ae41b4700377226/test/6a5679883fecb430a6453bc3 \u001b[32m200\u001b[0m 300.622 ms - 1953\u001b[0m","service":"laboratory-management-system","timestamp":"2026-07-15 00:18:39"}

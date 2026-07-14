@@ -191,9 +191,38 @@ const createPatientTest = asyncHandler(async (req, res) => {
     throw new BadRequestError("Please provide patientId and at least one test");
   }
 
+  // Fetch all templates for the assigned tests to initialize their results with default values (like defaultText)
+  const testsWithResults = await Promise.all(
+    tests.map(async (t) => {
+      const template = await Test.findById(t.testId);
+      let result = [];
+      if (template && template.subTests) {
+        result = template.subTests.map((st) => {
+          const isTb = st.isTextBlock || st.type === "text_block";
+          return {
+            parameter: st.name,
+            type: st.type === "text_block" ? "parameter" : (st.type || "parameter"),
+            isListParameter: !!st.isListParameter,
+            isTextBlock: isTb,
+            allowedValues: st.allowedValues || [],
+            unit: st.unit || "",
+            normalRange: st.normalRange || "",
+            value: "",
+            textBlockValue: isTb ? (st.textBlockSettings?.defaultText || "") : "",
+          };
+        });
+      }
+      return {
+        testId: t.testId,
+        testName: t.testName || (template ? template.name : "Unnamed Test"),
+        result,
+      };
+    })
+  );
+
   const patientTest = await PatientTest.create({
     patientId,
-    tests,
+    tests: testsWithResults,
     createdBy: req.user._id,
     date: new Date(),
   });
@@ -296,7 +325,30 @@ const addTestToReport = asyncHandler(async (req, res) => {
     throw new BadRequestError("Test already exists in report");
   }
 
-  patientTest.tests.push({ testId, testName, result: [] });
+  const template = await Test.findById(testId);
+  let result = [];
+  if (template && template.subTests) {
+    result = template.subTests.map((st) => {
+      const isTb = st.isTextBlock || st.type === "text_block";
+      return {
+        parameter: st.name,
+        type: st.type === "text_block" ? "parameter" : (st.type || "parameter"),
+        isListParameter: !!st.isListParameter,
+        isTextBlock: isTb,
+        allowedValues: st.allowedValues || [],
+        unit: st.unit || "",
+        normalRange: st.normalRange || "",
+        value: "",
+        textBlockValue: isTb ? (st.textBlockSettings?.defaultText || "") : "",
+      };
+    });
+  }
+
+  patientTest.tests.push({ 
+    testId, 
+    testName: testName || (template ? template.name : "Unnamed Test"), 
+    result 
+  });
   await patientTest.save();
 
   const updatedTest = await PatientTest.findById(req.params.id)

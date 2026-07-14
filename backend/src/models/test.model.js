@@ -21,6 +21,10 @@ const subTestSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    isTextBlock: {
+      type: Boolean,
+      default: false,
+    },
     formula: {
       leftParameterId: { type: String },
       operator: { type: String, enum: ['+', '-', '*', '/'] },

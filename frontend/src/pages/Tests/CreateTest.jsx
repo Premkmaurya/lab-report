@@ -87,7 +87,7 @@ export const CreateTest = () => {
     defaultValues: {
       departmentId: "",
       name: "",
-      subTests: [{ _id: generateObjectId(), name: "", type: "parameter", price: "", unit: "", normalRange: "", isListParameter: false, allowedValues: [], isCalculated: false, formula: { leftParameterId: "", operator: "+", rightParameterId: "" }, textBlockSettings: { defaultText: "", placeholder: "", rows: 3 } }],
+      subTests: [{ _id: generateObjectId(), name: "", type: "parameter", price: "", unit: "", normalRange: "", isListParameter: false, allowedValues: [], isCalculated: false, isTextBlock: false, formula: { leftParameterId: "", operator: "+", rightParameterId: "" }, textBlockSettings: { defaultText: "" } }],
     },
   });
 
@@ -112,11 +112,12 @@ export const CreateTest = () => {
 
   const testName = watch("name");
   const watchedTypes = watch(fields.map((_, i) => `subTests.${i}.type`));
+  const watchedTextBlocks = watch(fields.map((_, i) => `subTests.${i}.isTextBlock`)) || [];
   const inputRefs = useRef({});
 
   const isEmptyRow = (st) => {
     if (!st) return true;
-    if (st.type === "section" || st.type === "text_block") {
+    if (st.type === "section") {
       return !st.name;
     }
     return (
@@ -129,7 +130,7 @@ export const CreateTest = () => {
 
   const isRowComplete = (st) => {
     if (!st) return false;
-    if (st.type === "section" || st.type === "text_block") {
+    if (st.type === "section") {
       return !!st.name;
     }
     return (
@@ -145,7 +146,6 @@ export const CreateTest = () => {
     const fieldIndex = fieldsOrder.indexOf(fieldName);
     const currentValues = getValues("subTests");
     const isSection = currentValues[index]?.type === "section";
-    const isTextBlock = currentValues[index]?.type === "text_block";
 
     if (e.key === "Enter") {
       e.preventDefault();
@@ -161,7 +161,7 @@ export const CreateTest = () => {
         }
       } else {
         // Move to next field
-        if (fieldIndex < fieldsOrder.length - 1 && (!isSection && !isTextBlock)) {
+        if (fieldIndex < fieldsOrder.length - 1 && !isSection) {
           inputRefs.current[index]?.[fieldsOrder[fieldIndex + 1]]?.focus();
         } else {
           // On last field, check completion
@@ -169,7 +169,7 @@ export const CreateTest = () => {
             index === fields.length - 1 &&
             isRowComplete(currentValues[index])
           ) {
-            append({ _id: generateObjectId(), name: "", type: "parameter", price: "", unit: "", normalRange: "", isListParameter: false, allowedValues: [], isCalculated: false, formula: { leftParameterId: "", operator: "+", rightParameterId: "" }, textBlockSettings: { defaultText: "", placeholder: "", rows: 3 } });
+            append({ _id: generateObjectId(), name: "", type: "parameter", price: "", unit: "", normalRange: "", isListParameter: false, allowedValues: [], isCalculated: false, isTextBlock: false, formula: { leftParameterId: "", operator: "+", rightParameterId: "" }, textBlockSettings: { defaultText: "" } });
             setTimeout(() => {
               inputRefs.current[index + 1]?.name?.focus();
             }, 0);
@@ -196,12 +196,12 @@ export const CreateTest = () => {
         if (typeof e.target.selectionStart === "number") {
           isAtEnd = e.target.selectionStart === e.target.value.length;
         }
-      } catch (err) {
+      } catch {
         isAtEnd = true; // Fallback for type="number"
       }
       if (isAtEnd) {
         e.preventDefault();
-        if (fieldIndex < fieldsOrder.length - 1 && (!isSection && !isTextBlock)) {
+        if (fieldIndex < fieldsOrder.length - 1 && !isSection) {
           inputRefs.current[index]?.[fieldsOrder[fieldIndex + 1]]?.focus();
         } else if (index < fields.length - 1) {
           inputRefs.current[index + 1]?.[fieldsOrder[0]]?.focus();
@@ -213,7 +213,7 @@ export const CreateTest = () => {
         if (typeof e.target.selectionStart === "number") {
           isAtStart = e.target.selectionStart === 0;
         }
-      } catch (err) {
+      } catch {
         isAtStart = true; // Fallback for type="number"
       }
       if (isAtStart) {
@@ -235,13 +235,12 @@ export const CreateTest = () => {
       setTimeout(() => {
         const currentValues = getValues("subTests");
         const isSection = currentValues[index]?.type === "section";
-    const isTextBlock = currentValues[index]?.type === "text_block";
         if ((fieldName === "normalRange" || (isSection && fieldName === "name")) && isRowComplete(currentValues[index])) {
           // Do not append on blur to avoid duplicate rows since Enter might have already appended
           // Actually the user requirement states: "When the final required field of a completed row is confirmed, create the next row."
           // But appending on blur might cause issues if they click elsewhere. Let's keep it but check if the last row is actually complete and no blank row exists.
           if (isRowComplete(currentValues[currentValues.length - 1])) {
-            append({ _id: generateObjectId(), name: "", type: "parameter", price: "", unit: "", normalRange: "", isListParameter: false, allowedValues: [], isCalculated: false, formula: { leftParameterId: "", operator: "+", rightParameterId: "" }, textBlockSettings: { defaultText: "", placeholder: "", rows: 3 } });
+            append({ _id: generateObjectId(), name: "", type: "parameter", price: "", unit: "", normalRange: "", isListParameter: false, allowedValues: [], isCalculated: false, isTextBlock: false, formula: { leftParameterId: "", operator: "+", rightParameterId: "" }, textBlockSettings: { defaultText: "" } });
           }
         }
       }, 100);
@@ -300,7 +299,7 @@ export const CreateTest = () => {
       subTests: validSubTests.map((st) => {
         return {
           ...st,
-          price: (st.type === "section" || st.type === "text_block") ? 0 : (parseFloat(st.price) || 0),
+          price: st.type === "section" ? 0 : (parseFloat(st.price) || 0),
           isListParameter: !!st.isListParameter,
           allowedValues: st.allowedValues || [],
         };
@@ -522,7 +521,7 @@ export const CreateTest = () => {
                       if (!inputRefs.current[index])
                         inputRefs.current[index] = {};
                       const isSection = watchedTypes[index] === "section";
-                      const isTextBlock = watchedTypes[index] === "text_block";
+                      const isTextBlock = watchedTextBlocks[index];
                       return (
                         <React.Fragment key={item.id}>
                         <tr className="bg-paper-white">
@@ -543,7 +542,7 @@ export const CreateTest = () => {
                                 inputRefs.current[index].name = el;
                               }}
                             />
-                                                        <div className="mt-2 flex items-center space-x-4">
+                                                         <div className="mt-2 flex items-center">
                               <div className="flex items-center">
                                 <input 
                                   type="checkbox" 
@@ -558,10 +557,11 @@ export const CreateTest = () => {
                                       setValue(`subTests.${index}.normalRange`, "");
                                       setValue(`subTests.${index}.isListParameter`, false);
                                       setValue(`subTests.${index}.isCalculated`, false);
+                                      setValue(`subTests.${index}.isTextBlock`, false);
                                     }
                                     const currentValues = getValues("subTests");
                                     if (index === currentValues.length - 1 && isRowComplete(currentValues[index])) {
-                                      append({ _id: generateObjectId(), name: "", type: "parameter", price: "", unit: "", normalRange: "", isListParameter: false, allowedValues: [], isCalculated: false, formula: { leftParameterId: "", operator: "+", rightParameterId: "" }, textBlockSettings: { defaultText: "", placeholder: "", rows: 3 } });
+                                      append({ _id: generateObjectId(), name: "", type: "parameter", price: "", unit: "", normalRange: "", isListParameter: false, allowedValues: [], isCalculated: false, isTextBlock: false, formula: { leftParameterId: "", operator: "+", rightParameterId: "" }, textBlockSettings: { defaultText: "" } });
                                       setTimeout(() => {
                                         inputRefs.current[index + 1]?.name?.focus();
                                       }, 0);
@@ -572,34 +572,6 @@ export const CreateTest = () => {
                                   Section Header
                                 </label>
                               </div>
-                              <div className="flex items-center">
-                                <input 
-                                  type="checkbox" 
-                                  id={`isTextBlock-${index}`} 
-                                  className="mr-1.5 cursor-pointer"
-                                  checked={isTextBlock}
-                                  onChange={(e) => {
-                                    setValue(`subTests.${index}.type`, e.target.checked ? 'text_block' : 'parameter');
-                                    if (e.target.checked) {
-                                      setValue(`subTests.${index}.price`, "");
-                                      setValue(`subTests.${index}.unit`, "");
-                                      setValue(`subTests.${index}.normalRange`, "");
-                                      setValue(`subTests.${index}.isListParameter`, false);
-                                      setValue(`subTests.${index}.isCalculated`, false);
-                                    }
-                                    const currentValues = getValues("subTests");
-                                    if (index === currentValues.length - 1 && isRowComplete(currentValues[index])) {
-                                      append({ _id: generateObjectId(), name: "", type: "parameter", price: "", unit: "", normalRange: "", isListParameter: false, allowedValues: [], isCalculated: false, formula: { leftParameterId: "", operator: "+", rightParameterId: "" }, textBlockSettings: { defaultText: "", placeholder: "", rows: 3 } });
-                                      setTimeout(() => {
-                                        inputRefs.current[index + 1]?.name?.focus();
-                                      }, 0);
-                                    }
-                                  }}
-                                />
-                                <label htmlFor={`isTextBlock-${index}`} className="text-[10px] text-stone uppercase tracking-wider font-bold cursor-pointer">
-                                  Text Block
-                                </label>
-                              </div>
                             </div>
                           </td>
                           <td className="px-4 py-3 align-top">
@@ -607,8 +579,8 @@ export const CreateTest = () => {
                               type="number"
                               step="0.01"
                               placeholder={isSection ? "-" : "0.00"}
-                              disabled={isSection || isTextBlock}
-                              className={`w-full min-w-[80px] text-sm ${(isSection || isTextBlock) ? "bg-slate-50 text-slate-400 cursor-not-allowed" : ""} ${errors?.subTests?.[index]?.price ? "border-red-500" : ""}`}
+                              disabled={isSection}
+                              className={`w-full min-w-[80px] text-sm ${isSection ? "bg-slate-50 text-slate-400 cursor-not-allowed" : ""} ${errors?.subTests?.[index]?.price ? "border-red-500" : ""}`}
                               {...register(`subTests.${index}.price`, {
                                 validate: (val, formValues) => {
                                   if (formValues.subTests[index].type === "section" || formValues.subTests[index].type === "text_block") return true;
@@ -632,7 +604,7 @@ export const CreateTest = () => {
                                 inputRefs.current[index].price = el;
                               }}
                             />
-                            {(!isSection && !isTextBlock) && (
+                            {(!isSection) && (
                               <div className="mt-2 flex flex-col space-y-2">
                                 <div className="flex items-center">
                                   <input 
@@ -673,15 +645,29 @@ export const CreateTest = () => {
                                     Calculated
                                   </label>
                                 </div>
+                                <div className="flex items-center">
+                                  <input 
+                                    type="checkbox" 
+                                    id={`isTextBlock-${index}`} 
+                                    className="mr-1.5 cursor-pointer"
+                                    {...register(`subTests.${index}.isTextBlock`)}
+                                    onChange={(e) => {
+                                      setValue(`subTests.${index}.isTextBlock`, e.target.checked);
+                                    }}
+                                  />
+                                  <label htmlFor={`isTextBlock-${index}`} className="text-[10px] text-stone uppercase tracking-wider font-bold cursor-pointer">
+                                    Text Block
+                                  </label>
+                                </div>
                               </div>
                             )}
                           </td>
                           <td className="px-4 py-3 align-top">
                             <input
                               type="text"
-                              placeholder={(isSection || isTextBlock) ? "-" : "e.g. g/dL"}
-                              disabled={isSection || isTextBlock}
-                              className={`w-full min-w-[80px] text-sm ${(isSection || isTextBlock || watch(`subTests.${index}.isListParameter`)) ? "bg-slate-50 text-slate-400 cursor-not-allowed" : ""} ${errors?.subTests?.[index]?.unit ? "border-red-500" : ""}`}
+                              placeholder={isSection ? "-" : "e.g. g/dL"}
+                              disabled={isSection}
+                              className={`w-full min-w-[80px] text-sm ${(isSection || watch(`subTests.${index}.isListParameter`)) ? "bg-slate-50 text-slate-400 cursor-not-allowed" : ""} ${errors?.subTests?.[index]?.unit ? "border-red-500" : ""}`}
                               {...register(`subTests.${index}.unit`)}
                               onKeyDown={(e) => handleKeyDown(e, index, "unit")}
                               ref={(el) => {
@@ -693,9 +679,9 @@ export const CreateTest = () => {
                           <td className="px-4 py-3 align-top">
                             <input
                               type="text"
-                              placeholder={(isSection || isTextBlock || watch(`subTests.${index}.isListParameter`)) ? "-" : "e.g. 13-17"}
-                              disabled={isSection || isTextBlock || watch(`subTests.${index}.isListParameter`)}
-                              className={`w-full min-w-[100px] text-sm ${(isSection || isTextBlock || watch(`subTests.${index}.isListParameter`)) ? "bg-slate-50 text-slate-400 cursor-not-allowed" : ""} ${errors?.subTests?.[index]?.normalRange ? "border-red-500" : ""}`}
+                              placeholder={(isSection || watch(`subTests.${index}.isListParameter`)) ? "-" : "e.g. 13-17"}
+                              disabled={isSection || watch(`subTests.${index}.isListParameter`)}
+                              className={`w-full min-w-[100px] text-sm ${(isSection || watch(`subTests.${index}.isListParameter`)) ? "bg-slate-50 text-slate-400 cursor-not-allowed" : ""} ${errors?.subTests?.[index]?.normalRange ? "border-red-500" : ""}`}
                               {...register(`subTests.${index}.normalRange`)}
                               onKeyDown={(e) =>
                                 handleKeyDown(e, index, "normalRange")
@@ -718,7 +704,7 @@ export const CreateTest = () => {
                                   // Ensure one blank row remains if all are deleted
                                   const currentValues = watch("subTests");
                                   if (currentValues.length <= 1) {
-                                    append({ _id: generateObjectId(), name: "", type: "parameter", price: "", unit: "", normalRange: "", isListParameter: false, allowedValues: [], isCalculated: false, formula: { leftParameterId: "", operator: "+", rightParameterId: "" }, textBlockSettings: { defaultText: "", placeholder: "", rows: 3 } });
+                                    append({ _id: generateObjectId(), name: "", type: "parameter", price: "", unit: "", normalRange: "", isListParameter: false, allowedValues: [], isCalculated: false, isTextBlock: false, formula: { leftParameterId: "", operator: "+", rightParameterId: "" }, textBlockSettings: { defaultText: "" } });
                                   }
                                 }}
                                 className="text-red-600 hover:text-red-800 p-2 rounded-full hover:bg-red-50 transition-colors"
@@ -729,7 +715,7 @@ export const CreateTest = () => {
                             )}
                           </td>
                         </tr>
-                        {watch(`subTests.${index}.isListParameter`) && (!isSection && !isTextBlock) && (
+                        {watch(`subTests.${index}.isListParameter`) && (!isSection) && (
                           <tr key={`${item.id}-list`} className="bg-slate-50 border-t border-cream-border">
                             <td colSpan="5" className="px-4 py-4">
                               <div className="flex flex-col max-w-sm pl-4 border-l-2 border-electric-cobalt">
@@ -772,7 +758,7 @@ export const CreateTest = () => {
                             </td>
                           </tr>
                         )}
-                        {watch(`subTests.${index}.isCalculated`) && (!isSection && !isTextBlock) && (
+                        {watch(`subTests.${index}.isCalculated`) && (!isSection) && (
                           <tr key={`${item.id}-calc`} className="bg-slate-50 border-t border-cream-border">
                             <td colSpan="5" className="px-4 py-4">
                               <div className="flex flex-col max-w-2xl pl-4 border-l-2 border-electric-cobalt">
@@ -816,41 +802,14 @@ export const CreateTest = () => {
                                                 {isTextBlock && (
                           <tr key={`${item.id}-textblock`} className="bg-slate-50 border-t border-cream-border">
                             <td colSpan="5" className="px-4 py-4">
-                              <div className="flex flex-col max-w-2xl pl-4 border-l-2 border-electric-cobalt space-y-4">
-                                <span className="text-xs font-bold text-charcoal uppercase mb-2">Text Block Configuration</span>
-                                
-                                <div className="grid grid-cols-2 gap-4">
-                                  <div>
-                                    <label className="block text-xs font-semibold text-stone uppercase tracking-wide mb-1">Placeholder (Hint)</label>
-                                    <input
-                                      type="text"
-                                      className="w-full text-sm border border-cream-border rounded-inputs px-3 py-2 focus:outline-none focus:border-electric-cobalt"
-                                      placeholder="e.g. Enter clinical findings here..."
-                                      {...register(`subTests.${index}.textBlockSettings.placeholder`)}
-                                    />
-                                  </div>
-                                  <div>
-                                    <label className="block text-xs font-semibold text-stone uppercase tracking-wide mb-1">Rows (Height)</label>
-                                    <input
-                                      type="number"
-                                      className="w-full text-sm border border-cream-border rounded-inputs px-3 py-2 focus:outline-none focus:border-electric-cobalt"
-                                      min="1"
-                                      max="20"
-                                      placeholder="3"
-                                      {...register(`subTests.${index}.textBlockSettings.rows`, { valueAsNumber: true })}
-                                    />
-                                  </div>
-                                </div>
-
-                                <div>
-                                  <label className="block text-xs font-semibold text-stone uppercase tracking-wide mb-1">Default Text</label>
-                                  <textarea
-                                    className="w-full text-sm border border-cream-border rounded-inputs px-3 py-2 focus:outline-none focus:border-electric-cobalt"
-                                    placeholder="Optional pre-filled text..."
-                                    rows="3"
-                                    {...register(`subTests.${index}.textBlockSettings.defaultText`)}
-                                  />
-                                </div>
+                              <div className="flex flex-col max-w-2xl pl-4 border-l-2 border-electric-cobalt">
+                                <span className="text-xs font-bold text-charcoal uppercase mb-2">Default Text</span>
+                                <textarea
+                                  className="w-full text-sm border border-cream-border rounded-inputs px-3 py-2 focus:outline-none focus:border-electric-cobalt"
+                                  placeholder="Optional pre-filled text for this text block..."
+                                  rows="3"
+                                  {...register(`subTests.${index}.textBlockSettings.defaultText`)}
+                                />
                               </div>
                             </td>
                           </tr>

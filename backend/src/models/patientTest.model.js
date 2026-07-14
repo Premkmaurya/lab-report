@@ -28,6 +28,10 @@ const patientTestItemSchema = new mongoose.Schema(
           type: Boolean,
           default: false,
         },
+        isTextBlock: {
+          type: Boolean,
+          default: false,
+        },
         allowedValues: {
           type: [String],
           default: [],
@@ -42,6 +46,10 @@ const patientTestItemSchema = new mongoose.Schema(
           trim: true,
         },
         normalRange: {
+          type: String,
+          trim: true,
+        },
+        textBlockValue: {
           type: String,
           trim: true,
         },

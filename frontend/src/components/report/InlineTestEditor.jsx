@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { reportService } from "../../services/reportService";
 import { Save, ShieldAlert, ChevronDown, ChevronRight, Edit2 } from "lucide-react";
 import { useForm, useFieldArray } from "react-hook-form";
@@ -90,17 +90,45 @@ export const InlineTestEditor = ({
   useEffect(() => {
     if ((isEditing || isExpanded) && testTemplate) {
       const mergedResults = testTemplate.subTests.map((sub, index) => {
-        // Match by index to preserve customized parameter names instead of strictly matching by template name
         const existingResult = test.result?.[index];
+        const isTb = sub.isTextBlock || sub.type === 'text_block';
+        
+        let initialTbVal = "";
+        let initialVal = "";
+        
+        if (existingResult) {
+          initialVal = existingResult.value || "";
+          initialTbVal = existingResult.textBlockValue !== undefined ? existingResult.textBlockValue : "";
+          
+          if (isTb) {
+            // Legacy report fallback: if textBlockValue is undefined/empty and value is populated, use value
+            if (!initialTbVal && existingResult.value) {
+              initialTbVal = existingResult.value;
+              initialVal = "";
+            }
+            // Display fallback: if still empty, use template defaultText
+            if (!initialTbVal && sub.textBlockSettings?.defaultText) {
+              initialTbVal = sub.textBlockSettings.defaultText;
+            }
+          }
+        } else {
+          // New report: use template defaultText
+          if (isTb) {
+            initialTbVal = sub.textBlockSettings?.defaultText || "";
+          }
+        }
+
         return {
           _id: sub._id,
           parameter: existingResult ? existingResult.parameter : sub.name,
-          value: existingResult ? existingResult.value : (sub.type === 'text_block' ? (sub.textBlockSettings?.defaultText || "") : ""),
+          value: initialVal,
+          textBlockValue: initialTbVal,
           unit: sub.unit,
           normalRange: sub.normalRange,
-          type: sub.type || "parameter",
+          type: (sub.type === 'text_block') ? 'parameter' : (sub.type || "parameter"),
           isListParameter: sub.isListParameter || false,
           isCalculated: sub.isCalculated || false,
+          isTextBlock: isTb,
           formula: sub.formula || null,
           allowedValues: sub.allowedValues || [],
           textBlockSettings: sub.textBlockSettings || null,
@@ -126,15 +154,44 @@ export const InlineTestEditor = ({
     if (testTemplate) {
       const mergedResults = testTemplate.subTests.map((sub, index) => {
         const existingResult = test.result?.[index];
+        const isTb = sub.isTextBlock || sub.type === 'text_block';
+        
+        let initialTbVal = "";
+        let initialVal = "";
+        
+        if (existingResult) {
+          initialVal = existingResult.value || "";
+          initialTbVal = existingResult.textBlockValue !== undefined ? existingResult.textBlockValue : "";
+          
+          if (isTb) {
+            // Legacy report fallback: if textBlockValue is undefined/empty and value is populated, use value
+            if (!initialTbVal && existingResult.value) {
+              initialTbVal = existingResult.value;
+              initialVal = "";
+            }
+            // Display fallback: if still empty, use template defaultText
+            if (!initialTbVal && sub.textBlockSettings?.defaultText) {
+              initialTbVal = sub.textBlockSettings.defaultText;
+            }
+          }
+        } else {
+          // New report: use template defaultText
+          if (isTb) {
+            initialTbVal = sub.textBlockSettings?.defaultText || "";
+          }
+        }
+
         return {
           _id: sub._id,
           parameter: existingResult ? existingResult.parameter : sub.name,
-          value: existingResult ? existingResult.value : (sub.type === 'text_block' ? (sub.textBlockSettings?.defaultText || "") : ""),
+          value: initialVal,
+          textBlockValue: initialTbVal,
           unit: sub.unit,
           normalRange: sub.normalRange,
-          type: sub.type || "parameter",
+          type: (sub.type === 'text_block') ? 'parameter' : (sub.type || "parameter"),
           isListParameter: sub.isListParameter || false,
           isCalculated: sub.isCalculated || false,
+          isTextBlock: isTb,
           formula: sub.formula || null,
           allowedValues: sub.allowedValues || [],
           textBlockSettings: sub.textBlockSettings || null,
@@ -173,16 +230,17 @@ export const InlineTestEditor = ({
             if (r.type === "section") {
               return { parameter: r.parameter, type: "section" };
             }
-            if (r.type === "text_block") {
-              if (r.value && r.value.trim() !== '') hasAnyValue = true;
-              return { parameter: r.parameter, value: r.value, type: "text_block" };
-            }
             if (r.value && r.value.trim() !== '') {
+               hasAnyValue = true;
+            }
+            if (r.isTextBlock && r.textBlockValue && r.textBlockValue.trim() !== '') {
                hasAnyValue = true;
             }
             return {
               parameter: r.parameter,
               value: r.value,
+              textBlockValue: r.textBlockValue,
+              isTextBlock: r.isTextBlock,
               unit: r.unit,
               normalRange: r.normalRange,
               type: r.type || "parameter",
@@ -194,7 +252,7 @@ export const InlineTestEditor = ({
         }
         
         // Check other tests to see if they have any values
-        if (t.result && t.result.some(r => r.type !== 'section' && r.value && r.value.trim() !== '')) {
+        if (t.result && t.result.some(r => r.type !== 'section' && ((r.value && r.value.trim() !== '') || (r.textBlockValue && r.textBlockValue.trim() !== '')))) {
            hasAnyValue = true;
         }
         return t;
@@ -243,6 +301,23 @@ export const InlineTestEditor = ({
   const displayResults = testTemplate && fields.length > 0 
     ? fields 
     : test.result || [];
+
+  const mappedDisplayResults = displayResults.map((r, resIndex) => {
+    const isTb = r.isTextBlock || r.type === 'text_block';
+    const subTestTemplate = testTemplate?.subTests?.[resIndex];
+    
+    let tbVal = r.textBlockValue !== undefined ? r.textBlockValue : (isTb ? r.value : "");
+    if (isTb && !tbVal && subTestTemplate?.textBlockSettings?.defaultText) {
+      tbVal = subTestTemplate.textBlockSettings.defaultText;
+    }
+    
+    return {
+      ...r,
+      type: (r.type === 'text_block') ? 'parameter' : r.type,
+      isTextBlock: isTb,
+      textBlockValue: tbVal
+    };
+  });
 
   return (
     <div className={`border-b border-cream-border last:border-0 ${isEditing ? 'bg-white shadow-sm ring-1 ring-cream-border rounded-md my-2' : ''}`}>
@@ -333,69 +408,64 @@ export const InlineTestEditor = ({
                           );
                         }
 
-                        if (item.type === "text_block") {
-                          return (
-                            <tr key={item.id} className="bg-white border-y border-cream-border hover:bg-warm-canvas/20 transition-colors">
-                              <td colSpan="4" className="py-4 px-4 align-top">
-                                <span className="w-full text-sm font-bold text-charcoal block mb-2 tracking-wider uppercase" style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
+                        return (
+                          <React.Fragment key={item.id}>
+                            <tr className="hover:bg-warm-canvas/30 transition-colors">
+                              <td className="py-3 px-3 align-middle pl-6 border-l-4 border-l-transparent" style={{ wordBreak: 'break-word', overflowWrap: 'anywhere', whiteSpace: 'normal' }}>
+                                <span className="w-full text-sm font-medium text-charcoal block px-2">
                                   {item.parameter}
                                 </span>
+                                <input type="hidden" value={item.parameter} {...register(`results.${index}.parameter`)} />
+                                <input type="hidden" value="parameter" {...register(`results.${index}.type`)} />
+                              </td>
+                              <td className="py-3 px-3 align-middle">
                                 {(() => {
                                   const { ref, onChange, ...rest } = register(`results.${index}.value`);
-                                  return (
-                                    <textarea
-                                      className="w-full bg-white border border-electric-cobalt focus:border-ink-navy focus:ring-1 focus:ring-ink-navy rounded-inputs px-3 py-2 text-sm text-charcoal transition-colors resize-y"
-                                      rows={item.textBlockSettings?.rows || 3}
-                                      placeholder={item.textBlockSettings?.placeholder || "Enter text..."}
-                                      {...rest}
-                                      onChange={(e) => {
-                                        onChange(e);
-                                        recalculateFormulas();
-                                      }}
-                                      ref={ref}
-                                    />
-                                  );
-                                })()}
-                                <input type="hidden" value={item.parameter} {...register(`results.${index}.parameter`)} />
-                                <input type="hidden" value="text_block" {...register(`results.${index}.type`)} />
-                              </td>
-                            </tr>
-                          );
-                        }
-
-                        return (
-                          <tr key={item.id} className="hover:bg-warm-canvas/30 transition-colors">
-                            <td className="py-3 px-3 align-middle pl-6 border-l-4 border-l-transparent" style={{ wordBreak: 'break-word', overflowWrap: 'anywhere', whiteSpace: 'normal' }}>
-                              <span className="w-full text-sm font-medium text-charcoal block px-2">
-                                {item.parameter}
-                              </span>
-                              <input type="hidden" value={item.parameter} {...register(`results.${index}.parameter`)} />
-                              <input type="hidden" value="parameter" {...register(`results.${index}.type`)} />
-                            </td>
-                            <td className="py-3 px-3 align-middle">
-                              {(() => {
-                                const { ref, onChange, ...rest } = register(`results.${index}.value`);
-                                
-                                if (item.isCalculated) {
+                                  
+                                  if (item.isCalculated) {
+                                    return (
+                                      <input
+                                        type="text"
+                                        placeholder="Auto-calculated"
+                                        readOnly
+                                        className="w-full min-w-[120px] bg-slate-50 border border-cream-border text-slate-500 rounded-inputs px-3 py-1.5 text-sm font-medium transition-colors cursor-not-allowed"
+                                        {...rest}
+                                        onChange={onChange}
+                                        ref={(e) => {
+                                          ref(e);
+                                          inputRefs.current[index] = e;
+                                        }}
+                                      />
+                                    );
+                                  }
+                                  
+                                  if (item.isListParameter) {
+                                    return (
+                                      <select
+                                        className="w-full min-w-[120px] bg-white border border-electric-cobalt focus:border-ink-navy focus:ring-1 focus:ring-ink-navy rounded-inputs px-3 py-1.5 text-sm font-medium text-charcoal transition-colors"
+                                        {...rest}
+                                        onChange={(e) => {
+                                          onChange(e);
+                                          recalculateFormulas();
+                                        }}
+                                        ref={(e) => {
+                                          ref(e);
+                                          inputRefs.current[index] = e;
+                                        }}
+                                        onKeyDown={(e) => handleKeyDown(e, index)}
+                                      >
+                                        <option value="">Select...</option>
+                                        {(item.allowedValues || []).map((opt, i) => (
+                                          <option key={i} value={opt}>{opt}</option>
+                                        ))}
+                                      </select>
+                                    );
+                                  }
+                                  
                                   return (
                                     <input
                                       type="text"
-                                      placeholder="Auto-calculated"
-                                      readOnly
-                                      className="w-full min-w-[120px] bg-slate-50 border border-cream-border text-slate-500 rounded-inputs px-3 py-1.5 text-sm font-medium transition-colors cursor-not-allowed"
-                                      {...rest}
-                                      onChange={onChange}
-                                      ref={(e) => {
-                                        ref(e);
-                                        inputRefs.current[index] = e;
-                                      }}
-                                    />
-                                  );
-                                }
-                                
-                                if (item.isListParameter) {
-                                  return (
-                                    <select
+                                      placeholder="Value"
                                       className="w-full min-w-[120px] bg-white border border-electric-cobalt focus:border-ink-navy focus:ring-1 focus:ring-ink-navy rounded-inputs px-3 py-1.5 text-sm font-medium text-charcoal transition-colors"
                                       {...rest}
                                       onChange={(e) => {
@@ -407,56 +477,49 @@ export const InlineTestEditor = ({
                                         inputRefs.current[index] = e;
                                       }}
                                       onKeyDown={(e) => handleKeyDown(e, index)}
-                                    >
-                                      <option value="">Select...</option>
-                                      {(item.allowedValues || []).map((opt, i) => (
-                                        <option key={i} value={opt}>{opt}</option>
-                                      ))}
-                                    </select>
+                                      autoComplete="off"
+                                    />
                                   );
-                                }
-                                
-                                return (
-                                  <input
-                                    type="text"
-                                    placeholder="Value"
-                                    className="w-full min-w-[120px] bg-white border border-electric-cobalt focus:border-ink-navy focus:ring-1 focus:ring-ink-navy rounded-inputs px-3 py-1.5 text-sm font-medium text-charcoal transition-colors"
-                                    {...rest}
-                                    onChange={(e) => {
-                                      onChange(e);
-                                      recalculateFormulas();
-                                    }}
-                                    ref={(e) => {
-                                      ref(e);
-                                      inputRefs.current[index] = e;
-                                    }}
-                                    onKeyDown={(e) => handleKeyDown(e, index)}
-                                    autoComplete="off"
+                                })()}
+                              </td>
+                              <td className="py-3 px-3 align-middle text-center">
+                                {item.unit ? (
+                                  <span className="text-xs text-stone px-2 py-1 bg-warm-canvas rounded border border-cream-border inline-block">
+                                    {item.unit}
+                                  </span>
+                                ) : (
+                                  <span className="text-xs text-stone/50 italic">None</span>
+                                )}
+                                <input type="hidden" {...register(`results.${index}.unit`)} />
+                              </td>
+                              <td className="py-3 px-3 align-middle">
+                                {item.normalRange ? (
+                                  <span className="text-xs text-stone px-2 py-1 bg-warm-canvas rounded border border-cream-border inline-block">
+                                    {item.normalRange}
+                                  </span>
+                                ) : (
+                                  <span className="text-xs text-stone/50 italic">None</span>
+                                )}
+                                <input type="hidden" {...register(`results.${index}.normalRange`)} />
+                              </td>
+                            </tr>
+                            {item.isTextBlock && (
+                              <tr className="bg-slate-50/50">
+                                <td colSpan="4" className="py-3 px-8">
+                                  <div className="text-xs font-semibold text-stone uppercase tracking-wide mb-1.5">
+                                    Remarks / Note (Optional)
+                                  </div>
+                                  <textarea
+                                    className="w-full bg-white border border-electric-cobalt focus:border-ink-navy focus:ring-1 focus:ring-ink-navy rounded-inputs px-3 py-2 text-sm text-charcoal transition-colors resize-y"
+                                    rows={3}
+                                    placeholder="Enter remarks..."
+                                    {...register(`results.${index}.textBlockValue`)}
                                   />
-                                );
-                              })()}
-                            </td>
-                            <td className="py-3 px-3 align-middle text-center">
-                              {item.unit ? (
-                                <span className="text-xs text-stone px-2 py-1 bg-warm-canvas rounded border border-cream-border inline-block">
-                                  {item.unit}
-                                </span>
-                              ) : (
-                                <span className="text-xs text-stone/50 italic">None</span>
-                              )}
-                              <input type="hidden" {...register(`results.${index}.unit`)} />
-                            </td>
-                            <td className="py-3 px-3 align-middle">
-                              {item.normalRange ? (
-                                <span className="text-xs text-stone px-2 py-1 bg-warm-canvas rounded border border-cream-border inline-block">
-                                  {item.normalRange}
-                                </span>
-                              ) : (
-                                <span className="text-xs text-stone/50 italic">None</span>
-                              )}
-                              <input type="hidden" {...register(`results.${index}.normalRange`)} />
-                            </td>
-                          </tr>
+                                  <input type="hidden" {...register(`results.${index}.isTextBlock`)} />
+                                </td>
+                              </tr>
+                            )}
+                          </React.Fragment>
                         );
                       })}
                       {fields.length === 0 && (
@@ -512,8 +575,8 @@ export const InlineTestEditor = ({
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-cream-border">
-                    {displayResults.length > 0 ? (
-                      displayResults.map((item, index) => {
+                    {mappedDisplayResults.length > 0 ? (
+                      mappedDisplayResults.map((item, index) => {
                         if (item.type === "section") {
                           return (
                             <tr key={index} className="bg-warm-canvas/50 border-y border-cream-border">
@@ -525,49 +588,42 @@ export const InlineTestEditor = ({
                           );
                         }
 
-                        if (item.type === "text_block") {
-                          return (
-                            <tr key={index} className="bg-white border-y border-cream-border hover:bg-warm-canvas/20 transition-colors">
-                              <td colSpan="4" className="py-4 px-4">
-                                <span className="text-sm font-bold text-charcoal block mb-2 tracking-wider uppercase" style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
-                                  {item.parameter}
-                                </span>
+                        return (
+                          <React.Fragment key={index}>
+                            <tr className="hover:bg-warm-canvas/20">
+                              <td className="py-2 px-3 text-sm font-medium text-charcoal pl-6 border-l-4 border-l-transparent" style={{ wordBreak: 'break-word', overflowWrap: 'anywhere', whiteSpace: 'normal' }}>{item.parameter}</td>
+                              <td className="py-2 px-3 text-sm text-charcoal">
                                 {item.value ? (
-                                  <div className="text-sm text-charcoal whitespace-pre-wrap font-medium">
-                                    {item.value}
-                                  </div>
+                                  (() => {
+                                    const { isAbnormal, formattedValue } = checkAbnormalResult(item.value, item.normalRange);
+                                    return (
+                                      <span className={`font-semibold ${isAbnormal ? 'font-bold' : ''}`}>
+                                        {formattedValue}
+                                      </span>
+                                    );
+                                  })()
                                 ) : (
                                   <span className="text-stone italic text-xs">Not recorded</span>
                                 )}
                               </td>
+                              <td className="py-2 px-3 text-xs text-stone text-center">
+                                {item.unit || "-"}
+                              </td>
+                              <td className="py-2 px-3 text-xs text-stone">
+                                {item.normalRange || "-"}
+                              </td>
                             </tr>
-                          );
-                        }
-
-                        return (
-                          <tr key={index} className="hover:bg-warm-canvas/20">
-                            <td className="py-2 px-3 text-sm font-medium text-charcoal pl-6 border-l-4 border-l-transparent" style={{ wordBreak: 'break-word', overflowWrap: 'anywhere', whiteSpace: 'normal' }}>{item.parameter}</td>
-                            <td className="py-2 px-3 text-sm text-charcoal">
-                              {item.value ? (
-                                (() => {
-                                  const { isAbnormal, formattedValue } = checkAbnormalResult(item.value, item.normalRange);
-                                  return (
-                                    <span className={`font-semibold ${isAbnormal ? 'font-bold' : ''}`}>
-                                      {formattedValue}
-                                    </span>
-                                  );
-                                })()
-                              ) : (
-                                <span className="text-stone italic text-xs">Not recorded</span>
-                              )}
-                            </td>
-                            <td className="py-2 px-3 text-xs text-stone text-center">
-                              {item.unit || "-"}
-                            </td>
-                            <td className="py-2 px-3 text-xs text-stone">
-                              {item.normalRange || "-"}
-                            </td>
-                          </tr>
+                            {item.isTextBlock && item.textBlockValue && item.textBlockValue.trim() !== "" && (
+                              <tr className="bg-slate-50/30">
+                                <td colSpan="4" className="py-2 px-8">
+                                  <div className="text-[10px] font-bold text-stone uppercase tracking-wide mb-1">Remarks</div>
+                                  <div className="text-sm text-charcoal whitespace-pre-wrap font-medium">
+                                    {item.textBlockValue}
+                                  </div>
+                                </td>
+                              </tr>
+                            )}
+                          </React.Fragment>
                         );
                       })
                     ) : (
