@@ -22,13 +22,13 @@ export const App = () => {
   return (
     <>
       <Helmet>
-        <title>Balaji Labs - Laboratory Management System</title>
+        <title>UltraPath - Laboratory Management System</title>
         <meta
           name="description"
           content="Cloud-based Laboratory Information Management System for pathology laboratories."
         />
         <meta name="keywords" content="LIMS, pathology software, laboratory software" />
-        <meta property="og:title" content="Balaji Labs - Laboratory Management System" />
+        <meta property="og:title" content="UltraPath - Laboratory Management System" />
         <meta
           property="og:description"
           content="Cloud-based Laboratory Information Management System for pathology laboratories."
