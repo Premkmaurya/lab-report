@@ -1,0 +1,5 @@
+User-agent: *
+
+Allow: /
+
+Sitemap: https://lab-report-theta.vercel.app/sitemap.xml
