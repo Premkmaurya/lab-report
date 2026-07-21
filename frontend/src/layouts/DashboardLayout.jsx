@@ -7,6 +7,7 @@ import {
   useLocation,
 } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
+import { useLaboratory } from "../context/LaboratoryContext";
 import {
   LayoutDashboard,
   Users,
@@ -19,10 +20,12 @@ import {
   User,
   ChartNoAxesColumnIncreasing,
   X,
+  Building2,
 } from "lucide-react";
 
 export const DashboardLayout = () => {
   const { user, logout, hasPermission } = useAuth();
+  const { laboratories, selectedLabId, setSelectedLabId, isSystemAdmin } = useLaboratory();
   const navigate = useNavigate();
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -58,46 +61,50 @@ export const DashboardLayout = () => {
     return () => window.removeEventListener("keydown", handleEsc);
   }, []);
 
-  const isAdmin = user?.role === "admin";
-
   const navItems = [
     {
       name: "Dashboard",
       path: "/",
       icon: LayoutDashboard,
-      roles: ["admin", "user"],
+      roles: ["admin", "system_admin", "user", "lab_technician", "receptionist"],
+    },
+    {
+      name: "Laboratories",
+      path: "/laboratories",
+      icon: Building2,
+      roles: ["system_admin"],
     },
     {
       name: "Users",
       path: "/users",
       icon: Users,
-      roles: ["admin"],
+      roles: ["admin", "system_admin"],
     },
     {
       name: "Patients",
       path: "/patients",
       icon: HeartPulse,
-      roles: ["admin", "user"],
+      roles: ["admin", "system_admin", "user", "lab_technician", "receptionist"],
     },
     {
       name: "Doctors",
       path: "/doctors",
       icon: Stethoscope,
-      roles: ["admin", "user"],
+      roles: ["admin", "system_admin", "user", "lab_technician", "receptionist"],
       permission: "manage_doctors",
     },
     {
       name: "Tests",
       path: "/tests",
       icon: FlaskConical,
-      roles: ["admin", "user"],
+      roles: ["admin", "system_admin", "user", "lab_technician", "receptionist"],
       permission: "manage_tests",
     },
     {
       name: "Settings",
       path: "/settings",
       icon: Settings,
-      roles: ["admin", "user"],
+      roles: ["admin", "system_admin", "user", "lab_technician", "receptionist"],
       permission: "manage_settings",
     },
   ];
@@ -107,6 +114,21 @@ export const DashboardLayout = () => {
     if (item.permission && !hasPermission(item.permission)) return false;
     return true;
   });
+
+  const getUserRoleLabel = (role) => {
+    switch (role) {
+      case "system_admin":
+        return "System Administrator";
+      case "admin":
+        return "Lab Administrator";
+      case "receptionist":
+        return "Receptionist";
+      case "user":
+      case "lab_technician":
+      default:
+        return "Lab Technician";
+    }
+  };
 
   return (
     <div className="flex h-screen overflow-hidden bg-warm-canvas">
@@ -179,7 +201,7 @@ export const DashboardLayout = () => {
                 {user?.username}
               </p>
               <p className="text-[10px] text-stone truncate uppercase tracking-wider font-bold">
-                {user?.role === "admin" ? "Administrator" : "Lab Technician"}
+                {getUserRoleLabel(user?.role)}
               </p>
             </div>
           </div>
@@ -196,6 +218,28 @@ export const DashboardLayout = () => {
 
       {/* Main content wrapper */}
       <main className="flex-1 flex flex-col overflow-hidden w-full h-full">
+        {/* Top Bar for System Admin (Laboratory Selector) */}
+        {isSystemAdmin && (
+          <div className="bg-indigo-900 text-white px-6 py-2.5 flex items-center justify-between shadow-inner shrink-0 text-xs">
+            <div className="flex items-center gap-2 font-medium">
+              <Building2 className="w-4 h-4 text-indigo-300" />
+              <span>System Admin Mode — Select Active Laboratory View:</span>
+            </div>
+
+            <select
+              value={selectedLabId || ""}
+              onChange={(e) => setSelectedLabId(e.target.value || null)}
+              className="bg-indigo-800 border border-indigo-700 text-white text-xs rounded px-3 py-1 focus:outline-none focus:ring-1 focus:ring-indigo-400 font-medium cursor-pointer"
+            >
+              <option value="">🌐 All Laboratories (Global View)</option>
+              {laboratories.map((lab) => (
+                <option key={lab._id} value={lab._id}>
+                  🏥 {lab.name} ({lab.code})
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
         {/* Mobile Header */}
         <header className="lg:hidden border-b border-cream-border px-4 flex items-center justify-between shrink-0">
           <div className="flex items-center space-x-3">

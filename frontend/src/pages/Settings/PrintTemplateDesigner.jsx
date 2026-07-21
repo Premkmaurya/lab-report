@@ -116,17 +116,33 @@ export const PrintTemplateDesigner = () => {
     template: savedTemplate,
     updateTemplate,
     resetTemplate,
+    fetchTemplate,
     loading,
+    error: contextError,
   } = usePrintTemplate();
 
   const [template, setTemplate] = useState(null);
   const [activeTab, setActiveTab] = useState("page"); // page, typography, elements, footer
   const [selectedElement, setSelectedElement] = useState("patientName");
   const [error, setError] = useState(null);
+  const [retrying, setRetrying] = useState(false);
 
   // Zoom state
   const [zoomLevel, setZoomLevel] = useState(1);
   const workspaceRef = React.useRef(null);
+
+  const handleRetry = async () => {
+    setRetrying(true);
+    setError(null);
+    try {
+      await fetchTemplate();
+    } catch (err) {
+      console.error("[PrintTemplateDesigner] Retry fetch template failed:", err);
+      setError(err.message || "Failed to load template");
+    } finally {
+      setRetrying(false);
+    }
+  };
 
   // Helper function to get element value with default fallback
   const getElementValue = (field, elementKey = selectedElement) => {
@@ -165,49 +181,53 @@ export const PrintTemplateDesigner = () => {
     }));
   };
 
-  // Initialize local state with context template and merge with defaults
+  // Initialize local state with context template or fallback to default template
   useEffect(() => {
     if (!loading) {
-      if (savedTemplate) {
-        // Deep copy the saved template
-        const initialTemplate = JSON.parse(JSON.stringify(savedTemplate));
+      // Use savedTemplate if available, otherwise construct default template
+      const baseTemplate = savedTemplate || {
+        page: { ...DEFAULT_PAGE_SETTINGS },
+        typography: { baseFont: "Times New Roman, serif", lineHeight: "1.5" },
+        elements: JSON.parse(JSON.stringify(DEFAULT_ELEMENT_STYLES)),
+        signatures: {
+          technician: { name: "Lab Technician", designation: "System Admin", show: true, signatureImage: "", showSignatureImage: false },
+          pathologist: { name: "", designation: "Pathologist", qualification: "", registrationNumber: "", show: true, signatureImage: "", showSignatureImage: false }
+        }
+      };
 
-        // Ensure the elements object exists
-        initialTemplate.elements = initialTemplate.elements || {};
+      const initialTemplate = JSON.parse(JSON.stringify(baseTemplate));
 
-        // Merge each element with its schema defaults
-        Object.keys(DEFAULT_ELEMENT_STYLES).forEach((elementKey) => {
-          initialTemplate.elements[elementKey] = {
-            ...DEFAULT_ELEMENT_STYLES[elementKey],
-            ...(initialTemplate.elements[elementKey] || {}),
-          };
-        });
+      // Ensure the elements object exists
+      initialTemplate.elements = initialTemplate.elements || {};
 
-        // Apply page defaults for print margins
-        initialTemplate.page = {
-          ...DEFAULT_PAGE_SETTINGS,
-          ...(initialTemplate.page || {}),
+      // Merge each element with its schema defaults
+      Object.keys(DEFAULT_ELEMENT_STYLES).forEach((elementKey) => {
+        initialTemplate.elements[elementKey] = {
+          ...DEFAULT_ELEMENT_STYLES[elementKey],
+          ...(initialTemplate.elements[elementKey] || {}),
         };
+      });
 
-        const savedBarcode = savedTemplate.elements?.barcode || {};
-        if (savedBarcode.show !== undefined)
-          initialTemplate.elements.barcode.enabled = savedBarcode.show;
-        if (savedBarcode.barcodeType)
-          initialTemplate.elements.barcode.format = savedBarcode.barcodeType;
-        if (savedBarcode.x === undefined)
-          initialTemplate.elements.barcode.x = 620;
-        if (savedBarcode.y === undefined)
-          initialTemplate.elements.barcode.y = 30;
+      // Apply page defaults for print margins
+      initialTemplate.page = {
+        ...DEFAULT_PAGE_SETTINGS,
+        ...(initialTemplate.page || {}),
+      };
 
-        setTemplate(initialTemplate);
-        setError(null);
-      } else {
-        setError(
-          "Unable to load template. Please try again or check your backend connection.",
-        );
-      }
+      const savedBarcode = baseTemplate.elements?.barcode || {};
+      if (savedBarcode.show !== undefined)
+        initialTemplate.elements.barcode.enabled = savedBarcode.show;
+      if (savedBarcode.barcodeType)
+        initialTemplate.elements.barcode.format = savedBarcode.barcodeType;
+      if (savedBarcode.x === undefined)
+        initialTemplate.elements.barcode.x = 620;
+      if (savedBarcode.y === undefined)
+        initialTemplate.elements.barcode.y = 30;
+
+      setTemplate(initialTemplate);
+      setError(null);
     }
-  }, [loading, savedTemplate]);
+  }, [loading, savedTemplate, contextError]);
 
   const handlePageChange = (field, value) => {
     setTemplate((prev) => ({
@@ -289,20 +309,45 @@ export const PrintTemplateDesigner = () => {
     }
   };
 
-  if (loading) return <div className="p-8">Loading template designer...</div>;
-  if (error)
+  if (loading) return <div className="p-8 text-slate-600 font-medium">Loading template designer...</div>;
+  if (error || contextError)
     return (
-      <div className="p-8 flex flex-col items-start space-y-4">
-        <div className="text-red-600 font-medium">{error}</div>
-        <button
-          onClick={() => window.location.reload()}
-          className="px-4 py-2 bg-slate-200 hover:bg-slate-300 rounded text-sm font-medium"
-        >
-          Retry
-        </button>
+      <div className="p-8 flex flex-col items-start space-y-4 max-w-xl bg-white rounded-lg shadow-sm border border-slate-200 m-6">
+        <div className="text-red-600 font-semibold text-base">
+          {error || contextError || "Unable to load template. Please try again or check your backend connection."}
+        </div>
+        <p className="text-slate-600 text-sm">
+          Please check your browser console (F12) for network logs, or click Retry below to re-fetch from the backend.
+        </p>
+        <div className="flex items-center space-x-3 pt-2">
+          <button
+            onClick={handleRetry}
+            disabled={retrying}
+            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded text-sm font-medium transition-colors disabled:opacity-50"
+          >
+            {retrying ? "Retrying..." : "Retry"}
+          </button>
+          <button
+            onClick={async () => {
+              try {
+                setRetrying(true);
+                await resetTemplate();
+                setError(null);
+              } catch (e) {
+                console.error("[PrintTemplateDesigner] Reset error:", e);
+                toast.error("Failed to reset template. Please check backend server.");
+              } finally {
+                setRetrying(false);
+              }
+            }}
+            className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-sm font-medium transition-colors border border-slate-300"
+          >
+            Reset to Defaults
+          </button>
+        </div>
       </div>
     );
-  if (!template) return <div className="p-8">Loading template designer...</div>;
+  if (!template) return <div className="p-8 text-slate-600 font-medium">Loading template designer...</div>;
 
   // Mock data for live preview
   const mockPatient = {

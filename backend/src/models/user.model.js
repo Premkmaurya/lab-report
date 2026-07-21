@@ -20,10 +20,16 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    laboratoryId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Laboratory',
+      default: null,
+      index: true,
+    },
     role: {
       type: String,
-      enum: ["user", "admin"],
-      default: "user",
+      enum: ['user', 'admin', 'system_admin', 'lab_technician', 'receptionist'],
+      default: 'user',
     },
     isAuthorized: {
       type: Boolean,

@@ -41,8 +41,11 @@ app.use(
 app.use("/status", userAuth, authorizeRoles("admin"));
 app.use(statusMonitor());
 
+const laboratoryRoutes = require("./routes/laboratory.routes");
+
 app.use("/api/health", healthRoutes);
 app.use("/api/auth", authRoutes); // Auth routes have their own limiters
+app.use("/api/laboratories", laboratoryRoutes);
 app.use("/api/doctors", doctorRoutes);
 app.use("/api/patients", patientRoutes);
 app.use("/api/departments", departmentRoutes);

@@ -22,9 +22,11 @@ const {
 
 const validateRequest = require("../validators/validationMiddleware");
 
+const { injectTenantFilter, injectTenantOnCreate } = require("../middlewares/tenant.middleware");
+
 const router = express.Router();
 
-router.use(authMiddleware.userAuth);
+router.use(authMiddleware.userAuth, injectTenantFilter);
 
 // Get all patients
 router.get("/", getPatients);
@@ -44,8 +46,6 @@ router.get(
   exportPatientsSummary
 );
 
-
-
 // Get patient by ID
 router.get(
   "/:id",
@@ -57,6 +57,7 @@ router.get(
 // Create patient
 router.post(
   "/",
+  injectTenantOnCreate,
   validateCreatePatient,
   validateRequest,
   auditMiddleware("CREATED", "Patient"),

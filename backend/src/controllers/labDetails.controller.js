@@ -1,49 +1,81 @@
-const LabDetails = require("../models/labDetails.model");
+const Laboratory = require("../models/laboratory.model");
 const asyncHandler = require("../utils/asyncHandler");
 const { BadRequestError, NotFoundError } = require("../utils/errors");
 const { invalidateCacheKey } = require("../services/cache.service");
 
 const getLabDetails = asyncHandler(async (req, res) => {
-  const lab = await LabDetails.findOne({ userId: req.user._id });
-  res.status(200).json({ success: true, labDetails: lab });
+  const labId = req.laboratoryId || req.user.laboratoryId;
+  if (!labId) {
+    return res.status(200).json({ success: true, labDetails: null });
+  }
+
+  const lab = await Laboratory.findById(labId);
+  if (!lab) {
+    return res.status(200).json({ success: true, labDetails: null });
+  }
+
+  const mappedLabDetails = {
+    _id: lab._id,
+    laboratoryDisplayName: lab.name,
+    letterheadAddressLine: lab.letterheadAddressLine || lab.address,
+    contactPhone: lab.phone,
+    contactEmail: lab.email,
+    logo: lab.logo,
+    code: lab.code,
+    gstNumber: lab.gstNumber,
+    licenseNumber: lab.licenseNumber,
+  };
+
+  res.status(200).json({ success: true, labDetails: mappedLabDetails });
 });
 
 // Upsert handler used by existing PUT route
 const createOrUpdateLabDetails = asyncHandler(async (req, res) => {
-  const { laboratoryDisplayName, letterheadAddressLine, contactPhone, contactEmail } = req.body;
+  const { laboratoryDisplayName, letterheadAddressLine, contactPhone, contactEmail, logo } = req.body;
+  const labId = req.laboratoryId || req.user.laboratoryId;
 
-  const updates = {};
-  if (laboratoryDisplayName !== undefined) updates.laboratoryDisplayName = laboratoryDisplayName;
-  if (letterheadAddressLine !== undefined) updates.letterheadAddressLine = letterheadAddressLine;
-  if (contactPhone !== undefined) updates.contactPhone = contactPhone;
-  if (contactEmail !== undefined) updates.contactEmail = contactEmail;
-
-  if (Object.keys(updates).length === 0) {
-    throw new BadRequestError("Please provide at least one field to create or update lab details");
+  if (!labId) {
+    throw new BadRequestError("User is not associated with any laboratory");
   }
 
-  const lab = await LabDetails.findOneAndUpdate(
-    { userId: req.user._id },
-    { $set: updates, $setOnInsert: { userId: req.user._id } },
-    { new: true, upsert: true, runValidators: true },
+  const updates = {};
+  if (laboratoryDisplayName !== undefined) updates.name = laboratoryDisplayName;
+  if (letterheadAddressLine !== undefined) updates.letterheadAddressLine = letterheadAddressLine;
+  if (contactPhone !== undefined) updates.phone = contactPhone;
+  if (contactEmail !== undefined) updates.email = contactEmail;
+  if (logo !== undefined) updates.logo = logo;
+
+  if (Object.keys(updates).length === 0) {
+    throw new BadRequestError("Please provide at least one field to update lab details");
+  }
+
+  const lab = await Laboratory.findByIdAndUpdate(
+    labId,
+    { $set: updates },
+    { new: true, runValidators: true },
   );
+
+  if (!lab) {
+    throw new NotFoundError("Laboratory not found");
+  }
 
   await invalidateCacheKey(`settings:lab-details:${req.user._id}`);
 
-  res.status(200).json({ success: true, labDetails: lab });
+  const mappedLabDetails = {
+    _id: lab._id,
+    laboratoryDisplayName: lab.name,
+    letterheadAddressLine: lab.letterheadAddressLine || lab.address,
+    contactPhone: lab.phone,
+    contactEmail: lab.email,
+    logo: lab.logo,
+    code: lab.code,
+  };
+
+  res.status(200).json({ success: true, labDetails: mappedLabDetails });
 });
 
 const deleteLabDetails = asyncHandler(async (req, res) => {
-  const lab = await LabDetails.findOne({ userId: req.user._id });
-  if (!lab) {
-    throw new NotFoundError("Lab details not found");
-  }
-
-  await LabDetails.deleteOne({ _id: lab._id });
-
-  await invalidateCacheKey(`settings:lab-details:${req.user._id}`);
-
-  res.status(200).json({ success: true, message: "Lab details deleted" });
+  res.status(200).json({ success: true, message: "Lab details cleared" });
 });
 
 module.exports = {

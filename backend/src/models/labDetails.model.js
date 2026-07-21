@@ -1,12 +1,11 @@
 const mongoose = require("mongoose");
+const tenantPlugin = require("../plugins/tenantPlugin");
 
 const labDetailsSchema = new mongoose.Schema(
   {
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true,
-      unique: true,
     },
     laboratoryDisplayName: {
       type: String,
@@ -27,6 +26,8 @@ const labDetailsSchema = new mongoose.Schema(
   },
   { timestamps: true },
 );
+
+labDetailsSchema.plugin(tenantPlugin);
 
 const labDetailsModel = mongoose.model("LabDetails", labDetailsSchema);
 

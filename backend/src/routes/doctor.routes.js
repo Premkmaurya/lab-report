@@ -20,11 +20,13 @@ const {
 } = require("../validators/doctor.validator");
 const validateRequest = require("../validators/validationMiddleware");
 
+const { injectTenantFilter, injectTenantOnCreate } = require("../middlewares/tenant.middleware");
+
 const router = express.Router();
 
 const upload = multer({ storage: multer.memoryStorage() });
 
-router.use(authMiddleware.userAuth);
+router.use(authMiddleware.userAuth, injectTenantFilter);
 
 router.get("/", cacheMiddleware(86400, () => "doctors:all"), getAllDoctors);
 router.get(
@@ -37,6 +39,7 @@ router.get(
 
 router.post(
   "/",
+  injectTenantOnCreate,
   authMiddleware.authorizePermissions("manage_doctors"),
   upload.single("signature"),
   validateCreateDoctor,

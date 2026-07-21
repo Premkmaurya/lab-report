@@ -280,12 +280,88 @@ export const PrintablePage = ({
   };
 
   /* ── Zoom: scale the 794×1123 box and clip outer container ───── */
-  // Content is always laid out at full A4 size, then scaled visually.
+  const pageBox = (
+    <div
+      className="print-page"
+      style={{
+        width:          `${A4_WIDTH_PX}px`,
+        height:         `${A4_HEIGHT_PX}px`,
+        boxSizing:      'border-box',
+        padding:        `${marginTop}px ${marginRight}px ${marginBottom}px ${marginLeft}px`,
+        display:        'flex',
+        flexDirection:  'column',
+        background:     'white',
+        overflow:       'hidden',
+        contain:        'paint layout',
+        transformOrigin: 'top left',
+        transform:      zoom !== 1 ? `scale(${zoom})` : undefined,
+        ...baseFont,
+      }}
+    >
+      {/* ── 1. Patient Header ─────────────────────────────────── */}
+      <div style={{ flexShrink: 0, contain: 'layout' }}>
+        {renderBarcode()}
+        <PatientInfo patient={patient} report={report} template={template} />
+        <div style={{ borderBottom: '2px solid #CBD5E1', marginTop: '4px' }} />
+      </div>
+
+      {/* ── 2. Table Header ───────────────────────────────────── */}
+      <table style={{
+        width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed', flexShrink: 0,
+      }}>
+        {colgroup}
+        <thead>
+          <tr>
+            <th style={{ ...thBase, textAlign: 'left'   }}>TEST NAME</th>
+            <th style={{ ...thBase, textAlign: 'left'   }}>RESULT</th>
+            <th style={{ ...thBase, textAlign: 'center' }}>UNIT</th>
+            <th style={{ ...thBase, textAlign: 'left'   }}>REFERENCE RANGE</th>
+          </tr>
+        </thead>
+      </table>
+
+      {/* ── 3. Content Area ───────────────────────────────────── */}
+      <div style={{ flex: 1, overflow: 'hidden' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
+          {colgroup}
+          <tbody>
+            {rows.length > 0
+              ? rows.map((row, i) => renderRow(row, i))
+              : (
+                <tr>
+                  <td colSpan={4} style={{
+                    textAlign:  'center',
+                    color:      '#94A3B8',
+                    fontStyle:  'italic',
+                    paddingTop: '40px',
+                  }}>
+                    No tests available in this report.
+                  </td>
+                </tr>
+              )
+            }
+          </tbody>
+        </table>
+      </div>
+
+      {/* ── 4. Footer (always at page bottom via flex) ────────── */}
+      <div style={{ flexShrink: 0 }}>
+        <div style={{ borderTop: '2px solid #CBD5E1', marginBottom: '4px' }} />
+        <SignatureSection patient={patient} template={template} />
+      </div>
+    </div>
+  );
+
+  // When unzoomed (e.g. print-window mode), return the .print-page directly as the top-level element
+  if (zoom === 1) {
+    return pageBox;
+  }
+
+  // Designer preview mode: clip outer container to scaled dimensions
   const outerW = A4_WIDTH_PX  * zoom;
   const outerH = A4_HEIGHT_PX * zoom;
 
   return (
-    /* Outer wrapper clips the scaled content to the zoomed dimensions */
     <div style={{
       width:    `${outerW}px`,
       height:   `${outerH}px`,
@@ -293,75 +369,7 @@ export const PrintablePage = ({
       flexShrink: 0,
       display:  'block',
     }}>
-      {/* Inner A4 page box — always 794×1123, scaled via transform */}
-      <div
-        className="print-page"
-        style={{
-          width:          `${A4_WIDTH_PX}px`,
-          height:         `${A4_HEIGHT_PX}px`,
-          boxSizing:      'border-box',
-          padding:        `${marginTop}px ${marginRight}px ${marginBottom}px ${marginLeft}px`,
-          display:        'flex',
-          flexDirection:  'column',
-          background:     'white',
-          overflow:       'hidden',
-          transformOrigin: 'top left',
-          transform:      zoom !== 1 ? `scale(${zoom})` : undefined,
-          ...baseFont,
-        }}
-      >
-        {/* ── 1. Patient Header ─────────────────────────────────── */}
-        <div style={{ flexShrink: 0 }}>
-          {renderBarcode()}
-          <PatientInfo patient={patient} report={report} template={template} />
-          <div style={{ borderBottom: '2px solid #CBD5E1', marginTop: '4px' }} />
-        </div>
-
-        {/* ── 2. Table Header ───────────────────────────────────── */}
-        <table style={{
-          width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed', flexShrink: 0,
-        }}>
-          {colgroup}
-          <thead>
-            <tr>
-              <th style={{ ...thBase, textAlign: 'left'   }}>TEST NAME</th>
-              <th style={{ ...thBase, textAlign: 'left'   }}>RESULT</th>
-              <th style={{ ...thBase, textAlign: 'center' }}>UNIT</th>
-              <th style={{ ...thBase, textAlign: 'left'   }}>REFERENCE RANGE</th>
-            </tr>
-          </thead>
-        </table>
-
-        {/* ── 3. Content Area ───────────────────────────────────── */}
-        <div style={{ flex: 1, overflow: 'hidden' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
-            {colgroup}
-            <tbody>
-              {rows.length > 0
-                ? rows.map((row, i) => renderRow(row, i))
-                : (
-                  <tr>
-                    <td colSpan={4} style={{
-                      textAlign:  'center',
-                      color:      '#94A3B8',
-                      fontStyle:  'italic',
-                      paddingTop: '40px',
-                    }}>
-                      No tests available in this report.
-                    </td>
-                  </tr>
-                )
-              }
-            </tbody>
-          </table>
-        </div>
-
-        {/* ── 4. Footer (always at page bottom via flex) ────────── */}
-        <div style={{ flexShrink: 0 }}>
-          <div style={{ borderTop: '2px solid #CBD5E1', marginBottom: '4px' }} />
-          <SignatureSection patient={patient} template={template} />
-        </div>
-      </div>
+      {pageBox}
     </div>
   );
 };

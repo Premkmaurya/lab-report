@@ -21,9 +21,9 @@
  */
 export const openPrintWindow = () => {
   const win = window.open(
-    '',
-    '_blank',
-    'width=900,height=700,scrollbars=yes,resizable=yes'
+    "",
+    "_blank",
+    "width=900,height=700,scrollbars=yes,resizable=yes",
   );
 
   if (!win) return null;
@@ -78,14 +78,16 @@ export const openPrintWindow = () => {
  */
 const collectAppCss = () => {
   // Linked stylesheets — link.href is already an absolute URL in the browser.
-  const linkTags = Array.from(document.querySelectorAll('link[rel="stylesheet"]'))
+  const linkTags = Array.from(
+    document.querySelectorAll('link[rel="stylesheet"]'),
+  )
     .map((el) => `<link rel="stylesheet" href="${el.href}">`)
-    .join('\n');
+    .join("\n");
 
   // Inline <style> blocks (Tailwind v4 runtime output, @theme tokens, etc.)
-  const styleTags = Array.from(document.querySelectorAll('style'))
+  const styleTags = Array.from(document.querySelectorAll("style"))
     .map((el) => `<style>${el.textContent}</style>`)
-    .join('\n');
+    .join("\n");
 
   return `${linkTags}\n${styleTags}`;
 };
@@ -98,7 +100,7 @@ const collectAppCss = () => {
  * @param {string} reportHtml – innerHTML of the rendered pages container div
  * @param {string} title      – Used as the window document title
  */
-export const injectAndPrint = (win, reportHtml, title = 'Lab Report') => {
+export const injectAndPrint = (win, reportHtml, title = "Lab Report") => {
   if (!win || win.closed) return;
 
   const cssTags = collectAppCss();
@@ -135,27 +137,34 @@ export const injectAndPrint = (win, reportHtml, title = 'Lab Report') => {
     }
 
     /* ── Print media ─────────────────────────────────────────────────── */
+    /* ── Print media ─────────────────────────────────────────────────── */
     @page {
-      /* size: A4 matches the 794x1123px page boxes we generate.
-         margin: 0 means our application-level padding IS the margin. */
-      size: A4;
+      size: A4 portrait;
       margin: 0;
     }
     @media print {
-      html, body { background: white !important; }
+      html, body {
+        margin: 0 !important;
+        padding: 0 !important;
+        background: white !important;
+      }
       .print-pages-wrapper {
-        display: block;
-        gap: 0;
-        padding: 0;
+        display: block !important;
+        margin: 0 !important;
+        padding: 0 !important;
       }
       .print-page {
         box-shadow: none !important;
-        page-break-after: always;
-        break-after: page;
+        border: none !important;
+        margin: 0 !important;
+        page-break-after: always !important;
+        break-after: page !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
       }
       .print-page:last-child {
-        page-break-after: avoid;
-        break-after: avoid;
+        page-break-after: avoid !important;
+        break-after: avoid !important;
       }
     }
   </style>
@@ -169,10 +178,6 @@ export const injectAndPrint = (win, reportHtml, title = 'Lab Report') => {
       // Helper to log to both print window console and parent window console
       function pipelineLog(msg, data) {
         const text = "[PRINT PIPELINE] " + msg + (data !== undefined ? " " + JSON.stringify(data) : "");
-        console.log(text);
-        if (window.opener && !window.opener.closed) {
-          window.opener.console.log(text);
-        }
       }
 
       pipelineLog("3. document.write() started (injected script running).");
@@ -336,7 +341,7 @@ export const injectAndPrint = (win, reportHtml, title = 'Lab Report') => {
         // Safety override: ensure layout/wrapper elements are visible under print media.
         // This overrides body > * { display: none !important } which leaks from main print.css.
         const styleOverride = document.createElement('style');
-        styleOverride.textContent = '@media print { body { display: block !important; visibility: visible !important; } body > .print-pages-wrapper, .print-pages-wrapper, .print-pages-wrapper > * { display: block !important; visibility: visible !important; opacity: 1 !important; } .print-page { display: flex !important; visibility: visible !important; opacity: 1 !important; } }';
+        styleOverride.textContent = '@media print { html, body { display: block !important; margin: 0 !important; padding: 0 !important; visibility: visible !important; } .print-pages-wrapper { display: block !important; margin: 0 !important; padding: 0 !important; visibility: visible !important; } .print-page { display: flex !important; margin: 0 !important; visibility: visible !important; opacity: 1 !important; page-break-after: always !important; break-after: page !important; } .print-page:last-child { page-break-after: avoid !important; break-after: avoid !important; } }';
         document.head.appendChild(styleOverride);
         pipelineLog("Appended CSS overrides to clear any leaked display:none styles under print media.");
 

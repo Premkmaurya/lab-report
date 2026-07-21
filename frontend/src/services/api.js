@@ -8,7 +8,15 @@ const API = axios.create({
     "Content-Type": "application/json",
   },
 });
-
+API.interceptors.request.use(
+  (config) => {
+    if (window.__ACTIVE_LABORATORY_ID__) {
+      config.headers['x-laboratory-id'] = window.__ACTIVE_LABORATORY_ID__;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 API.interceptors.response.use(
   (response) => response,
   (error) => {

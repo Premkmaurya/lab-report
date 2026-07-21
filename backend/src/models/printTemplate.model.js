@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const tenantPlugin = require("../plugins/tenantPlugin");
 
 const elementStyleSchema = new mongoose.Schema(
   {
@@ -40,11 +41,15 @@ const elementStyleSchema = new mongoose.Schema(
 
 const printTemplateSchema = new mongoose.Schema(
   {
+    laboratoryId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Laboratory",
+      required: true,
+      unique: true,
+    },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true,
-      unique: true,
     },
 
     page: {

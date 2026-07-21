@@ -18,10 +18,12 @@ const {
 } = require("../validators/test.validator");
 const validateRequest = require("../validators/validationMiddleware");
 
+const { injectTenantFilter, injectTenantOnCreate } = require("../middlewares/tenant.middleware");
+
 const router = express.Router();
 
 // Apply auth middleware to all routes
-router.use(authMiddleware.userAuth);
+router.use(authMiddleware.userAuth, injectTenantFilter);
 
 // Get all tests
 router.get("/", cacheMiddleware(86400, () => "tests:all"), getTests);
@@ -38,6 +40,7 @@ router.get(
 // Create test
 router.post(
   "/",
+  injectTenantOnCreate,
   authMiddleware.authorizePermissions("manage_tests"),
   validateCreateTest,
   validateRequest,

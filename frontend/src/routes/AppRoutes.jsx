@@ -39,6 +39,13 @@ const EditUser = lazy(() =>
   import("../pages/Users/EditUser").then((m) => ({ default: m.EditUser })),
 );
 
+const LaboratoryList = lazy(() =>
+  import("../pages/Laboratories/LaboratoryList")
+);
+const LaboratoryForm = lazy(() =>
+  import("../pages/Laboratories/LaboratoryForm")
+);
+
 const PatientList = lazy(() =>
   import("../pages/Patients/PatientList").then((m) => ({
     default: m.PatientList,
@@ -156,11 +163,18 @@ export const AppRoutes = () => {
                 element={<PrintTemplateDesigner />}
               />
             </Route>
-            {/* Admin Only Views */}
-            <Route element={<RoleGuard allowedRoles={["admin"]} />}>
+            {/* Admin & System Admin Views */}
+            <Route element={<RoleGuard allowedRoles={["admin", "system_admin"]} />}>
               <Route path="/users" element={<UserList />} />
               <Route path="/users/create" element={<CreateUser />} />
               <Route path="/users/edit/:id" element={<EditUser />} />
+            </Route>
+
+            {/* System Admin Only Views */}
+            <Route element={<RoleGuard allowedRoles={["system_admin"]} />}>
+              <Route path="/laboratories" element={<LaboratoryList />} />
+              <Route path="/laboratories/new" element={<LaboratoryForm />} />
+              <Route path="/laboratories/edit/:id" element={<LaboratoryForm />} />
             </Route>
           </Route>
         </Route>

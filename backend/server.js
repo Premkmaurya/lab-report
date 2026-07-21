@@ -8,12 +8,14 @@ const cron = require("node-cron");
 
 connectDB();
 
-// Initialize Redis Connection
+// Initialize Redis Connection safely
 (async () => {
   try {
-    await redisClient.connect();
+    if (!redisClient.isOpen && !redisClient.isReady) {
+      await redisClient.connect();
+    }
   } catch (err) {
-    logger.error("Initial Redis connection failed, cache disabled", err);
+    logger.error(`Initial Redis connection failed, cache disabled: ${err.message}`);
   }
 })();
 

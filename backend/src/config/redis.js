@@ -3,13 +3,14 @@ const logger = require("../utils/logger");
 
 const REDIS_URL = process.env.REDIS_URL || "redis://localhost:6379";
 
-// Create Redis Client
 const redisClient = redis.createClient({
   url: REDIS_URL,
   socket: {
     reconnectStrategy: (retries) => {
-      // Reconnect progressively up to 3 seconds
-      return Math.min(retries * 50, 3000);
+      if (retries > 5) {
+        return new Error("Redis connection retries exhausted");
+      }
+      return Math.min(retries * 100, 3000);
     }
   }
 });

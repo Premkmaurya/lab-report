@@ -5,7 +5,7 @@ const { BadRequestError, NotFoundError } = require("../utils/errors");
 const { invalidateCachePattern } = require("../services/cache.service");
 
 const getPatients = asyncHandler(async (req, res) => {
-  const patients = await Patient.find()
+  const patients = await Patient.find(req.tenantFilter || {})
     .populate("createdBy", "username email")
     .sort({ createdAt: -1 });
 
@@ -16,7 +16,8 @@ const getPatients = asyncHandler(async (req, res) => {
 });
 
 const getPatientById = asyncHandler(async (req, res) => {
-  const patient = await Patient.findById(req.params.id).populate(
+  const query = { _id: req.params.id, ...req.tenantFilter };
+  const patient = await Patient.findOne(query).populate(
     "createdBy",
     "username email",
   );
@@ -32,7 +33,8 @@ const getPatientById = asyncHandler(async (req, res) => {
 });
 
 const deletePatient = asyncHandler(async (req, res) => {
-  const patient = await Patient.findById(req.params.id);
+  const query = { _id: req.params.id, ...req.tenantFilter };
+  const patient = await Patient.findOne(query);
 
   if (!patient) {
     throw new NotFoundError("Patient not found");
@@ -50,7 +52,7 @@ const deletePatient = asyncHandler(async (req, res) => {
 });
 
 const createPatient = asyncHandler(async (req, res) => {
-  const { name, firstName, lastName, title, age, gender, date, referredDoctor } = req.body;
+  const { name, firstName, lastName, title, age, gender, date, referredDoctor, laboratoryId } = req.body;
 
   const fullName = name?.trim() || [title, firstName, lastName].filter(Boolean).join(" ").trim();
 
@@ -69,6 +71,7 @@ const createPatient = asyncHandler(async (req, res) => {
     registeredAt: new Date(),
     referredDoctor,
     createdBy: req.user.id,
+    laboratoryId: laboratoryId || req.user.laboratoryId,
   });
 
   await invalidateCachePattern("dashboard:stats:*");
@@ -93,7 +96,8 @@ const updatePatient = asyncHandler(async (req, res) => {
     throw new BadRequestError("Please provide at least one valid field to update");
   }
 
-  const patient = await Patient.findByIdAndUpdate(req.params.id, updates, {
+  const query = { _id: req.params.id, ...req.tenantFilter };
+  const patient = await Patient.findOneAndUpdate(query, updates, {
     new: true,
     returnDocument: "after",
     runValidators: true,
@@ -115,7 +119,6 @@ const getRange = (period, timezoneOffsetMinutes = 0) => {
   const tzOffset = parseInt(timezoneOffsetMinutes, 10) || 0;
 
   const now = new Date();
-  // clientLocalTime represents the client's wall clock time as a Date object in UTC
   const clientLocalTime = new Date(now.getTime() - tzOffset * 60 * 1000);
 
   const start = new Date(clientLocalTime);
@@ -126,7 +129,7 @@ const getRange = (period, timezoneOffsetMinutes = 0) => {
     start.setUTCHours(0, 0, 0, 0);
   } else if (period === "week") {
     const day = start.getUTCDay();
-    const diff = start.getUTCDate() - day; // get Sunday
+    const diff = start.getUTCDate() - day;
     start.setUTCDate(diff);
     start.setUTCHours(0, 0, 0, 0);
   } else if (period === "month") {
@@ -136,7 +139,6 @@ const getRange = (period, timezoneOffsetMinutes = 0) => {
     throw new BadRequestError("Invalid period type. Supported periods: today, week, month");
   }
 
-  // Convert back to UTC to query the database
   const utcStart = new Date(start.getTime() + tzOffset * 60 * 1000);
   const utcEnd = new Date(end.getTime() + tzOffset * 60 * 1000);
 
@@ -153,9 +155,12 @@ const getPatientsSummary = asyncHandler(async (req, res) => {
 
   const { start, end } = getRange(period, timezoneOffset);
 
-  const patients = await Patient.find({
+  const filter = {
     date: { $gte: start, $lte: end },
-  })
+    ...req.tenantFilter,
+  };
+
+  const patients = await Patient.find(filter)
     .populate("createdBy", "username email")
     .sort({ createdAt: -1 });
 
@@ -165,12 +170,15 @@ const getPatientsSummary = asyncHandler(async (req, res) => {
 
   const todayCount = await Patient.countDocuments({
     date: { $gte: todayRange.start, $lte: todayRange.end },
+    ...req.tenantFilter,
   });
   const weekCount = await Patient.countDocuments({
     date: { $gte: weekRange.start, $lte: weekRange.end },
+    ...req.tenantFilter,
   });
   const monthCount = await Patient.countDocuments({
     date: { $gte: monthRange.start, $lte: monthRange.end },
+    ...req.tenantFilter,
   });
 
   res.status(200).json({
@@ -197,6 +205,7 @@ const exportPatientsSummary = asyncHandler(async (req, res) => {
 
   const patients = await Patient.find({
     date: { $gte: start, $lte: end },
+    ...req.tenantFilter,
   }).sort({ createdAt: -1 });
 
   const todayRange = getRange("today", timezoneOffset);
@@ -205,12 +214,15 @@ const exportPatientsSummary = asyncHandler(async (req, res) => {
 
   const todayCount = await Patient.countDocuments({
     date: { $gte: todayRange.start, $lte: todayRange.end },
+    ...req.tenantFilter,
   });
   const weekCount = await Patient.countDocuments({
     date: { $gte: weekRange.start, $lte: weekRange.end },
+    ...req.tenantFilter,
   });
   const monthCount = await Patient.countDocuments({
     date: { $gte: monthRange.start, $lte: monthRange.end },
+    ...req.tenantFilter,
   });
 
   // Generate CSV data
@@ -233,8 +245,7 @@ const exportPatientsSummary = asyncHandler(async (req, res) => {
     "Patient ID,Patient Name,Age,Gender,Phone,Referred Doctor,Registration Date,Reports\n";
 
   for (const patient of patients) {
-    // Find reports for the patient
-    const reports = await PatientTest.find({ patientId: patient._id });
+    const reports = await PatientTest.find({ patientId: patient._id, ...req.tenantFilter });
     const reportsString = reports
       .map((r) => {
         return r.tests

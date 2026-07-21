@@ -10,15 +10,33 @@ export const PrintTemplateProvider = ({ children }) => {
   const { user } = useAuth();
   const [template, setTemplate] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const fetchTemplate = async () => {
+    setLoading(true);
+    setError(null);
     try {
       const res = await printTemplateService.getTemplate();
-      if (res.success && res.data) {
+
+      if (res && res.data) {
         setTemplate(res.data);
+      } else if (res && res.template) {
+        setTemplate(res.template);
+      } else {
+        const resetRes = await printTemplateService.resetTemplate();
+        if (resetRes && resetRes.data) {
+          setTemplate(resetRes.data);
+          setError(null);
+        } else {
+          const errMsg = "Backend returned template response with empty data";
+          console.error("[PrintTemplateContext] Error:", errMsg, res);
+          setError(errMsg);
+        }
       }
-    } catch (error) {
-      console.error("Failed to fetch print template:", error);
+    } catch (err) {
+      const errMsg = err.response?.data?.message || err.message || "Failed to fetch print template";
+      console.error("[PrintTemplateContext] Fetch template exception:", errMsg, err);
+      setError(errMsg);
     } finally {
       setLoading(false);
     }
@@ -27,37 +45,50 @@ export const PrintTemplateProvider = ({ children }) => {
   useEffect(() => {
     if (user) {
       fetchTemplate();
+    } else {
+      setLoading(false);
     }
   }, [user]);
 
   const updateTemplate = async (templateData) => {
     try {
       const res = await printTemplateService.updateTemplate(templateData);
-      if (res.success && res.data) {
+      if (res && res.data) {
         setTemplate(res.data);
       }
       return res;
-    } catch (error) {
-      console.error("Failed to update print template:", error);
-      throw error;
+    } catch (err) {
+      console.error("[PrintTemplateContext] Failed to update print template:", err.response?.data?.message || err.message || err);
+      throw err;
     }
   };
 
   const resetTemplate = async () => {
     try {
       const res = await printTemplateService.resetTemplate();
-      if (res.success && res.data) {
+      if (res && res.data) {
         setTemplate(res.data);
+        setError(null);
       }
       return res;
-    } catch (error) {
-      console.error("Failed to reset print template:", error);
-      throw error;
+    } catch (err) {
+      console.error("[PrintTemplateContext] Failed to reset print template:", err.response?.data?.message || err.message || err);
+      throw err;
     }
   };
 
   return (
-    <PrintTemplateContext.Provider value={{ template, loading, updateTemplate, resetTemplate, fetchTemplate, setTemplate }}>
+    <PrintTemplateContext.Provider
+      value={{
+        template,
+        loading,
+        error,
+        updateTemplate,
+        resetTemplate,
+        fetchTemplate,
+        setTemplate,
+      }}
+    >
       {children}
     </PrintTemplateContext.Provider>
   );

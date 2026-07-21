@@ -117,9 +117,11 @@ export const AuthProvider = ({ children }) => {
 
   const hasPermission = (permName) => {
     if (!user) return false;
-    if (user.role === "admin") return true;
+    if (user.role === "admin" || user.role === "system_admin") return true;
     return (user.permissions || []).includes(permName);
   };
+
+  const isSystemAdmin = user?.role === 'system_admin';
 
   return (
     <AuthContext.Provider
@@ -127,6 +129,7 @@ export const AuthProvider = ({ children }) => {
         user,
         loading,
         isAuthorizedUser,
+        isSystemAdmin,
         authError,
         login,
         signup,

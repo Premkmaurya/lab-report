@@ -1,8 +1,8 @@
 import API from "./api";
 
 export const userService = {
-  getAllUsers: async () => {
-    const response = await API.get("/auth/users");
+  getAllUsers: async (params = {}) => {
+    const response = await API.get("/auth/users", { params });
     return response.data;
   },
 

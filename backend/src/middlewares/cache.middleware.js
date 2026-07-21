@@ -15,14 +15,15 @@ const cacheMiddleware = (ttl = 3600, keyGenerator = null) => {
 
     let cacheKey;
     try {
+      const tenantPrefix = req.user?.laboratoryId ? req.user.laboratoryId.toString() : 'global';
       if (keyGenerator) {
-        cacheKey = keyGenerator(req);
+        cacheKey = `tenant:${tenantPrefix}:${keyGenerator(req)}`;
       } else {
         // Default key: Base URL + query params (sorted for determinism)
         const params = new URLSearchParams(req.query);
         params.sort();
         const queryStr = params.toString() ? `?${params.toString()}` : "";
-        cacheKey = `route:${req.baseUrl}${req.path}${queryStr}`;
+        cacheKey = `tenant:${tenantPrefix}:route:${req.baseUrl}${req.path}${queryStr}`;
       }
 
       req.cacheKey = cacheKey; // Expose to controller if needed
@@ -42,8 +43,19 @@ const cacheMiddleware = (ttl = 3600, keyGenerator = null) => {
     }
 
     if (cachedData) {
-      logger.debug(`Cache hit for key: ${cacheKey}`);
-      return res.status(200).json(JSON.parse(cachedData));
+      try {
+        const parsed = JSON.parse(cachedData);
+        if (parsed && parsed.data === null) {
+          logger.warn(`Bypassing and clearing invalid null cache for key: ${cacheKey}`);
+          redisClient.del(cacheKey).catch(() => {});
+        } else {
+          logger.debug(`Cache hit for key: ${cacheKey}`);
+          return res.status(200).json(parsed);
+        }
+      } catch (parseErr) {
+        logger.error(`Cache parse error for key ${cacheKey}: ${parseErr.message}`);
+        redisClient.del(cacheKey).catch(() => {});
+      }
     }
 
     logger.debug(`Cache miss for key: ${cacheKey}`);
@@ -51,8 +63,8 @@ const cacheMiddleware = (ttl = 3600, keyGenerator = null) => {
     // Overwrite res.json to cache the response before sending it
     const originalJson = res.json.bind(res);
     res.json = (body) => {
-      // Only cache successful responses (status 200-299)
-      if (res.statusCode >= 200 && res.statusCode < 300 && redisClient.isReady) {
+      // Only cache successful responses (status 200-299) that contain valid data
+      if (res.statusCode >= 200 && res.statusCode < 300 && body && (body.data !== undefined && body.data !== null) && redisClient.isReady) {
         redisClient.setEx(cacheKey, ttl, JSON.stringify(body)).catch((err) => {
           logger.error(`Redis SetEx Error for key ${cacheKey}: ${err.message}`);
         });

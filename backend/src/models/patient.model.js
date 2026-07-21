@@ -1,11 +1,12 @@
 const mongoose = require("mongoose");
 const mongooseDelete = require("mongoose-delete");
+const tenantPlugin = require("../plugins/tenantPlugin");
 
 const patientSchema = new mongoose.Schema(
   {
     title: {
       type: String,
-      enum: ["Mr.", "Mrs.", "Miss", "Master", "Baby of"],
+      enum: ["Mr.", "Mrs.", "Miss", "Master", "Baby of", ""],
       default: "",
     },
     firstName: {
@@ -50,7 +51,6 @@ const patientSchema = new mongoose.Schema(
     },
     visitId: {
       type: String,
-      unique: true,
       sparse: true,
     },
   },
@@ -59,13 +59,15 @@ const patientSchema = new mongoose.Schema(
   },
 );
 
+patientSchema.plugin(tenantPlugin);
+
 patientSchema.pre("validate", async function () {
   if (!this.visitId) {
     let unique = false;
     let attempts = 0;
     while (!unique && attempts < 10) {
       const id = String(Math.floor(10000 + Math.random() * 90000));
-      const existing = await mongoose.model("Patient").findOne({ visitId: id });
+      const existing = await mongoose.model("Patient").findOne({ visitId: id, laboratoryId: this.laboratoryId });
       if (!existing) {
         this.visitId = id;
         unique = true;
@@ -84,8 +86,14 @@ patientSchema.pre("validate", async function () {
 });
 
 patientSchema.plugin(mongooseDelete, { overrideMethods: "all", deletedAt: true });
+patientSchema.index(
+  { visitId: 1, laboratoryId: 1 },
+  { unique: true, partialFilterExpression: { visitId: { $type: "string" } } }
+);
 patientSchema.index({ date: -1 });
 patientSchema.index({ createdAt: -1 });
+patientSchema.index({ laboratoryId: 1, createdAt: -1 });
+patientSchema.index({ laboratoryId: 1, date: -1 });
 
 const patientModel = mongoose.model("Patient", patientSchema);
 

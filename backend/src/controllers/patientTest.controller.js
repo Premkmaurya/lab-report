@@ -20,7 +20,8 @@ const computeTotalPrice = (report) => {
 const getReportAndTestTemplate = asyncHandler(async (req, res) => {
   const { id, testId } = req.params;
 
-  const patientTest = await PatientTest.findById(id)
+  const query = { _id: id, ...req.tenantFilter };
+  const patientTest = await PatientTest.findOne(query)
     .populate("patientId", "name age")
     .populate("createdBy", "username email");
 
@@ -28,15 +29,13 @@ const getReportAndTestTemplate = asyncHandler(async (req, res) => {
     throw new NotFoundError("Patient test not found");
   }
 
-  let testTemplate = await Test.findById(testId);
+  let testTemplate = await Test.findOne({ _id: testId, ...req.tenantFilter });
   if (!testTemplate) {
-    // Fallback: If the test was deleted and recreated, the ID may be stale.
-    // Lookup the template by the testName stored in the patient's report.
     const reportTest = patientTest.tests.find(
       (t) => t.testId.toString() === testId,
     );
     if (reportTest && reportTest.testName) {
-      testTemplate = await Test.findOne({ name: reportTest.testName });
+      testTemplate = await Test.findOne({ name: reportTest.testName, ...req.tenantFilter });
     }
   }
 
@@ -75,24 +74,21 @@ const getRange = (
     end.setUTCHours(23, 59, 59, 999);
   } else if (period === "week") {
     const day = start.getUTCDay();
-    const diff = start.getUTCDate() - day; // get Sunday
+    const diff = start.getUTCDate() - day;
     start.setUTCDate(diff);
     start.setUTCHours(0, 0, 0, 0);
   } else if (period === "month") {
     start.setUTCDate(1);
     start.setUTCHours(0, 0, 0, 0);
   } else if (period === "custom" && customStart && customEnd) {
-    // Treat custom start/end as local dates parsed in UTC
     start = new Date(customStart);
     start.setUTCHours(0, 0, 0, 0);
     end = new Date(customEnd);
     end.setUTCHours(23, 59, 59, 999);
   } else {
-    // Default to today
     start.setUTCHours(0, 0, 0, 0);
   }
 
-  // Convert back to UTC to query the database
   const utcStart = new Date(start.getTime() + tzOffset * 60 * 1000);
   const utcEnd = new Date(end.getTime() + tzOffset * 60 * 1000);
 
@@ -101,9 +97,8 @@ const getRange = (
 
 const getPatientTests = asyncHandler(async (req, res) => {
   const { date, startDate, endDate, timezoneOffset } = req.query;
-  let query = {};
+  let query = { ...req.tenantFilter };
 
-  // Only apply date filtering if explicitly requested or if it's the default workflow
   if (date) {
     const { start, end } = getRange(date, timezoneOffset, startDate, endDate);
     query.createdAt = { $gte: start, $lte: end };
@@ -133,7 +128,8 @@ const getPatientTests = asyncHandler(async (req, res) => {
 });
 
 const getPatientTestById = asyncHandler(async (req, res) => {
-  const patientTest = await PatientTest.findById(req.params.id)
+  const query = { _id: req.params.id, ...req.tenantFilter };
+  const patientTest = await PatientTest.findOne(query)
     .populate("patientId")
     .populate("createdBy", "username email")
     .populate({
@@ -158,9 +154,11 @@ const getPatientTestById = asyncHandler(async (req, res) => {
 });
 
 const getTestsByPatientId = asyncHandler(async (req, res) => {
-  const patientTests = await PatientTest.find({
+  const query = {
     patientId: req.params.patientId,
-  })
+    ...req.tenantFilter,
+  };
+  const patientTests = await PatientTest.find(query)
     .populate("patientId")
     .populate("createdBy", "username email")
     .populate({
@@ -185,16 +183,15 @@ const getTestsByPatientId = asyncHandler(async (req, res) => {
 });
 
 const createPatientTest = asyncHandler(async (req, res) => {
-  const { patientId, tests } = req.body;
+  const { patientId, tests, laboratoryId } = req.body;
 
   if (!patientId || !tests || tests.length === 0) {
     throw new BadRequestError("Please provide patientId and at least one test");
   }
 
-  // Fetch all templates for the assigned tests to initialize their results with default values (like defaultText)
   const testsWithResults = await Promise.all(
     tests.map(async (t) => {
-      const template = await Test.findById(t.testId);
+      const template = await Test.findOne({ _id: t.testId, ...req.tenantFilter });
       let result = [];
       if (template && template.subTests) {
         result = template.subTests.map((st) => {
@@ -224,6 +221,7 @@ const createPatientTest = asyncHandler(async (req, res) => {
     patientId,
     tests: testsWithResults,
     createdBy: req.user._id,
+    laboratoryId: laboratoryId || req.user.laboratoryId,
     date: new Date(),
   });
 
@@ -261,8 +259,9 @@ const updatePatientTest = asyncHandler(async (req, res) => {
     throw new BadRequestError("Please provide at least one valid field to update");
   }
 
-  const patientTest = await PatientTest.findByIdAndUpdate(
-    req.params.id,
+  const query = { _id: req.params.id, ...req.tenantFilter };
+  const patientTest = await PatientTest.findOneAndUpdate(
+    query,
     updates,
     {
       new: true,
@@ -294,7 +293,8 @@ const updatePatientTest = asyncHandler(async (req, res) => {
 });
 
 const deletePatientTest = asyncHandler(async (req, res) => {
-  const patientTest = await PatientTest.findById(req.params.id);
+  const query = { _id: req.params.id, ...req.tenantFilter };
+  const patientTest = await PatientTest.findOne(query);
 
   if (!patientTest) {
     throw new NotFoundError("Patient test not found");
@@ -312,12 +312,12 @@ const deletePatientTest = asyncHandler(async (req, res) => {
 const addTestToReport = asyncHandler(async (req, res) => {
   const { testId, testName } = req.body;
 
-  const patientTest = await PatientTest.findById(req.params.id);
+  const query = { _id: req.params.id, ...req.tenantFilter };
+  const patientTest = await PatientTest.findOne(query);
   if (!patientTest) {
     throw new NotFoundError("Patient test not found");
   }
 
-  // Duplicate Check
   const exists = patientTest.tests.some(
     (t) => t.testId.toString() === testId,
   );
@@ -325,7 +325,7 @@ const addTestToReport = asyncHandler(async (req, res) => {
     throw new BadRequestError("Test already exists in report");
   }
 
-  const template = await Test.findById(testId);
+  const template = await Test.findOne({ _id: testId, ...req.tenantFilter });
   let result = [];
   if (template && template.subTests) {
     result = template.subTests.map((st) => {

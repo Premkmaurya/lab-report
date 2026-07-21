@@ -23,10 +23,12 @@ const {
 } = require("../validators/patientTest.validator");
 const validateRequest = require("../validators/validationMiddleware");
 
+const { injectTenantFilter, injectTenantOnCreate } = require("../middlewares/tenant.middleware");
+
 const router = express.Router();
 
 // Apply auth middleware to all routes
-router.use(authMiddleware.userAuth);
+router.use(authMiddleware.userAuth, injectTenantFilter);
 
 // Get all patient tests
 router.get("/", getPatientTests);
@@ -60,6 +62,7 @@ router.get(
 // Create patient test
 router.post(
   "/",
+  injectTenantOnCreate,
   validateCreatePatientTest,
   validateRequest,
   auditMiddleware("CREATED", "Report"),

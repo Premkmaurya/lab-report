@@ -20,6 +20,8 @@ const {
 } = require("../validators/auth.validator");
 const validateRequest = require("../validators/validationMiddleware");
 
+const { injectTenantFilter, injectTenantOnCreate } = require("../middlewares/tenant.middleware");
+
 const router = express.Router();
 
 router.post(
@@ -39,10 +41,12 @@ router.post(
 router.post("/logout", auditMiddleware("LOGOUT", "Auth"), logout);
 router.get("/me", authMiddleware.userAuth, getMe);
 
-// Admin routes
+// Admin / System Admin user management routes
 router.post(
   "/users",
   authMiddleware.userAuth,
+  injectTenantFilter,
+  injectTenantOnCreate,
   authMiddleware.authorizeRoles("admin"),
   validateCreateUser,
   validateRequest,
@@ -52,18 +56,21 @@ router.post(
 router.get(
   "/users",
   authMiddleware.userAuth,
+  injectTenantFilter,
   authMiddleware.authorizeRoles("admin"),
   getAllUsers,
 );
 router.get(
   "/users/:id",
   authMiddleware.userAuth,
+  injectTenantFilter,
   authMiddleware.authorizeRoles("admin"),
   getUserById,
 );
 router.patch(
   "/users/:id/status",
   authMiddleware.userAuth,
+  injectTenantFilter,
   authMiddleware.authorizeRoles("admin"),
   validateUpdateUserStatus,
   validateRequest,

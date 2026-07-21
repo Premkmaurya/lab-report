@@ -11,6 +11,8 @@ const generateToken = (user) => {
       id: user._id,
       username: user.username,
       email: user.email,
+      role: user.role,
+      laboratoryId: user.laboratoryId || null,
     },
     config.JWT_SECRET || "report-secret-key",
     {
@@ -38,40 +40,20 @@ const sendTokenResponse = (user, statusCode, res) => {
       role: user.role,
       isAuthorized: user.isAuthorized,
       permissions: user.permissions || [],
+      laboratoryId: user.laboratoryId || null,
     },
   });
 };
 
 const signup = asyncHandler(async (req, res) => {
-  const { username, email, password } = req.body;
-
-  if (!username || !email || !password) {
-    throw new BadRequestError("Please provide username, email and password");
-  }
-
-  const existingUser = await User.findOne({
-    $or: [{ email }, { username }],
-  });
-
-  if (existingUser) {
-    throw new BadRequestError("User already exists");
-  }
-
-  const hashedPassword = await bcrypt.hash(password, 10);
-
-  const user = await User.create({
-    username,
-    email,
-    password: hashedPassword,
-  });
-
-  sendTokenResponse(user, 201, res);
+  throw new ForbiddenError("Public registration is disabled. Please contact your System Administrator to receive an account.");
 });
 
 const login = asyncHandler(async (req, res) => {
   const { username, email, password } = req.body;
+  const loginIdentifier = email || username;
 
-  if (!username && !email) {
+  if (!loginIdentifier) {
     throw new BadRequestError("Please provide username or email");
   }
 
@@ -79,7 +61,10 @@ const login = asyncHandler(async (req, res) => {
     throw new BadRequestError("Please provide password");
   }
 
-  const user = await User.findOne({ email });
+  const user = await User.findOne({
+    $or: [{ email: loginIdentifier.toLowerCase() }, { username: loginIdentifier }],
+  });
+
   if (!user) {
     throw new NotFoundError("User not found");
   }
@@ -114,6 +99,7 @@ const getMe = asyncHandler(async (req, res) => {
       role: user.role,
       isAuthorized: user.isAuthorized,
       permissions: user.permissions || [],
+      laboratoryId: user.laboratoryId || null,
     },
   });
 });
@@ -121,14 +107,22 @@ const getMe = asyncHandler(async (req, res) => {
 // admin functions
 
 const createUser = asyncHandler(async (req, res) => {
-  const { username, email, password, permissions } = req.body;
+  const { username, email, password, role, permissions, laboratoryId } = req.body;
 
   if (!username || !email || !password) {
-    throw new BadRequestError("Please provide username, email, password and role");
+    throw new BadRequestError("Please provide username, email and password");
+  }
+
+  let targetLabId = req.user.laboratoryId;
+  if (req.user.role === 'system_admin') {
+    if (role !== 'system_admin' && !laboratoryId) {
+      throw new BadRequestError("Please select a laboratory for this user");
+    }
+    targetLabId = role === 'system_admin' ? null : laboratoryId;
   }
 
   const existingUser = await User.findOne({
-    $or: [{ email }, { username }],
+    $or: [{ email: email.toLowerCase() }, { username }],
   });
 
   if (existingUser) {
@@ -136,13 +130,14 @@ const createUser = asyncHandler(async (req, res) => {
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
-
   const sanitizedPermissions = (permissions || []).filter(p => p !== 'create_user');
 
   const user = await User.create({
     username,
-    email,
+    email: email.toLowerCase(),
     password: hashedPassword,
+    role: role || 'user',
+    laboratoryId: targetLabId,
     isAuthorized: true,
     permissions: sanitizedPermissions,
   });
@@ -156,14 +151,18 @@ const createUser = asyncHandler(async (req, res) => {
       role: user.role,
       isAuthorized: user.isAuthorized,
       permissions: user.permissions || [],
+      laboratoryId: user.laboratoryId,
     },
   });
 });
 
 const getAllUsers = asyncHandler(async (req, res) => {
-  const users = await User.find({
+  const query = {
     _id: { $ne: req.user._id },
-  });
+    ...req.tenantFilter,
+  };
+
+  const users = await User.find(query).populate('laboratoryId', 'name code');
 
   res.status(200).json({
     success: true,
@@ -174,6 +173,8 @@ const getAllUsers = asyncHandler(async (req, res) => {
       role: user.role,
       isAuthorized: user.isAuthorized,
       permissions: user.permissions || [],
+      laboratoryId: user.laboratoryId,
+      laboratory: user.laboratoryId ? { id: user.laboratoryId._id, name: user.laboratoryId.name, code: user.laboratoryId.code } : null,
     })),
   });
 });
@@ -183,7 +184,8 @@ const getUserById = asyncHandler(async (req, res) => {
     throw new ForbiddenError("You cannot access your own account here");
   }
 
-  const user = await User.findById(req.params.id);
+  const query = { _id: req.params.id, ...req.tenantFilter };
+  const user = await User.findOne(query).populate('laboratoryId', 'name code');
   if (!user) {
     throw new NotFoundError("User not found");
   }
@@ -197,6 +199,8 @@ const getUserById = asyncHandler(async (req, res) => {
       role: user.role,
       isAuthorized: user.isAuthorized,
       permissions: user.permissions || [],
+      laboratoryId: user.laboratoryId,
+      laboratory: user.laboratoryId ? { id: user.laboratoryId._id, name: user.laboratoryId.name, code: user.laboratoryId.code } : null,
     },
   });
 });
@@ -206,26 +210,27 @@ const updateUserStatus = asyncHandler(async (req, res) => {
     throw new ForbiddenError("You cannot update your own account status");
   }
 
-  const { status, permissions } = req.body;
+  const { status, permissions, role } = req.body;
 
-  if (typeof status !== "boolean") {
-    throw new BadRequestError("Please provide a valid status (true or false)");
-  }
-
-  const updateData = { isAuthorized: status };
-  if (permissions !== undefined) {
-    updateData.permissions = (permissions || []).filter(p => p !== 'create_user');
-  }
-
-  const user = await User.findByIdAndUpdate(
-    req.params.id,
-    updateData,
-    { new: true },
-  );
-
+  const query = { _id: req.params.id, ...req.tenantFilter };
+  const user = await User.findOne(query);
   if (!user) {
     throw new NotFoundError("User not found");
   }
+
+  if (typeof status === "boolean") {
+    user.isAuthorized = status;
+  }
+
+  if (permissions !== undefined) {
+    user.permissions = (permissions || []).filter(p => p !== 'create_user');
+  }
+
+  if (role !== undefined && ['user', 'admin', 'lab_technician', 'receptionist'].includes(role)) {
+    user.role = role;
+  }
+
+  await user.save();
 
   res.status(200).json({
     success: true,
@@ -237,6 +242,7 @@ const updateUserStatus = asyncHandler(async (req, res) => {
       role: user.role,
       isAuthorized: user.isAuthorized,
       permissions: user.permissions || [],
+      laboratoryId: user.laboratoryId,
     },
   });
 });

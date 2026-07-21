@@ -28,6 +28,7 @@ const userAuth = async (req, res, next) => {
     }
 
     req.user = user;
+    req.laboratoryId = user.laboratoryId || null;
     next();
   } catch (error) {
     return res.status(401).json({ message: "Not authorized, invalid token" });
@@ -36,19 +37,20 @@ const userAuth = async (req, res, next) => {
 
 const authorizeRoles = (...roles) => {
   return (req, res, next) => {
-    if (!roles.includes(req.user.role)) {
-      return res
-        .status(403)
-        .json({ message: "Forbidden: Insufficient permissions" });
+    // system_admin has global access
+    if (req.user.role === "system_admin" || roles.includes(req.user.role)) {
+      return next();
     }
-    next();
+    return res
+      .status(403)
+      .json({ message: "Forbidden: Insufficient permissions" });
   };
 };  
 
 const authorizePermissions = (...requiredPermissions) => {
   return (req, res, next) => {
-    // Admin always has full access
-    if (req.user.role === "admin") {
+    // Admin and System Admin always have full access
+    if (req.user.role === "admin" || req.user.role === "system_admin") {
       return next();
     }
     
@@ -65,12 +67,16 @@ const authorizePermissions = (...requiredPermissions) => {
 const authorizeOwnership = (Model) => {
   return async (req, res, next) => {
     try {
-      if (req.user.role === "admin") {
+      if (req.user.role === "admin" || req.user.role === "system_admin") {
         return next();
       }
 
-      const resource = await Model.findById(req.params.id).select("createdBy");
+      const resource = await Model.findById(req.params.id).select("createdBy laboratoryId");
       if (!resource) {
+        return res.status(404).json({ message: "Resource not found" });
+      }
+
+      if (resource.laboratoryId && req.user.laboratoryId && resource.laboratoryId.toString() !== req.user.laboratoryId.toString()) {
         return res.status(404).json({ message: "Resource not found" });
       }
 

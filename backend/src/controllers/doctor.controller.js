@@ -5,7 +5,7 @@ const { BadRequestError, NotFoundError } = require("../utils/errors");
 const { invalidateCacheKey } = require("../services/cache.service");
 
 const getAllDoctors = asyncHandler(async (req, res) => {
-  const doctors = await Doctor.find()
+  const doctors = await Doctor.find(req.tenantFilter || {})
     .populate('createdBy', 'username _id')
     .populate('updatedBy', 'username _id');
   res.status(200).json({
@@ -15,7 +15,8 @@ const getAllDoctors = asyncHandler(async (req, res) => {
 });
 
 const getDoctorById = asyncHandler(async (req, res) => {
-  const doctor = await Doctor.findById(req.params.id)
+  const query = { _id: req.params.id, ...req.tenantFilter };
+  const doctor = await Doctor.findOne(query)
     .populate('createdBy', 'username _id')
     .populate('updatedBy', 'username _id');
 
@@ -30,7 +31,7 @@ const getDoctorById = asyncHandler(async (req, res) => {
 });
 
 const createDoctor = asyncHandler(async (req, res) => {
-  const { name, qualification } = req.body;
+  const { name, qualification, laboratoryId } = req.body;
   let signature = req.file;
 
   if (signature) {
@@ -49,6 +50,7 @@ const createDoctor = asyncHandler(async (req, res) => {
     signUrl: signature,
     createdBy: req.user._id,
     updatedBy: req.user._id,
+    laboratoryId: laboratoryId || req.user.laboratoryId,
   });
 
   doctor = await Doctor.findById(doctor._id)
@@ -87,7 +89,8 @@ const updateDoctor = asyncHandler(async (req, res) => {
 
   updates.updatedBy = req.user._id;
 
-  const doctor = await Doctor.findByIdAndUpdate(req.params.id, updates, {
+  const query = { _id: req.params.id, ...req.tenantFilter };
+  const doctor = await Doctor.findOneAndUpdate(query, updates, {
     returnDocument: "after",
     runValidators: true,
   })
@@ -108,7 +111,8 @@ const updateDoctor = asyncHandler(async (req, res) => {
 });
 
 const deleteDoctor = asyncHandler(async (req, res) => {
-  const doctor = await Doctor.findById(req.params.id);
+  const query = { _id: req.params.id, ...req.tenantFilter };
+  const doctor = await Doctor.findOne(query);
 
   if (!doctor) {
     throw new NotFoundError("Doctor not found");

@@ -8,6 +8,8 @@ import { OfflineFallback } from "./components/OfflineFallback";
 import { PrintTemplateProvider } from "./context/PrintTemplateContext";
 import { Toaster } from "sonner";
 
+import { LaboratoryProvider } from "./context/LaboratoryContext";
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -39,13 +41,15 @@ export const App = () => {
 
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
-          <PrintTemplateProvider>
-            <Router>
-              <AppRoutes />
-              <OfflineFallback />
-              <Toaster position="top-right" richColors closeButton />
-            </Router>
-          </PrintTemplateProvider>
+          <LaboratoryProvider>
+            <PrintTemplateProvider>
+              <Router>
+                <AppRoutes />
+                <OfflineFallback />
+                <Toaster position="top-right" richColors closeButton />
+              </Router>
+            </PrintTemplateProvider>
+          </LaboratoryProvider>
         </AuthProvider>
       </QueryClientProvider>
     </>

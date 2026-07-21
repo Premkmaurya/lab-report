@@ -4,7 +4,8 @@ const { BadRequestError, NotFoundError } = require("../utils/errors");
 const { invalidateCacheKey } = require("../services/cache.service");
 
 const getDepartments = asyncHandler(async (req, res) => {
-  const departments = await Department.find({ isActive: true }).sort({ name: 1 });
+  const query = { isActive: true, ...req.tenantFilter };
+  const departments = await Department.find(query).sort({ name: 1 });
   res.status(200).json({
     success: true,
     departments,
@@ -12,13 +13,13 @@ const getDepartments = asyncHandler(async (req, res) => {
 });
 
 const createDepartment = asyncHandler(async (req, res) => {
-  const { name, description } = req.body;
+  const { name, description, laboratoryId } = req.body;
 
   if (!name) {
     throw new BadRequestError("Department name is required");
   }
 
-  const existing = await Department.findOne({ name });
+  const existing = await Department.findOne({ name, ...req.tenantFilter });
   if (existing) {
     throw new BadRequestError("Department with this name already exists");
   }
@@ -26,6 +27,7 @@ const createDepartment = asyncHandler(async (req, res) => {
   const department = await Department.create({
     name,
     description,
+    laboratoryId: laboratoryId || req.user.laboratoryId,
   });
 
   await invalidateCacheKey("departments:all");
@@ -43,7 +45,8 @@ const updateDepartment = asyncHandler(async (req, res) => {
   if (description !== undefined) updates.description = description;
   if (isActive !== undefined) updates.isActive = isActive;
 
-  const department = await Department.findByIdAndUpdate(req.params.id, updates, {
+  const query = { _id: req.params.id, ...req.tenantFilter };
+  const department = await Department.findOneAndUpdate(query, updates, {
     new: true,
     runValidators: true,
   });
@@ -61,7 +64,8 @@ const updateDepartment = asyncHandler(async (req, res) => {
 });
 
 const deleteDepartment = asyncHandler(async (req, res) => {
-  const department = await Department.findById(req.params.id);
+  const query = { _id: req.params.id, ...req.tenantFilter };
+  const department = await Department.findOne(query);
 
   if (!department) {
     throw new NotFoundError("Department not found");
@@ -69,7 +73,7 @@ const deleteDepartment = asyncHandler(async (req, res) => {
 
   // Check if department is being used by any tests before soft deleting
   const Test = require("../models/test.model");
-  const testsUsingDepartment = await Test.countDocuments({ departmentId: req.params.id });
+  const testsUsingDepartment = await Test.countDocuments({ departmentId: req.params.id, ...req.tenantFilter });
 
   if (testsUsingDepartment > 0) {
     throw new BadRequestError(`Cannot delete department. It is currently assigned to ${testsUsingDepartment} tests.`);

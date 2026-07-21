@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const mongooseDelete = require("mongoose-delete");
+const tenantPlugin = require("../plugins/tenantPlugin");
 
 const doctorSchema = new mongoose.Schema(
   {
@@ -37,7 +38,9 @@ const doctorSchema = new mongoose.Schema(
   },
 );
 
+doctorSchema.plugin(tenantPlugin);
 doctorSchema.plugin(mongooseDelete, { overrideMethods: "all", deletedAt: true });
+doctorSchema.index({ laboratoryId: 1, name: 1 });
 
 const doctorModel = mongoose.model("Doctor", doctorSchema);
 

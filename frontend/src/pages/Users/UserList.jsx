@@ -4,13 +4,17 @@ import { userService } from "../../services/userService";
 import { Plus, Check, X, ShieldAlert } from "lucide-react";
 import { toast } from "../../lib/toast";
 
+import { useLaboratory } from "../../context/LaboratoryContext";
+
 export const UserList = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { selectedLabId } = useLaboratory();
 
   const fetchUsers = async () => {
+    setLoading(true);
     try {
-      const data = await userService.getAllUsers();
+      const data = await userService.getAllUsers(selectedLabId ? { laboratoryId: selectedLabId } : {});
       setUsers(data.users || []);
     } catch (err) {
       toast.error("Failed to fetch users list.");
@@ -22,7 +26,7 @@ export const UserList = () => {
 
   useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [selectedLabId]);
 
   const handleToggleStatus = async (id, currentStatus) => {
     const newStatus = !currentStatus;
@@ -47,6 +51,21 @@ export const UserList = () => {
     );
   }
 
+  const getRoleBadge = (role) => {
+    switch (role) {
+      case "system_admin":
+        return <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-purple-50 text-purple-700">System Admin</span>;
+      case "admin":
+        return <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-red-50 text-red-700">Lab Admin</span>;
+      case "receptionist":
+        return <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700">Receptionist</span>;
+      case "user":
+      case "lab_technician":
+      default:
+        return <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-lavender-mist text-electric-cobalt">Lab Tech</span>;
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -59,7 +78,7 @@ export const UserList = () => {
             User <span className="italic font-light">Management</span>
           </h1>
           <p className="font-inter text-stone text-sm mt-1">
-            Authorize newly registered lab technicians or suspend accounts.
+            Manage user accounts, laboratory assignments, and access permissions.
           </p>
         </div>
         <div>
@@ -73,7 +92,6 @@ export const UserList = () => {
         </div>
       </div>
 
-
       {/* Users Table */}
       <div className="bg-paper-white border border-cream-border rounded-cards overflow-hidden">
         <div className="overflow-x-auto w-full block">
@@ -82,6 +100,9 @@ export const UserList = () => {
               <tr className="bg-warm-canvas border-b border-cream-border">
                 <th className="px-6 py-4 font-abcfavoritvariable text-xs font-bold text-graphite uppercase tracking-wider">
                   Username
+                </th>
+                <th className="px-6 py-4 font-abcfavoritvariable text-xs font-bold text-graphite uppercase tracking-wider">
+                  Laboratory
                 </th>
                 <th className="px-6 py-4 font-abcfavoritvariable text-xs font-bold text-graphite uppercase tracking-wider">
                   Email
@@ -100,8 +121,8 @@ export const UserList = () => {
             <tbody className="divide-y divide-cream-border">
               {users.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="px-6 py-10 text-center text-stone text-sm">
-                    No users found.
+                  <td colSpan="6" className="px-6 py-10 text-center text-stone text-sm">
+                    No users found for this laboratory.
                   </td>
                 </tr>
               ) : (
@@ -111,18 +132,13 @@ export const UserList = () => {
                       {userItem.username}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-stone">
+                      {userItem.laboratory ? `${userItem.laboratory.name} (${userItem.laboratory.code})` : 'Global / None'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-stone">
                       {userItem.email}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      <span
-                        className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium uppercase tracking-wider ${
-                          userItem.role === "admin"
-                            ? "bg-red-50 text-red-700"
-                            : "bg-lavender-mist text-electric-cobalt"
-                        }`}
-                      >
-                        {userItem.role === "admin" ? "Admin" : "Lab Tech"}
-                      </span>
+                      {getRoleBadge(userItem.role)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                       <span

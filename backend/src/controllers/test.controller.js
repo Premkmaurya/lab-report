@@ -28,7 +28,7 @@ const validateSubTests = (subTests) => {
 };
 
 const getTests = asyncHandler(async (req, res) => {
-  const tests = await Test.find()
+  const tests = await Test.find(req.tenantFilter || {})
     .populate('departmentId')
     .populate('createdBy', 'username _id')
     .populate('updatedBy', 'username _id')
@@ -41,7 +41,8 @@ const getTests = asyncHandler(async (req, res) => {
 });
 
 const getTestById = asyncHandler(async (req, res) => {
-  const test = await Test.findById(req.params.id)
+  const query = { _id: req.params.id, ...req.tenantFilter };
+  const test = await Test.findOne(query)
     .populate('departmentId')
     .populate('createdBy', 'username _id')
     .populate('updatedBy', 'username _id');
@@ -57,7 +58,7 @@ const getTestById = asyncHandler(async (req, res) => {
 });
 
 const createTest = asyncHandler(async (req, res) => {
-  const { name, departmentId, price, subTests } = req.body;
+  const { name, departmentId, price, subTests, laboratoryId } = req.body;
 
   if (!name || price === undefined || !departmentId) {
     throw new BadRequestError("Please provide name, departmentId, and price");
@@ -72,6 +73,7 @@ const createTest = asyncHandler(async (req, res) => {
     subTests,
     createdBy: req.user._id,
     updatedBy: req.user._id,
+    laboratoryId: laboratoryId || req.user.laboratoryId,
   });
 
   test = await Test.findById(test._id)
@@ -107,7 +109,8 @@ const updateTest = asyncHandler(async (req, res) => {
 
   updates.updatedBy = req.user._id;
 
-  const test = await Test.findByIdAndUpdate(req.params.id, updates, {
+  const query = { _id: req.params.id, ...req.tenantFilter };
+  const test = await Test.findOneAndUpdate(query, updates, {
     new: true,
     returnDocument: "after",
     runValidators: true,
@@ -130,7 +133,8 @@ const updateTest = asyncHandler(async (req, res) => {
 });
 
 const deleteTest = asyncHandler(async (req, res) => {
-  const test = await Test.findById(req.params.id);
+  const query = { _id: req.params.id, ...req.tenantFilter };
+  const test = await Test.findOne(query);
 
   if (!test) {
     throw new NotFoundError("Test not found");

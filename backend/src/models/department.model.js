@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const mongooseDelete = require("mongoose-delete");
+const tenantPlugin = require("../plugins/tenantPlugin");
 
 const departmentSchema = new mongoose.Schema(
   {
@@ -7,7 +8,6 @@ const departmentSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
-      unique: true,
     },
     isActive: {
       type: Boolean,
@@ -19,7 +19,9 @@ const departmentSchema = new mongoose.Schema(
   }
 );
 
+departmentSchema.plugin(tenantPlugin);
 departmentSchema.plugin(mongooseDelete, { overrideMethods: "all", deletedAt: true });
+departmentSchema.index({ name: 1, laboratoryId: 1 }, { unique: true });
 departmentSchema.index({ isActive: 1, name: 1 });
 
 const Department = mongoose.model("Department", departmentSchema);
