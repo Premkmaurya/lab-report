@@ -116,7 +116,7 @@ export const Settings = () => {
         </div>
 
         {/* Print Template Designer Card */}
-        {(user?.role === "admin" || user?.permissions?.includes("manage_settings")) && (
+        {(user?.role === "admin" || user?.role === "system_admin" || user?.permissions?.includes("manage_settings")) && (
           <div className="md:col-span-1 bg-paper-white border border-cream-border rounded-cards p-6 space-y-6">
             <div className="flex items-center space-x-3 border-b border-cream-border pb-4">
               <Printer className="h-5 w-5 text-electric-cobalt shrink-0" />

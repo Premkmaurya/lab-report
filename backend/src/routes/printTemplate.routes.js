@@ -12,7 +12,12 @@ router.use(userAuth, injectTenantFilter);
 // Allow authenticated users to fetch the template (needed for printing reports)
 router.get(
   "/",
-  cacheMiddleware(86400, (req) => `settings:print-template:${req.laboratoryId || req.user.laboratoryId || req.user._id}`),
+  cacheMiddleware(86400, (req) => {
+    const labId = req.user.role === 'system_admin'
+      ? (req.query.laboratoryId || req.headers['x-laboratory-id'] || req.laboratoryId || req.user?.laboratoryId || 'default')
+      : (req.user.laboratoryId);
+    return `settings:print-template:${labId}`;
+  }),
   getTemplate
 );
 

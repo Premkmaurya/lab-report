@@ -1,5 +1,6 @@
 const Patient = require("../models/patient.model");
 const PatientTest = require("../models/patientTest.model");
+const Laboratory = require("../models/laboratory.model");
 const asyncHandler = require("../utils/asyncHandler");
 const { BadRequestError, NotFoundError } = require("../utils/errors");
 const { invalidateCachePattern } = require("../services/cache.service");
@@ -7,6 +8,7 @@ const { invalidateCachePattern } = require("../services/cache.service");
 const getPatients = asyncHandler(async (req, res) => {
   const patients = await Patient.find(req.tenantFilter || {})
     .populate("createdBy", "username email")
+    .populate("laboratoryId", "name code")
     .sort({ createdAt: -1 });
 
   res.status(200).json({
@@ -17,10 +19,9 @@ const getPatients = asyncHandler(async (req, res) => {
 
 const getPatientById = asyncHandler(async (req, res) => {
   const query = { _id: req.params.id, ...req.tenantFilter };
-  const patient = await Patient.findOne(query).populate(
-    "createdBy",
-    "username email",
-  );
+  const patient = await Patient.findOne(query)
+    .populate("createdBy", "username email")
+    .populate("laboratoryId", "name code");
 
   if (!patient) {
     throw new NotFoundError("Patient not found");
@@ -60,6 +61,23 @@ const createPatient = asyncHandler(async (req, res) => {
     throw new BadRequestError("Please provide name, age, gender, and referred doctor");
   }
 
+  let targetLabId;
+  if (req.user.role === "system_admin") {
+    if (!laboratoryId) {
+      throw new BadRequestError("Laboratory selection is required for System Admin");
+    }
+    const lab = await Laboratory.findById(laboratoryId);
+    if (!lab) {
+      throw new BadRequestError("Specified laboratory does not exist");
+    }
+    if (lab.status === "inactive" || lab.status === "suspended") {
+      throw new BadRequestError("Specified laboratory is not active");
+    }
+    targetLabId = lab._id;
+  } else {
+    targetLabId = req.user.laboratoryId;
+  }
+
   const patient = await Patient.create({
     title: title || "",
     firstName: firstName?.trim() || "",
@@ -71,7 +89,7 @@ const createPatient = asyncHandler(async (req, res) => {
     registeredAt: new Date(),
     referredDoctor,
     createdBy: req.user.id,
-    laboratoryId: laboratoryId || req.user.laboratoryId,
+    laboratoryId: targetLabId,
   });
 
   await invalidateCachePattern("dashboard:stats:*");
@@ -92,6 +110,17 @@ const updatePatient = asyncHandler(async (req, res) => {
     }
   }
 
+  if (req.user.role === "system_admin" && req.body.laboratoryId !== undefined) {
+    const lab = await Laboratory.findById(req.body.laboratoryId);
+    if (!lab) {
+      throw new BadRequestError("Specified laboratory does not exist");
+    }
+    if (lab.status === "inactive" || lab.status === "suspended") {
+      throw new BadRequestError("Specified laboratory is not active");
+    }
+    updates.laboratoryId = lab._id;
+  }
+
   if (Object.keys(updates).length === 0) {
     throw new BadRequestError("Please provide at least one valid field to update");
   }
@@ -101,7 +130,9 @@ const updatePatient = asyncHandler(async (req, res) => {
     new: true,
     returnDocument: "after",
     runValidators: true,
-  }).populate("createdBy", "name email");
+  })
+    .populate("createdBy", "name email")
+    .populate("laboratoryId", "name code");
 
   if (!patient) {
     throw new NotFoundError("Patient not found");

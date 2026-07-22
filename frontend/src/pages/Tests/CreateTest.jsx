@@ -1,11 +1,12 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { testService } from "../../services/testService";
 import { departmentService } from "../../services/departmentService";
-import { ArrowLeft, ShieldAlert, Trash2 } from "lucide-react";
+import { ArrowLeft, ShieldAlert, Trash2, Globe } from "lucide-react";
 import { toast } from "../../lib/toast";
 import { generateObjectId } from "../../utils/objectId";
+import { useQueryClient } from "@tanstack/react-query";
 
 const ParameterSelect = ({ index, field, watch, setValue, register, errors }) => {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -66,6 +67,9 @@ const ParameterSelect = ({ index, field, watch, setValue, register, errors }) =>
 
 export const CreateTest = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const isGlobalMode = new URLSearchParams(location.search).get("global") === "true";
+
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [departments, setDepartments] = useState([]);
@@ -306,11 +310,21 @@ export const CreateTest = () => {
       }),
     };
 
-    toast.promise(testService.createTest(payload), {
-      loading: "Saving test...",
+  const queryClient = useQueryClient();
+
+  const apiCall = isGlobalMode
+      ? testService.createGlobalTest(payload)
+      : testService.createTest(payload);
+
+    toast.promise(apiCall, {
+      loading: isGlobalMode ? "Saving global test template..." : "Saving test...",
       success: () => {
+        queryClient.invalidateQueries({ queryKey: ['tests'] });
+        queryClient.invalidateQueries({ queryKey: ['summary'] });
         navigate("/tests");
-        return "Test created successfully";
+        return isGlobalMode
+          ? "Global test template published successfully"
+          : "Test created successfully";
       },
       error: (err) => err.response?.data?.message || "Failed to create test profile. Please try again.",
       finally: () => setIsSubmitting(false)
@@ -333,7 +347,7 @@ export const CreateTest = () => {
       {/* Header */}
       <div>
         <span className="font-abcfavoritvariable text-xs font-bold text-electric-cobalt uppercase tracking-widest block mb-2">
-          CREATION
+          {isGlobalMode ? "GLOBAL TEMPLATE CREATION" : "CREATION"}
         </span>
         <h1 className="font-martinaplantijn text-4xl text-ink-navy">
           {step === 1 ? (
@@ -342,7 +356,7 @@ export const CreateTest = () => {
             </>
           ) : step === 2 ? (
             <>
-              Create <span className="italic font-light">Laboratory Test</span>
+              Create <span className="italic font-light">{isGlobalMode ? "Global Test Template" : "Laboratory Test"}</span>
             </>
           ) : (
             <>

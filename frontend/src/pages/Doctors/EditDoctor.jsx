@@ -3,11 +3,18 @@ import { useForm } from "react-hook-form";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { doctorService } from "../../services/doctorService";
 import { ArrowLeft, ShieldAlert, Upload } from "lucide-react";
+import LaboratorySelect from "../../components/LaboratorySelect";
+import { useAuth } from "../../hooks/useAuth";
+import { useLaboratory } from "../../context/LaboratoryContext";
 import { toast } from "../../lib/toast";
 
 export const EditDoctor = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { laboratories } = useLaboratory();
+  const isSystemAdmin = user?.role === "system_admin";
+
   const [loading, setLoading] = useState(true);
   const [currentDoctor, setCurrentDoctor] = useState(null);
   const [fileName, setFileName] = useState("");
@@ -16,6 +23,8 @@ export const EditDoctor = () => {
     register,
     handleSubmit,
     reset,
+    watch,
+    setValue,
     formState: { errors },
   } = useForm();
 
@@ -24,10 +33,15 @@ export const EditDoctor = () => {
       try {
         const data = await doctorService.getDoctorById(id);
         setCurrentDoctor(data.doctor);
+        const currentLabId = typeof data.doctor.laboratoryId === 'object'
+          ? data.doctor.laboratoryId?._id
+          : data.doctor.laboratoryId;
+
         reset({
           name: data.doctor.name,
           qualification: data.doctor.qualification,
           isActive: data.doctor.isActive,
+          laboratoryId: currentLabId || "",
         });
       } catch (err) {
         toast.error("Failed to fetch doctor details.");
@@ -51,6 +65,10 @@ export const EditDoctor = () => {
     formData.append("name", data.name);
     formData.append("qualification", data.qualification);
     formData.append("isActive", data.isActive);
+
+    if (isSystemAdmin && data.laboratoryId) {
+      formData.append("laboratoryId", data.laboratoryId);
+    }
 
     if (data.signature && data.signature[0]) {
       formData.append("signature", data.signature[0]);
@@ -107,6 +125,26 @@ export const EditDoctor = () => {
       {/* Form Card */}
       <div className="bg-paper-white border border-cream-border rounded-cards p-6 md:p-8">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+          {/* Laboratory Selection for System Admin Only */}
+          {isSystemAdmin && (
+            <div>
+              <LaboratorySelect
+                value={watch("laboratoryId")}
+                onChange={(val) => setValue("laboratoryId", val, { shouldValidate: true })}
+                laboratories={laboratories}
+                error={!!errors.laboratoryId}
+                required={true}
+              />
+              <input
+                type="hidden"
+                {...register("laboratoryId", { required: "Laboratory selection is required for System Admin" })}
+              />
+              {errors.laboratoryId && (
+                <p className="text-xs text-red-500 mt-1">{errors.laboratoryId.message}</p>
+              )}
+            </div>
+          )}
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
               <label className="block text-xs font-bold text-charcoal uppercase tracking-wider mb-2">

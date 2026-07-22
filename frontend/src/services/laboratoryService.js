@@ -11,6 +11,31 @@ export const laboratoryService = {
     return response.data;
   },
 
+  getLaboratoryUsers: async (id) => {
+    const response = await api.get(`/laboratories/${id}/users`);
+    return response.data;
+  },
+
+  getLaboratoryPatients: async (id, params = {}) => {
+    const response = await api.get(`/laboratories/${id}/patients`, { params });
+    return response.data;
+  },
+
+  getLaboratoryDoctors: async (id) => {
+    const response = await api.get(`/laboratories/${id}/doctors`);
+    return response.data;
+  },
+
+  getLaboratoryTests: async (id) => {
+    const response = await api.get(`/laboratories/${id}/tests`);
+    return response.data;
+  },
+
+  getLaboratoryReports: async (id) => {
+    const response = await api.get(`/laboratories/${id}/reports`);
+    return response.data;
+  },
+
   createLaboratory: async (data) => {
     const response = await api.post('/laboratories', data);
     return response.data;

@@ -6,6 +6,7 @@ import { departmentService } from "../../services/departmentService";
 import { ArrowLeft, Trash2, Search, ChevronDown } from "lucide-react";
 import { toast } from "../../lib/toast";
 import { generateObjectId } from "../../utils/objectId";
+import { useQueryClient } from "@tanstack/react-query";
 
 const ParameterSelect = ({ index, field, watch, setValue, register, errors, disabled }) => {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -268,6 +269,9 @@ export const EditTest = () => {
   }, []);
 
   // Fetch specific test details for Step 2
+  const location = useLocation();
+  const isGlobalMode = new URLSearchParams(location.search).get("global") === "true";
+
   useEffect(() => {
     if (step === 2) {
       const testIdToFetch = id || selectedTestId;
@@ -276,7 +280,9 @@ export const EditTest = () => {
       const fetchTestDetails = async () => {
         setLoading(true);
         try {
-          const data = await testService.getTestById(testIdToFetch);
+          const data = isGlobalMode 
+            ? await testService.getGlobalTestById(testIdToFetch)
+            : await testService.getTestById(testIdToFetch);
           const t = data.test;
           
            let tests = (t.subTests || []).map(st => {
@@ -309,7 +315,7 @@ export const EditTest = () => {
       };
       fetchTestDetails();
     }
-  }, [step, id, selectedTestId, reset]);
+  }, [step, id, selectedTestId, reset, isGlobalMode]);
 
   const handleNextStep1 = () => {
     if (selectedTestId) {
@@ -347,11 +353,19 @@ export const EditTest = () => {
       }),
     };
     
-    toast.promise(testService.updateTest(targetId, payload), {
-      loading: "Saving changes...",
+    const apiCall = isGlobalMode
+      ? testService.updateGlobalTest(targetId, payload)
+      : testService.updateTest(targetId, payload);
+    
+    toast.promise(apiCall, {
+      loading: isGlobalMode ? "Updating global template..." : "Saving changes...",
       success: () => {
+        queryClient.invalidateQueries({ queryKey: ['tests'] });
+        queryClient.invalidateQueries({ queryKey: ['summary'] });
         navigate("/tests");
-        return "Test updated successfully";
+        return isGlobalMode
+          ? "Global test template updated successfully"
+          : "Test updated successfully";
       },
       error: (err) => err.response?.data?.message || "Failed to update test details. Please try again.",
       finally: () => setIsSubmitting(false)

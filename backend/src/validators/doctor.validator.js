@@ -15,6 +15,13 @@ const validateCreateDoctor = [
     .isLength({ min: 1, max: 100 })
     .withMessage("Qualification must be between 1 and 100 characters"),
   
+  body("laboratoryId")
+    .if((value, { req }) => req.user?.role === "system_admin")
+    .notEmpty()
+    .withMessage("Laboratory selection is required for System Admin")
+    .isMongoId()
+    .withMessage("Invalid laboratory ID format"),
+  
   // Note: File validation happens in controller (req.file check)
 ];
 
@@ -43,6 +50,12 @@ const validateUpdateDoctor = [
     .optional()
     .isBoolean()
     .withMessage("isActive must be a boolean value"),
+  
+  body("laboratoryId")
+    .optional()
+    .if((value, { req }) => req.user?.role === "system_admin")
+    .isMongoId()
+    .withMessage("Invalid laboratory ID format"),
 ];
 
 /**

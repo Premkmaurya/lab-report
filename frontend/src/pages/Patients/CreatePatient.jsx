@@ -8,11 +8,18 @@ import { testService } from "../../services/testService";
 import { ArrowLeft, ShieldAlert } from "lucide-react";
 import DoctorAutocomplete from "../../components/DoctorAutocomplete";
 import SearchableTestSelector from "../../components/SearchableTestSelector";
+import LaboratorySelect from "../../components/LaboratorySelect";
+import { useAuth } from "../../hooks/useAuth";
+import { useLaboratory } from "../../context/LaboratoryContext";
 import { toast } from "../../lib/toast";
 
 export const CreatePatient = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
+  const { laboratories, selectedLabId } = useLaboratory();
+  const isSystemAdmin = user?.role === "system_admin";
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [doctors, setDoctors] = useState([]);
 
@@ -34,10 +41,18 @@ export const CreatePatient = () => {
       lastName: "",
       gender: "male",
       date: new Date().toISOString().substring(0, 10), // Defaults to today's date
+      laboratoryId: selectedLabId || "",
     },
   });
 
   const watchedDoctor = watch('referredDoctor', '');
+  const watchedLabId = watch('laboratoryId', selectedLabId || '');
+
+  useEffect(() => {
+    if (isSystemAdmin && selectedLabId && !watchedLabId) {
+      setValue("laboratoryId", selectedLabId);
+    }
+  }, [selectedLabId, isSystemAdmin]);
 
   useEffect(() => {
     const fetchInitialData = async () => {
@@ -139,6 +154,26 @@ export const CreatePatient = () => {
       <div className="bg-paper-white border border-cream-border rounded-cards p-6 md:p-8">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
           <div className={step === 1 ? "block space-y-5" : "hidden"}>
+            {/* Laboratory Selection for System Admin Only */}
+            {isSystemAdmin && (
+              <div>
+                <LaboratorySelect
+                  value={watch("laboratoryId")}
+                  onChange={(val) => setValue("laboratoryId", val, { shouldValidate: true })}
+                  laboratories={laboratories}
+                  error={!!errors.laboratoryId}
+                  required={true}
+                />
+                <input
+                  type="hidden"
+                  {...register("laboratoryId", { required: "Laboratory selection is required for System Admin" })}
+                />
+                {errors.laboratoryId && (
+                  <p className="text-xs text-red-500 mt-1">{errors.laboratoryId.message}</p>
+                )}
+              </div>
+            )}
+
             <div className="grid grid-cols-[100px_auto] gap-4">
               <div>
                 <label className="block text-xs font-bold text-charcoal uppercase tracking-wider mb-2">

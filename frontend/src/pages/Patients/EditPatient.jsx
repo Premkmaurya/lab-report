@@ -5,11 +5,18 @@ import { patientService } from "../../services/patientService";
 import { doctorService } from "../../services/doctorService";
 import { ArrowLeft, ShieldAlert } from "lucide-react";
 import DoctorAutocomplete from "../../components/DoctorAutocomplete";
+import LaboratorySelect from "../../components/LaboratorySelect";
+import { useAuth } from "../../hooks/useAuth";
+import { useLaboratory } from "../../context/LaboratoryContext";
 import { toast } from "../../lib/toast";
 
 export const EditPatient = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { laboratories } = useLaboratory();
+  const isSystemAdmin = user?.role === "system_admin";
+
   const [loading, setLoading] = useState(true);
   const [doctors, setDoctors] = useState([]);
 
@@ -30,6 +37,10 @@ export const EditPatient = () => {
         const patientData = await patientService.getPatientById(id);
         const patient = patientData.patient;
 
+        const currentLabId = typeof patient.laboratoryId === 'object'
+          ? patient.laboratoryId?._id
+          : patient.laboratoryId;
+
         // Prefill Form
         reset({
           title: patient.title || "Mr.",
@@ -39,6 +50,7 @@ export const EditPatient = () => {
           gender: patient.gender,
           referredDoctor: patient.referredDoctor,
           date: patient.date ? new Date(patient.date).toISOString().substring(0, 10) : "",
+          laboratoryId: currentLabId || "",
         });
 
         // Prefill Doctors list
@@ -64,6 +76,10 @@ export const EditPatient = () => {
       age: parseInt(data.age, 10),
     };
     
+    if (isSystemAdmin) {
+      payload.laboratoryId = data.laboratoryId;
+    }
+
     toast.promise(patientService.updatePatient(id, payload), {
       loading: "Saving changes...",
       success: () => {
@@ -115,6 +131,26 @@ export const EditPatient = () => {
       {/* Form Card */}
       <div className="bg-paper-white border border-cream-border rounded-cards p-6 md:p-8">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+          {/* Laboratory Selection for System Admin Only */}
+          {isSystemAdmin && (
+            <div>
+              <LaboratorySelect
+                value={watch("laboratoryId")}
+                onChange={(val) => setValue("laboratoryId", val, { shouldValidate: true })}
+                laboratories={laboratories}
+                error={!!errors.laboratoryId}
+                required={true}
+              />
+              <input
+                type="hidden"
+                {...register("laboratoryId", { required: "Laboratory selection is required for System Admin" })}
+              />
+              {errors.laboratoryId && (
+                <p className="text-xs text-red-500 mt-1">{errors.laboratoryId.message}</p>
+              )}
+            </div>
+          )}
+
           <div className="grid grid-cols-[100px_auto] gap-4">
             <div>
               <label className="block text-xs font-bold text-charcoal uppercase tracking-wider mb-2">

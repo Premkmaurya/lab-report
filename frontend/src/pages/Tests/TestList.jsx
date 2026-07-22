@@ -1,15 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Plus, Edit2, Search, ChevronDown, ChevronRight } from "lucide-react";
+import { Plus, Edit2, Search, ChevronDown, ChevronRight, Globe, FlaskConical } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { canManageTests } from "../../config/permissions";
 import { testService } from "../../services/testService";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import GlobalTestLibrary from "./GlobalTestLibrary";
 
 export const TestList = () => {
   const { user } = useAuth();
   const canManage = canManageTests(user);
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [activeTab, setActiveTab] = useState("local"); // "local" | "global"
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedDepts, setExpandedDepts] = useState({});
 
@@ -20,7 +23,7 @@ export const TestList = () => {
     }));
   };
 
-  const { data, isLoading: loading, error: fetchError } = useQuery({
+  const { data, isLoading: loading, error: fetchError, refetch } = useQuery({
     queryKey: ['tests'],
     queryFn: () => testService.getAllTests(),
     staleTime: 5 * 60 * 1000,
@@ -28,6 +31,13 @@ export const TestList = () => {
 
   const tests = data?.tests || [];
   const error = fetchError ? "Failed to load test catalog." : "";
+
+  const handleTabChange = (newTab) => {
+    setActiveTab(newTab);
+    if (newTab === "local") {
+      refetch();
+    }
+  };
 
   const filteredTests = tests.filter((test) => {
     const searchLower = searchQuery.toLowerCase();
@@ -53,18 +63,50 @@ export const TestList = () => {
   }, [groupedTests, expandedDepts]);
 
   return (
-    <div className="space-y-8 max-w-4xl mx-auto py-10">
+    <div className="space-y-8 max-w-5xl mx-auto py-6">
       <div className="text-center space-y-3">
         <span className="font-abcfavoritvariable text-xs font-bold text-electric-cobalt uppercase tracking-widest block">
-          TEST MODULE
+          TEST MANAGEMENT
         </span>
         <h1 className="font-martinaplantijn text-5xl text-ink-navy">
           Laboratory <span className="italic font-light">Tests</span>
         </h1>
-        <p className="font-inter text-stone text-base">
-          Manage your test catalog, pricing, and report parameters.
+        <p className="font-inter text-stone text-base max-w-xl mx-auto">
+          Manage your laboratory test catalog, configure custom parameters, or import standardized global test templates.
         </p>
+
+        {/* Tab Switcher */}
+        <div className="inline-flex items-center p-1.5 bg-paper-white border border-cream-border rounded-full shadow-sm mt-4">
+          <button
+            onClick={() => handleTabChange("local")}
+            className={`inline-flex items-center space-x-2 px-6 py-2 rounded-full text-xs font-bold tracking-wider uppercase transition-all duration-200 cursor-pointer ${
+              activeTab === "local"
+                ? "bg-electric-cobalt text-paper-white shadow-sm"
+                : "text-stone hover:text-charcoal"
+            }`}
+          >
+            <FlaskConical className="w-3.5 h-3.5" />
+            <span>Laboratory Tests ({tests.length})</span>
+          </button>
+          <button
+            onClick={() => handleTabChange("global")}
+            className={`inline-flex items-center space-x-2 px-6 py-2 rounded-full text-xs font-bold tracking-wider uppercase transition-all duration-200 cursor-pointer ${
+              activeTab === "global"
+                ? "bg-electric-cobalt text-paper-white shadow-sm"
+                : "text-stone hover:text-charcoal"
+            }`}
+          >
+            <Globe className="w-3.5 h-3.5" />
+            <span>Global Test Library</span>
+          </button>
+        </div>
       </div>
+
+      {/* Tab Content */}
+      {activeTab === "global" ? (
+        <GlobalTestLibrary onImportSuccess={() => refetch()} />
+      ) : (
+        <>
 
       {canManage && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-10">
@@ -192,6 +234,8 @@ export const TestList = () => {
               )}
             </div>
           </div>
+        </>
+      )}
     </div>
   );
 };

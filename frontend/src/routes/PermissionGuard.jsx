@@ -10,7 +10,7 @@ export const PermissionGuard = ({ requiredPermission }) => {
     return <Navigate to="/login" replace />;
   }
 
-  const isAllowed = user.role === "admin" || hasPermission(requiredPermission);
+  const isAllowed = user.role === "admin" || user.role === "system_admin" || hasPermission(requiredPermission);
 
   if (!isAllowed) {
     return (

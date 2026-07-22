@@ -34,6 +34,13 @@ const validateCreatePatient = [
     .optional()
     .isISO8601()
     .withMessage("Date must be in ISO 8601 format (YYYY-MM-DD or ISO string)"),
+  
+  body("laboratoryId")
+    .if((value, { req }) => req.user?.role === "system_admin")
+    .notEmpty()
+    .withMessage("Laboratory selection is required for System Admin")
+    .isMongoId()
+    .withMessage("Invalid laboratory ID format"),
 ];
 
 /**
@@ -71,6 +78,12 @@ const validateUpdatePatient = [
     .optional()
     .isISO8601()
     .withMessage("Date must be in ISO 8601 format (YYYY-MM-DD or ISO string)"),
+  
+  body("laboratoryId")
+    .optional()
+    .if((value, { req }) => req.user?.role === "system_admin")
+    .isMongoId()
+    .withMessage("Invalid laboratory ID format"),
 ];
 
 /**

@@ -3,6 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Save, RotateCcw } from "lucide-react";
 import { usePrintTemplate } from "../../context/PrintTemplateContext";
 import { ReportCanvas } from "../../components/report/ReportCanvas";
+import LaboratorySelect from "../../components/LaboratorySelect";
+import { useAuth } from "../../hooks/useAuth";
+import { useLaboratory } from "../../context/LaboratoryContext";
 import { toast } from "../../lib/toast";
 
 // Default element styles derived from backend schema
@@ -112,6 +115,10 @@ const DEFAULT_PAGE_SETTINGS = {
 
 export const PrintTemplateDesigner = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { laboratories, selectedLabId: globalSelectedLabId } = useLaboratory();
+  const isSystemAdmin = user?.role === "system_admin";
+
   const {
     template: savedTemplate,
     updateTemplate,
@@ -121,11 +128,28 @@ export const PrintTemplateDesigner = () => {
     error: contextError,
   } = usePrintTemplate();
 
+  const [selectedLabId, setSelectedLabId] = useState(globalSelectedLabId || "");
+
   const [template, setTemplate] = useState(null);
   const [activeTab, setActiveTab] = useState("page"); // page, typography, elements, footer
   const [selectedElement, setSelectedElement] = useState("patientName");
   const [error, setError] = useState(null);
   const [retrying, setRetrying] = useState(false);
+
+  useEffect(() => {
+    if (isSystemAdmin) {
+      const initialLabId = selectedLabId || globalSelectedLabId || (laboratories[0]?._id || "");
+      if (initialLabId && initialLabId !== selectedLabId) {
+        setSelectedLabId(initialLabId);
+        fetchTemplate(initialLabId);
+      }
+    }
+  }, [isSystemAdmin, globalSelectedLabId, laboratories]);
+
+  const handleLabChange = (newLabId) => {
+    setSelectedLabId(newLabId);
+    fetchTemplate(newLabId);
+  };
 
   // Zoom state
   const [zoomLevel, setZoomLevel] = useState(1);
@@ -135,7 +159,7 @@ export const PrintTemplateDesigner = () => {
     setRetrying(true);
     setError(null);
     try {
-      await fetchTemplate();
+      await fetchTemplate(isSystemAdmin ? selectedLabId : undefined);
     } catch (err) {
       console.error("[PrintTemplateDesigner] Retry fetch template failed:", err);
       setError(err.message || "Failed to load template");
@@ -246,7 +270,11 @@ export const PrintTemplateDesigner = () => {
   const handleSignatureChange = (role, field, value) => {
     setTemplate((prev) => {
       const signatures = prev.signatures || {
-        technician: { name: "", designation: "", show: true },
+        technician: {
+          name: "Lab Technician",
+          designation: "Lab Technician",
+          show: true,
+        },
         pathologist: {
           name: "",
           designation: "",
@@ -266,7 +294,7 @@ export const PrintTemplateDesigner = () => {
   };
 
   const handleSave = async () => {
-    toast.promise(updateTemplate(template), {
+    toast.promise(updateTemplate(template, isSystemAdmin ? selectedLabId : undefined), {
       loading: "Saving template...",
       success: "Template saved successfully!",
       error: "Failed to save template.",
@@ -279,7 +307,7 @@ export const PrintTemplateDesigner = () => {
         "Are you sure you want to restore the factory default layout? This cannot be undone.",
       )
     ) {
-      toast.promise(resetTemplate(), {
+      toast.promise(resetTemplate(isSystemAdmin ? selectedLabId : undefined), {
         loading: "Resetting template...",
         success: "Template reset to default!",
         error: "Failed to reset template.",
@@ -440,13 +468,25 @@ export const PrintTemplateDesigner = () => {
             </button>
             <button
               onClick={handleSave}
-              className="p-2 bg-electric-cobalt text-white hover:bg-opacity-90 rounded flex items-center space-x-1 px-3"
+              className="p-2 bg-electric-cobalt text-white hover:bg-opacity-90 rounded flex items-center space-x-1 px-3 cursor-pointer"
             >
               <Save className="h-4 w-4" />
               <span className="text-xs font-medium">Save</span>
             </button>
           </div>
         </div>
+
+        {/* Laboratory Selector for System Admin */}
+        {isSystemAdmin && (
+          <div className="p-3 border-b border-cream-border bg-warm-canvas/40">
+            <LaboratorySelect
+              value={selectedLabId}
+              onChange={handleLabChange}
+              laboratories={laboratories}
+              required={false}
+            />
+          </div>
+        )}
 
         <div className="flex border-b border-cream-border bg-white text-sm">
           <button
@@ -1276,7 +1316,7 @@ export const PrintTemplateDesigner = () => {
         >
           {/* Zoom Wrapper */}
           <div
-            className="transition-all duration-200 flex-shrink-0"
+            className="transition-all duration-200 flex-shrink-0 mx-auto"
             style={{
               width: `${794 * zoomLevel}px`,
               height: `${1123 * zoomLevel}px`,
@@ -1284,7 +1324,7 @@ export const PrintTemplateDesigner = () => {
           >
             {/* The scaled canvas */}
             <div
-              className="origin-top-left transition-transform duration-200"
+              className="origin-top-center transition-transform duration-200"
               style={{
                 transform: `scale(${zoomLevel})`,
                 width: "794px",

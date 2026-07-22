@@ -138,7 +138,7 @@ export const DoctorList = () => {
 
               {/* Admin/Owner Actions */}
               {(() => {
-                const isOwner = user?.role === 'admin' || (user?._id && doc.createdBy?._id && user._id === doc.createdBy._id) || (user?.id && doc.createdBy?._id && user.id === doc.createdBy._id);
+                const isOwner = user?.role === 'admin' || user?.role === 'system_admin' || (user?._id && doc.createdBy?._id && user._id === doc.createdBy._id) || (user?.id && doc.createdBy?._id && user.id === doc.createdBy._id);
                 
                 if (isOwner) {
                   return (

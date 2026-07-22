@@ -25,6 +25,37 @@ export const testService = {
     const response = await API.delete(`/tests/${id}`);
     return response.data;
   },
+
+  // Global Test Library Service Methods
+  getGlobalTests: async (params) => {
+    const response = await API.get("/tests/global", { params });
+    return response.data;
+  },
+
+  getGlobalTestById: async (id) => {
+    const response = await API.get(`/tests/global/${id}`);
+    return response.data;
+  },
+
+  createGlobalTest: async (testData) => {
+    const response = await API.post("/tests/global", testData);
+    return response.data;
+  },
+
+  updateGlobalTest: async (id, testData) => {
+    const response = await API.patch(`/tests/global/${id}`, testData);
+    return response.data;
+  },
+
+  deleteGlobalTest: async (id) => {
+    const response = await API.delete(`/tests/global/${id}`);
+    return response.data;
+  },
+
+  importGlobalTest: async (id, data = {}) => {
+    const response = await API.post(`/tests/global/${id}/import`, data);
+    return response.data;
+  },
 };
 
 export default testService;

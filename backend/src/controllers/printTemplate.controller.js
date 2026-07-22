@@ -1,11 +1,28 @@
 const PrintTemplate = require("../models/printTemplate.model");
+const Laboratory = require("../models/laboratory.model");
 const { invalidateCacheKey } = require("../services/cache.service");
+
+// Helper to determine target lab ID based on user role
+const resolveLabId = (req) => {
+  if (req.user.role === 'system_admin') {
+    const labId = req.query.laboratoryId || req.body?.laboratoryId || req.headers['x-laboratory-id'] || req.laboratoryId;
+    if (labId) return labId;
+  }
+  return req.user.laboratoryId;
+};
 
 exports.getTemplate = async (req, res, next) => {
   try {
-    const labId = req.laboratoryId || req.user.laboratoryId;
+    let labId = resolveLabId(req);
 
     if (!labId && req.user.role === 'system_admin') {
+      const defaultLab = await Laboratory.findOne({ status: { $ne: 'inactive' } });
+      if (defaultLab) {
+        labId = defaultLab._id;
+      }
+    }
+
+    if (!labId) {
       let template = new PrintTemplate({ userId: req.user._id });
       return res.status(200).json({ success: true, data: template });
     }
@@ -38,7 +55,7 @@ exports.getTemplate = async (req, res, next) => {
 exports.updateTemplate = async (req, res, next) => {
   try {
     const { page, typography, elements, signatures } = req.body;
-    const labId = req.laboratoryId || req.user.laboratoryId;
+    let labId = resolveLabId(req);
 
     if (!labId) {
       return res.status(400).json({ success: false, message: 'Laboratory ID required' });
@@ -60,7 +77,8 @@ exports.updateTemplate = async (req, res, next) => {
 
 exports.resetTemplate = async (req, res, next) => {
   try {
-    const labId = req.laboratoryId || req.user.laboratoryId;
+    let labId = resolveLabId(req);
+
     if (!labId) {
       return res.status(400).json({ success: false, message: 'Laboratory ID required' });
     }

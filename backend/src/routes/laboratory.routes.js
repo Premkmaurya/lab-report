@@ -6,20 +6,50 @@ const { validateCreateLaboratory, validateUpdateLaboratory } = require('../valid
 const {
   getLaboratories,
   getLaboratoryById,
+  getLaboratoryUsers,
+  getLaboratoryPatients,
+  getLaboratoryDoctors,
+  getLaboratoryTests,
+  getLaboratoryReports,
   createLaboratory,
   updateLaboratory,
   updateLaboratoryStatus,
   deleteLaboratory,
 } = require('../controllers/laboratory.controller');
 
-// System Admin only endpoints
-router.use(userAuth, authorizeRoles('system_admin'));
+// Access middleware: System Admin can view any lab; Lab Admin can view their own lab
+const authorizeLabAccess = (req, res, next) => {
+  if (req.user.role === 'system_admin') {
+    return next();
+  }
+  const userLabId = req.user.laboratoryId ? req.user.laboratoryId.toString() : null;
+  if (req.user.role === 'admin' && userLabId && userLabId === req.params.id) {
+    return next();
+  }
+  return res.status(403).json({
+    success: false,
+    message: 'Access denied. You can only view your own laboratory details.',
+  });
+};
 
-router.get('/', getLaboratories);
-router.get('/:id', getLaboratoryById);
-router.post('/', validateCreateLaboratory, validateRequest, createLaboratory);
-router.patch('/:id', validateUpdateLaboratory, validateRequest, updateLaboratory);
-router.patch('/:id/status', updateLaboratoryStatus);
-router.delete('/:id', deleteLaboratory);
+// All routes require user auth
+router.use(userAuth);
+
+// System Admin only list and creation
+router.get('/', authorizeRoles('system_admin'), getLaboratories);
+router.post('/', authorizeRoles('system_admin'), validateCreateLaboratory, validateRequest, createLaboratory);
+
+// Laboratory Details & Sub-resources (System Admin OR Lab Admin for own lab)
+router.get('/:id', authorizeLabAccess, getLaboratoryById);
+router.get('/:id/users', authorizeLabAccess, getLaboratoryUsers);
+router.get('/:id/patients', authorizeLabAccess, getLaboratoryPatients);
+router.get('/:id/doctors', authorizeLabAccess, getLaboratoryDoctors);
+router.get('/:id/tests', authorizeLabAccess, getLaboratoryTests);
+router.get('/:id/reports', authorizeLabAccess, getLaboratoryReports);
+
+// Updates & Deletion (System Admin or Lab Admin for own lab settings)
+router.patch('/:id', authorizeLabAccess, validateUpdateLaboratory, validateRequest, updateLaboratory);
+router.patch('/:id/status', authorizeRoles('system_admin'), updateLaboratoryStatus);
+router.delete('/:id', authorizeRoles('system_admin'), deleteLaboratory);
 
 module.exports = router;

@@ -1,6 +1,10 @@
 const Laboratory = require('../models/laboratory.model');
 const User = require('../models/user.model');
 const Patient = require('../models/patient.model');
+const Doctor = require('../models/doctor.model');
+const Test = require('../models/test.model');
+const PatientTest = require('../models/patientTest.model');
+const Department = require('../models/department.model');
 
 /**
  * Get all laboratories (System Admin only)
@@ -48,7 +52,7 @@ const getLaboratories = async (req, res, next) => {
 };
 
 /**
- * Get single laboratory by ID
+ * Get single laboratory by ID with basic stats
  */
 const getLaboratoryById = async (req, res, next) => {
   try {
@@ -57,9 +61,13 @@ const getLaboratoryById = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'Laboratory not found' });
     }
 
-    const [userCount, patientCount] = await Promise.all([
+    const [userCount, patientCount, doctorCount, testCount, reportCount, departmentCount] = await Promise.all([
       User.countDocuments({ laboratoryId: laboratory._id }),
       Patient.countDocuments({ laboratoryId: laboratory._id }),
+      Doctor.countDocuments({ laboratoryId: laboratory._id }),
+      Test.countDocuments({ laboratoryId: laboratory._id, isGlobal: false }),
+      PatientTest.countDocuments({ laboratoryId: laboratory._id }),
+      Department.countDocuments({}),
     ]);
 
     res.json({
@@ -69,8 +77,124 @@ const getLaboratoryById = async (req, res, next) => {
         stats: {
           users: userCount,
           patients: patientCount,
+          doctors: doctorCount,
+          tests: testCount,
+          reports: reportCount,
+          departments: departmentCount,
         },
       },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Get laboratory users
+ */
+const getLaboratoryUsers = async (req, res, next) => {
+  try {
+    const users = await User.find({ laboratoryId: req.params.id })
+      .select('-password')
+      .sort({ createdAt: -1 });
+
+    res.json({
+      success: true,
+      data: users,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Get laboratory patients
+ */
+const getLaboratoryPatients = async (req, res, next) => {
+  try {
+    const { search, page = 1, limit = 50 } = req.query;
+    const query = { laboratoryId: req.params.id };
+
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { phone: { $regex: search, $options: 'i' } },
+        { patientId: { $regex: search, $options: 'i' } },
+      ];
+    }
+
+    const skip = (Number(page) - 1) * Number(limit);
+    const [patients, total] = await Promise.all([
+      Patient.find(query)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(Number(limit)),
+      Patient.countDocuments(query),
+    ]);
+
+    res.json({
+      success: true,
+      data: patients,
+      pagination: {
+        page: Number(page),
+        limit: Number(limit),
+        total,
+        pages: Math.ceil(total / Number(limit)),
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Get laboratory doctors
+ */
+const getLaboratoryDoctors = async (req, res, next) => {
+  try {
+    const doctors = await Doctor.find({ laboratoryId: req.params.id }).sort({ name: 1 });
+    res.json({
+      success: true,
+      data: doctors,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Get laboratory tests
+ */
+const getLaboratoryTests = async (req, res, next) => {
+  try {
+    const tests = await Test.find({ laboratoryId: req.params.id, isGlobal: false })
+      .populate('departmentId')
+      .populate('sourceTestId', 'name isGlobal')
+      .sort({ name: 1 });
+
+    res.json({
+      success: true,
+      data: tests,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Get laboratory reports
+ */
+const getLaboratoryReports = async (req, res, next) => {
+  try {
+    const reports = await PatientTest.find({ laboratoryId: req.params.id })
+      .populate('patientId')
+      .populate('createdBy', 'username email')
+      .sort({ createdAt: -1 })
+      .limit(100);
+
+    res.json({
+      success: true,
+      data: reports,
     });
   } catch (error) {
     next(error);
@@ -204,6 +328,11 @@ const deleteLaboratory = async (req, res, next) => {
 module.exports = {
   getLaboratories,
   getLaboratoryById,
+  getLaboratoryUsers,
+  getLaboratoryPatients,
+  getLaboratoryDoctors,
+  getLaboratoryTests,
+  getLaboratoryReports,
   createLaboratory,
   updateLaboratory,
   updateLaboratoryStatus,

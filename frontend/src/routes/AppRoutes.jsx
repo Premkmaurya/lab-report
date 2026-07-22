@@ -45,6 +45,9 @@ const LaboratoryList = lazy(() =>
 const LaboratoryForm = lazy(() =>
   import("../pages/Laboratories/LaboratoryForm")
 );
+const LaboratoryDetails = lazy(() =>
+  import("../pages/Laboratories/LaboratoryDetails")
+);
 
 const PatientList = lazy(() =>
   import("../pages/Patients/PatientList").then((m) => ({
@@ -168,6 +171,7 @@ export const AppRoutes = () => {
               <Route path="/users" element={<UserList />} />
               <Route path="/users/create" element={<CreateUser />} />
               <Route path="/users/edit/:id" element={<EditUser />} />
+              <Route path="/laboratories/:id" element={<LaboratoryDetails />} />
             </Route>
 
             {/* System Admin Only Views */}

@@ -73,6 +73,28 @@ const testSchema = new mongoose.Schema(
       required: true,
     },
     subTests: [subTestSchema],
+    isGlobal: {
+      type: Boolean,
+      default: false,
+      index: true,
+    },
+    createdBySystem: {
+      type: Boolean,
+      default: false,
+    },
+    sourceTestId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Test',
+      default: null,
+      index: true,
+    },
+    laboratoryId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Laboratory',
+      required: function() { return !this.isGlobal; },
+      default: null,
+      index: true,
+    },
     createdAt: {
       type: Date,
       default: Date.now,
@@ -96,6 +118,8 @@ testSchema.plugin(tenantPlugin);
 testSchema.plugin(mongooseDelete, { overrideMethods: "all", deletedAt: true });
 testSchema.index({ departmentId: 1 });
 testSchema.index({ createdAt: -1 });
+testSchema.index({ isGlobal: 1, departmentId: 1 });
+testSchema.index({ laboratoryId: 1, sourceTestId: 1 });
 testSchema.index({ laboratoryId: 1, departmentId: 1 });
 testSchema.index({ laboratoryId: 1, createdAt: -1 });
 

@@ -12,18 +12,18 @@ export const PrintTemplateProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const fetchTemplate = async () => {
+  const fetchTemplate = async (labId) => {
     setLoading(true);
     setError(null);
     try {
-      const res = await printTemplateService.getTemplate();
+      const res = await printTemplateService.getTemplate(labId);
 
       if (res && res.data) {
         setTemplate(res.data);
       } else if (res && res.template) {
         setTemplate(res.template);
       } else {
-        const resetRes = await printTemplateService.resetTemplate();
+        const resetRes = await printTemplateService.resetTemplate(labId);
         if (resetRes && resetRes.data) {
           setTemplate(resetRes.data);
           setError(null);
@@ -50,9 +50,9 @@ export const PrintTemplateProvider = ({ children }) => {
     }
   }, [user]);
 
-  const updateTemplate = async (templateData) => {
+  const updateTemplate = async (templateData, labId) => {
     try {
-      const res = await printTemplateService.updateTemplate(templateData);
+      const res = await printTemplateService.updateTemplate(templateData, labId);
       if (res && res.data) {
         setTemplate(res.data);
       }
@@ -63,9 +63,9 @@ export const PrintTemplateProvider = ({ children }) => {
     }
   };
 
-  const resetTemplate = async () => {
+  const resetTemplate = async (labId) => {
     try {
-      const res = await printTemplateService.resetTemplate();
+      const res = await printTemplateService.resetTemplate(labId);
       if (res && res.data) {
         setTemplate(res.data);
         setError(null);

@@ -3,18 +3,39 @@ import { useForm } from "react-hook-form";
 import { useNavigate, Link } from "react-router-dom";
 import { doctorService } from "../../services/doctorService";
 import { ArrowLeft, ShieldAlert, Upload } from "lucide-react";
+import LaboratorySelect from "../../components/LaboratorySelect";
+import { useAuth } from "../../hooks/useAuth";
+import { useLaboratory } from "../../context/LaboratoryContext";
 import { toast } from "../../lib/toast";
 
 export const CreateDoctor = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { laboratories, selectedLabId } = useLaboratory();
+  const isSystemAdmin = user?.role === "system_admin";
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [fileName, setFileName] = useState("");
 
   const {
     register,
     handleSubmit,
+    watch,
+    setValue,
     formState: { errors },
-  } = useForm();
+  } = useForm({
+    defaultValues: {
+      laboratoryId: selectedLabId || "",
+    },
+  });
+
+  const watchedLabId = watch("laboratoryId", selectedLabId || "");
+
+  React.useEffect(() => {
+    if (isSystemAdmin && selectedLabId && !watchedLabId) {
+      setValue("laboratoryId", selectedLabId);
+    }
+  }, [selectedLabId, isSystemAdmin]);
 
   const handleFileChange = (e) => {
     if (e.target.files && e.target.files[0]) {
@@ -28,6 +49,15 @@ export const CreateDoctor = () => {
     const formData = new FormData();
     formData.append("name", data.name);
     formData.append("qualification", data.qualification);
+
+    if (isSystemAdmin) {
+      if (!data.laboratoryId) {
+        toast.error("Please select a laboratory.");
+        setIsSubmitting(false);
+        return;
+      }
+      formData.append("laboratoryId", data.laboratoryId);
+    }
 
     if (data.signature && data.signature[0]) {
       formData.append("signature", data.signature[0]);
@@ -78,6 +108,26 @@ export const CreateDoctor = () => {
       {/* Form Card */}
       <div className="bg-paper-white border border-cream-border rounded-cards p-6 md:p-8">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+          {/* Laboratory Selection for System Admin Only */}
+          {isSystemAdmin && (
+            <div>
+              <LaboratorySelect
+                value={watch("laboratoryId")}
+                onChange={(val) => setValue("laboratoryId", val, { shouldValidate: true })}
+                laboratories={laboratories}
+                error={!!errors.laboratoryId}
+                required={true}
+              />
+              <input
+                type="hidden"
+                {...register("laboratoryId", { required: "Laboratory selection is required for System Admin" })}
+              />
+              {errors.laboratoryId && (
+                <p className="text-xs text-red-500 mt-1">{errors.laboratoryId.message}</p>
+              )}
+            </div>
+          )}
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
               <label className="block text-xs font-bold text-charcoal uppercase tracking-wider mb-2">
