@@ -8,6 +8,7 @@ import DoctorAutocomplete from "../../components/DoctorAutocomplete";
 import LaboratorySelect from "../../components/LaboratorySelect";
 import { useAuth } from "../../hooks/useAuth";
 import { useLaboratory } from "../../context/LaboratoryContext";
+import { useUpdatePatientMutation } from "../../services/patientApi";
 import { toast } from "../../lib/toast";
 
 export const EditPatient = () => {
@@ -19,6 +20,7 @@ export const EditPatient = () => {
 
   const [loading, setLoading] = useState(true);
   const [doctors, setDoctors] = useState([]);
+  const [updatePatient, { isLoading: isSubmitting }] = useUpdatePatientMutation();
 
   const {
     register,
@@ -70,28 +72,24 @@ export const EditPatient = () => {
   }, [id, reset]);
 
   const onSubmit = async (data) => {
-    setIsSubmitting(true);
     const payload = {
       ...data,
       age: parseInt(data.age, 10),
     };
-    
+
     if (isSystemAdmin) {
       payload.laboratoryId = data.laboratoryId;
     }
 
-    toast.promise(patientService.updatePatient(id, payload), {
+    toast.promise(updatePatient({ id, ...payload }).unwrap(), {
       loading: "Saving changes...",
       success: () => {
         navigate(`/patients/${id}`);
         return "Patient updated successfully";
       },
-      error: (err) => err.response?.data?.message || "Failed to update patient details.",
-      finally: () => setIsSubmitting(false)
+      error: (err) => err.data?.message || err.response?.data?.message || "Failed to update patient details.",
     });
   };
-
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (loading) {
     return (
@@ -177,9 +175,8 @@ export const EditPatient = () => {
                 <input
                   type="text"
                   placeholder="e.g. Prem"
-                  className={`w-full bg-paper-white border border-cream-border rounded-inputs px-4 py-3 outline-none ${
-                    errors.firstName ? "border-red-500" : ""
-                  }`}
+                  className={`w-full bg-paper-white border border-cream-border rounded-inputs px-4 py-3 outline-none ${errors.firstName ? "border-red-500" : ""
+                    }`}
                   {...register("firstName", {
                     required: "First name is required",
                   })}

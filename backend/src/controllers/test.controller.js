@@ -1,7 +1,7 @@
 const Test = require("../models/test.model");
 const asyncHandler = require("../utils/asyncHandler");
 const { BadRequestError, NotFoundError, ConflictError } = require("../utils/errors");
-const { invalidateCacheKey } = require("../services/cache.service");
+const { invalidateCacheKey, invalidateCachePattern } = require("../services/cache.service");
 
 const validateSubTests = (subTests) => {
   if (subTests && Array.isArray(subTests)) {
@@ -91,8 +91,7 @@ const createTest = asyncHandler(async (req, res) => {
     .populate('createdBy', 'username _id')
     .populate('updatedBy', 'username _id');
 
-  await invalidateCacheKey("tests:all");
-  await invalidateCacheKey("tests:global:all");
+  await invalidateCachePattern("*test*");
 
   res.status(201).json({
     success: true,
@@ -134,8 +133,7 @@ const updateTest = asyncHandler(async (req, res) => {
     throw new NotFoundError("Test not found");
   }
 
-  await invalidateCacheKey("tests:all");
-  await invalidateCacheKey(`test:${req.params.id}`);
+  await invalidateCachePattern("*test*");
 
   res.status(200).json({
     success: true,
@@ -153,8 +151,7 @@ const deleteTest = asyncHandler(async (req, res) => {
 
   await test.delete();
 
-  await invalidateCacheKey("tests:all");
-  await invalidateCacheKey(`test:${req.params.id}`);
+  await invalidateCachePattern("*test*");
 
   res.status(200).json({
     success: true,
@@ -278,7 +275,7 @@ const createGlobalTest = asyncHandler(async (req, res) => {
     .populate('departmentId')
     .populate('createdBy', 'username _id');
 
-  await invalidateCacheKey("tests:global:all");
+  await invalidateCachePattern("*test*");
 
   res.status(201).json({
     success: true,
@@ -318,7 +315,7 @@ const updateGlobalTest = asyncHandler(async (req, res) => {
     throw new NotFoundError("Global test template not found");
   }
 
-  await invalidateCacheKey("tests:global:all");
+  await invalidateCachePattern("*test*");
 
   res.status(200).json({
     success: true,
@@ -335,7 +332,7 @@ const deleteGlobalTest = asyncHandler(async (req, res) => {
 
   await test.delete();
 
-  await invalidateCacheKey("tests:global:all");
+  await invalidateCachePattern("*test*");
 
   res.status(200).json({
     success: true,
@@ -393,8 +390,7 @@ const importGlobalTest = asyncHandler(async (req, res) => {
     .populate('departmentId')
     .populate('createdBy', 'username _id');
 
-  await invalidateCacheKey("tests:all");
-  await invalidateCacheKey("tests:global:all");
+  await invalidateCachePattern("*test*");
 
   res.status(201).json({
     success: true,

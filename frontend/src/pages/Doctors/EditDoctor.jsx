@@ -8,6 +8,8 @@ import { useAuth } from "../../hooks/useAuth";
 import { useLaboratory } from "../../context/LaboratoryContext";
 import { toast } from "../../lib/toast";
 
+import { useUpdateDoctorMutation } from "../../services/doctorApi";
+
 export const EditDoctor = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -18,6 +20,7 @@ export const EditDoctor = () => {
   const [loading, setLoading] = useState(true);
   const [currentDoctor, setCurrentDoctor] = useState(null);
   const [fileName, setFileName] = useState("");
+  const [updateDoctor, { isLoading: isSubmitting }] = useUpdateDoctorMutation();
 
   const {
     register,
@@ -59,8 +62,6 @@ export const EditDoctor = () => {
   };
 
   const onSubmit = async (data) => {
-    setIsSubmitting(true);
-    
     const formData = new FormData();
     formData.append("name", data.name);
     formData.append("qualification", data.qualification);
@@ -74,18 +75,15 @@ export const EditDoctor = () => {
       formData.append("signature", data.signature[0]);
     }
 
-    toast.promise(doctorService.updateDoctor(id, formData), {
+    toast.promise(updateDoctor({ id, formData }).unwrap(), {
       loading: "Updating doctor profile...",
       success: () => {
         navigate("/doctors");
         return "Doctor updated successfully";
       },
-      error: (err) => err.response?.data?.message || "Failed to update doctor. Please try again.",
-      finally: () => setIsSubmitting(false)
+      error: (err) => err.data?.message || err.response?.data?.message || "Failed to update doctor. Please try again.",
     });
   };
-
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (loading) {
     return (

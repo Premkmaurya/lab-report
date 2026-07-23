@@ -67,12 +67,13 @@ const ParameterSelect = ({ index, field, watch, setValue, register, errors }) =>
 export const CreateTest = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const queryParams = new URLSearchParams(location.search);
-  const isGlobalMode = queryParams.get("global") === "true";
+  const { user } = useAuth();
+  const { laboratories } = useLaboratory();
+  const isSystemAdmin = user?.role === "system_admin";
+  const isGlobalMode = isSystemAdmin && new URLSearchParams(location.search).get("global") === "true";
 
-  const [createTest] = useCreateTestMutation();
+  const [createTest, { isLoading: isSubmitting }] = useCreateTestMutation();
   const [step, setStep] = useState(1);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [departments, setDepartments] = useState([]);
   const [loadingDepts, setLoadingDepts] = useState(true);
   const [isCreatingDept, setIsCreatingDept] = useState(false);
@@ -311,24 +312,19 @@ export const CreateTest = () => {
       }),
     };
 
-  const queryClient = useQueryClient();
-
-  const apiCall = isGlobalMode
+    const apiCall = isGlobalMode
       ? testService.createGlobalTest(payload)
-      : testService.createTest(payload);
+      : createTest({ ...payload, isGlobal: false }).unwrap();
 
     toast.promise(apiCall, {
       loading: isGlobalMode ? "Saving global test template..." : "Saving test...",
       success: () => {
-        queryClient.invalidateQueries({ queryKey: ['tests'] });
-        queryClient.invalidateQueries({ queryKey: ['summary'] });
         navigate("/tests");
         return isGlobalMode
           ? "Global test template published successfully"
           : "Test created successfully";
       },
-      error: (err) => err.response?.data?.message || "Failed to create test profile. Please try again.",
-      finally: () => setIsSubmitting(false)
+      error: (err) => err.data?.message || err.response?.data?.message || "Failed to create test profile. Please try again.",
     });
   };
 

@@ -6,6 +6,8 @@ import { reportService } from "../../services/reportService";
 import { testService } from "../../services/testService";
 import { toast } from "../../lib/toast";
 
+import { useCreateReportMutation } from "../../services/reportApi";
+
 export const CreateReport = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -14,8 +16,8 @@ export const CreateReport = () => {
   const [allTests, setAllTests] = useState([]);
   const [selectedTests, setSelectedTests] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [createReport, { isLoading: isSubmitting }] = useCreateReportMutation();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -95,14 +97,13 @@ export const CreateReport = () => {
       })),
     };
 
-    toast.promise(reportService.createReport(payload), {
+    toast.promise(createReport(payload).unwrap(), {
       loading: "Creating report...",
       success: () => {
         navigate(`/patients/${id}`);
         return "Report created successfully";
       },
-      error: (err) => err.response?.data?.message || "Failed to create report. Please try again.",
-      finally: () => setIsSubmitting(false)
+      error: (err) => err.data?.message || err.response?.data?.message || "Failed to create report. Please try again.",
     });
   };
 

@@ -17,13 +17,15 @@ const AVAILABLE_PERMISSIONS = [
 import laboratoryService from "../../services/laboratoryService";
 import { Plus, Building2, X } from "lucide-react";
 
+import { useCreateUserMutation } from "../../services/userApi";
+
 export const CreateUser = () => {
   const navigate = useNavigate();
   const { user: currentUser } = useAuth();
   const { laboratories, fetchLaboratories } = useLaboratory();
   const isSystemAdmin = currentUser?.role === 'system_admin';
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [createUser, { isLoading: isSubmitting }] = useCreateUserMutation();
   const [selectedPermissions, setSelectedPermissions] = useState([]);
   
   // New Laboratory Modal State
@@ -77,16 +79,13 @@ export const CreateUser = () => {
   };
 
   const onSubmit = async (data) => {
-    setIsSubmitting(true);
-    
-    toast.promise(userService.createUser({ ...data, permissions: selectedPermissions }), {
+    toast.promise(createUser({ ...data, permissions: selectedPermissions }).unwrap(), {
       loading: "Creating user...",
       success: () => {
         navigate("/users");
         return "User created successfully";
       },
-      error: (err) => err.response?.data?.message || "Failed to create user. Please try again.",
-      finally: () => setIsSubmitting(false)
+      error: (err) => err.data?.message || err.response?.data?.message || "Failed to create user. Please try again.",
     });
   };
 

@@ -101,12 +101,23 @@ const createPatient = asyncHandler(async (req, res) => {
 });
 
 const updatePatient = asyncHandler(async (req, res) => {
-  const allowedFields = ["name", "age", "gender", "date", "referredDoctor"];
+  const allowedFields = ["name", "title", "firstName", "lastName", "age", "gender", "date", "referredDoctor"];
   const updates = {};
 
   for (const field of allowedFields) {
     if (req.body[field] !== undefined) {
       updates[field] = req.body[field];
+    }
+  }
+
+  // Compute full name if title, firstName, or lastName were provided
+  if (req.body.firstName !== undefined || req.body.lastName !== undefined || req.body.title !== undefined) {
+    const existing = await Patient.findOne({ _id: req.params.id, ...req.tenantFilter });
+    if (existing) {
+      const title = req.body.title !== undefined ? req.body.title : (existing.title || "");
+      const firstName = req.body.firstName !== undefined ? req.body.firstName : (existing.firstName || "");
+      const lastName = req.body.lastName !== undefined ? req.body.lastName : (existing.lastName || "");
+      updates.name = [title, firstName, lastName].filter(Boolean).join(" ").trim();
     }
   }
 
@@ -131,13 +142,14 @@ const updatePatient = asyncHandler(async (req, res) => {
     returnDocument: "after",
     runValidators: true,
   })
-    .populate("createdBy", "name email")
+    .populate("createdBy", "username email")
     .populate("laboratoryId", "name code");
 
   if (!patient) {
     throw new NotFoundError("Patient not found");
   }
 
+  await invalidateCachePattern("*patient*");
   await invalidateCachePattern("dashboard:stats:*");
 
   res.status(200).json({

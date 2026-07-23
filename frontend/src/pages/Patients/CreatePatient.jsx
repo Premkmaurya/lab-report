@@ -13,14 +13,18 @@ import { useAuth } from "../../hooks/useAuth";
 import { useLaboratory } from "../../context/LaboratoryContext";
 import { toast } from "../../lib/toast";
 
+import { useCreatePatientMutation, useAssignPatientTestsMutation } from "../../services/patientApi";
+
 export const CreatePatient = () => {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const { user } = useAuth();
   const { laboratories, selectedLabId } = useLaboratory();
   const isSystemAdmin = user?.role === "system_admin";
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [createPatient, { isLoading: isCreatingPatient }] = useCreatePatientMutation();
+  const [assignPatientTests, { isLoading: isAssigningTests }] = useAssignPatientTestsMutation();
+
+  const isSubmitting = isCreatingPatient || isAssigningTests;
   const [doctors, setDoctors] = useState([]);
 
   const [step, setStep] = useState(1);
@@ -40,7 +44,7 @@ export const CreatePatient = () => {
       firstName: "",
       lastName: "",
       gender: "male",
-      date: new Date().toISOString().substring(0, 10), // Defaults to today's date
+      date: new Date().toISOString().substring(0, 10),
       laboratoryId: selectedLabId || "",
     },
   });
@@ -59,7 +63,6 @@ export const CreatePatient = () => {
       const params = watchedLabId ? { laboratoryId: watchedLabId } : {};
       try {
         const docData = await doctorService.getAllDoctors(params);
-        // Only show active doctors
         setDoctors((docData.doctors || []).filter((d) => d.isActive !== false));
       } catch (err) {
         console.warn("Could not load doctor listings for dropdown", err);
@@ -83,8 +86,6 @@ export const CreatePatient = () => {
   };
 
   const onSubmit = async (data) => {
-    setIsSubmitting(true);
-    
     const payload = {
       ...data,
       laboratoryId: data.laboratoryId || watchedLabId || selectedLabId,
@@ -93,36 +94,33 @@ export const CreatePatient = () => {
       date: data.date ? new Date(data.date).toISOString() : new Date().toISOString(),
     };
 
-    toast.promise(patientService.createPatient(payload), {
-      loading: "Saving Patient...",
-      success: (response) => {
-        if (response.success && response.patient) {
-          const targetLabId = response.patient.laboratoryId || payload.laboratoryId;
-          if (selectedTestIds.length > 0) {
-            const tests = selectedTestIds.map((t) => ({
-              testId: t.testId,
-              testName: t.testName,
-            }));
-            patientService.createPatientTests(response.patient._id, tests, targetLabId)
-              .catch((testErr) => {
-                console.warn("Failed to assign tests to patient", testErr);
-                toast.warning("Patient created, but failed to assign some tests.");
-              });
-          }
-          queryClient.invalidateQueries({ queryKey: ['patients'] });
-          queryClient.invalidateQueries({ queryKey: ['reports'] });
-          queryClient.invalidateQueries({ queryKey: ['summary'] });
-          navigate(`/`);
-        } else {
-          navigate("/patients");
+    toast.promise(
+      (async () => {
+        const res = await createPatient(payload).unwrap();
+        const createdPatient = res.patient;
+        if (createdPatient && selectedTestIds.length > 0) {
+          const testItems = selectedTestIds.map((t) => ({
+            testId: t.testId,
+            testName: t.testName,
+          }));
+          const targetLabId = createdPatient.laboratoryId || payload.laboratoryId;
+          await assignPatientTests({
+            patientId: createdPatient._id,
+            tests: testItems,
+            laboratoryId: targetLabId,
+          }).unwrap();
         }
-        return "Patient created successfully";
-      },
-      error: (err) => {
-        return err.response?.data?.message || "Failed to create patient";
-      },
-      finally: () => setIsSubmitting(false)
-    });
+        return res;
+      })(),
+      {
+        loading: "Saving Patient...",
+        success: () => {
+          navigate("/");
+          return "Patient created successfully";
+        },
+        error: (err) => err.data?.message || err.response?.data?.message || "Failed to create patient",
+      }
+    );
   };
 
   const onFormSubmit = async (data) => {

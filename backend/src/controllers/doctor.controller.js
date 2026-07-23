@@ -3,7 +3,7 @@ const Laboratory = require("../models/laboratory.model");
 const { uploadFile } = require("../services/storage.service");
 const asyncHandler = require("../utils/asyncHandler");
 const { BadRequestError, NotFoundError } = require("../utils/errors");
-const { invalidateCacheKey } = require("../services/cache.service");
+const { invalidateCacheKey, invalidateCachePattern } = require("../services/cache.service");
 
 const getAllDoctors = asyncHandler(async (req, res) => {
   const doctors = await Doctor.find(req.tenantFilter || {})
@@ -78,7 +78,7 @@ const createDoctor = asyncHandler(async (req, res) => {
     .populate('updatedBy', 'username _id')
     .populate('laboratoryId', 'name code');
 
-  await invalidateCacheKey("doctors:all");
+  await invalidateCachePattern("*doctor*");
 
   res.status(201).json({
     success: true,
@@ -134,8 +134,7 @@ const updateDoctor = asyncHandler(async (req, res) => {
     throw new NotFoundError("Doctor not found");
   }
 
-  await invalidateCacheKey("doctors:all");
-  await invalidateCacheKey(`doctor:${req.params.id}`);
+  await invalidateCachePattern("*doctor*");
 
   res.status(200).json({
     success: true,
@@ -153,8 +152,7 @@ const deleteDoctor = asyncHandler(async (req, res) => {
 
   await doctor.delete();
 
-  await invalidateCacheKey("doctors:all");
-  await invalidateCacheKey(`doctor:${req.params.id}`);
+  await invalidateCachePattern("*doctor*");
 
   res.status(200).json({
     success: true,

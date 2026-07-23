@@ -68,6 +68,7 @@ const ParameterSelect = ({ index, field, watch, setValue, register, errors, disa
 export const EditTest = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { pathname } = useLocation();
   const isReadOnly = pathname.includes('/view');
   const [loading, setLoading] = useState(true);
@@ -373,14 +374,22 @@ export const EditTest = () => {
     toast.promise(apiCall, {
       loading: isGlobalMode ? "Updating global template..." : "Saving changes...",
       success: () => {
-        queryClient.invalidateQueries({ queryKey: ['tests'] });
-        queryClient.invalidateQueries({ queryKey: ['summary'] });
-        navigate("/tests");
+        try {
+          if (queryClient) {
+            queryClient.invalidateQueries({ queryKey: ['tests'] });
+            queryClient.invalidateQueries({ queryKey: ['summary'] });
+          }
+        } catch {
+          // Ignore secondary query invalidation errors
+        }
+        setTimeout(() => {
+          navigate("/tests");
+        }, 50);
         return isGlobalMode
           ? "Global test template updated successfully"
           : "Test updated successfully";
       },
-      error: (err) => err.response?.data?.message || "Failed to update test details. Please try again.",
+      error: (err) => err.response?.data?.message || err.message || "Failed to update test details. Please try again.",
       finally: () => setIsSubmitting(false)
     });
   };

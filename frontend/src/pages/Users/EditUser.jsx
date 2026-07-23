@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { userService } from "../../services/userService";
 import { ArrowLeft, ShieldAlert, CheckCircle, XCircle } from "lucide-react";
 import { toast } from "../../lib/toast";
+import { useUpdateUserMutation } from "../../services/userApi";
 
 const AVAILABLE_PERMISSIONS = [
   { key: 'manage_doctors', label: 'Manage Doctors' },
@@ -15,8 +16,8 @@ export const EditUser = () => {
   const navigate = useNavigate();
   const [userItem, setUserItem] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
   const [selectedPermissions, setSelectedPermissions] = useState([]);
+  const [updateUser, { isLoading: isSaving }] = useUpdateUserMutation();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -34,17 +35,21 @@ export const EditUser = () => {
   }, [id]);
 
   const handleStatusChange = async (newStatus) => {
-    setIsSaving(true);
-    
-    toast.promise(userService.updateUserStatus(id, newStatus, selectedPermissions), {
-      loading: "Updating user status...",
-      success: () => {
-        setUserItem((prev) => ({ ...prev, isAuthorized: newStatus, permissions: selectedPermissions }));
-        return `User status has been successfully updated to ${newStatus ? "Authorized" : "Suspended"}.`;
-      },
-      error: (err) => err.response?.data?.message || "Failed to update user authorization status.",
-      finally: () => setIsSaving(false)
-    });
+    toast.promise(
+      updateUser({
+        id,
+        status: newStatus,
+        permissions: selectedPermissions,
+      }).unwrap(),
+      {
+        loading: "Updating user status...",
+        success: () => {
+          setUserItem((prev) => ({ ...prev, isAuthorized: newStatus, permissions: selectedPermissions }));
+          return `User status has been successfully updated to ${newStatus ? "Authorized" : "Suspended"}.`;
+        },
+        error: (err) => err.data?.message || err.response?.data?.message || "Failed to update user authorization status.",
+      }
+    );
   };
 
   if (loading) {
