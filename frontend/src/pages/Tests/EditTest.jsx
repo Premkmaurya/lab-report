@@ -7,6 +7,7 @@ import { ArrowLeft, Trash2, Search, ChevronDown } from "lucide-react";
 import { toast } from "../../lib/toast";
 import { generateObjectId } from "../../utils/objectId";
 import { useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "../../hooks/useAuth";
 
 const ParameterSelect = ({ index, field, watch, setValue, register, errors, disabled }) => {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -68,9 +69,11 @@ const ParameterSelect = ({ index, field, watch, setValue, register, errors, disa
 export const EditTest = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const isSystemAdmin = user?.role === "system_admin";
   const queryClient = useQueryClient();
   const { pathname } = useLocation();
-  const isReadOnly = pathname.includes('/view');
+  const isReadOnly = pathname.includes('/view') || !isSystemAdmin;
   const [loading, setLoading] = useState(true);
   const [step, setStep] = useState(id ? 2 : 1);
   const [isSubmitting, setIsSubmitting] = useState(false);

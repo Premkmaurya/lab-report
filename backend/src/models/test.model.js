@@ -72,6 +72,10 @@ const testSchema = new mongoose.Schema(
       ref: 'Department',
       required: true,
     },
+    price: {
+      type: Number,
+      default: 0,
+    },
     subTests: [subTestSchema],
     isGlobal: {
       type: Boolean,

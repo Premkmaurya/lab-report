@@ -1,6 +1,6 @@
 const Test = require("../models/test.model");
 const asyncHandler = require("../utils/asyncHandler");
-const { BadRequestError, NotFoundError, ConflictError } = require("../utils/errors");
+const { BadRequestError, NotFoundError, ConflictError, ForbiddenError } = require("../utils/errors");
 const { invalidateCacheKey, invalidateCachePattern } = require("../services/cache.service");
 
 const validateSubTests = (subTests) => {
@@ -100,6 +100,19 @@ const createTest = asyncHandler(async (req, res) => {
 });
 
 const updateTest = asyncHandler(async (req, res) => {
+  const isSystemAdmin = req.user.role === 'system_admin';
+
+  if (!isSystemAdmin) {
+    if (req.body.name !== undefined || req.body.departmentId !== undefined) {
+      throw new ForbiddenError("Only System Admin can edit test definitions and structure. Laboratory users can only update prices.");
+    }
+  }
+
+  const existingTest = await Test.findOne({ _id: req.params.id, isGlobal: false, ...req.tenantFilter });
+  if (!existingTest) {
+    throw new NotFoundError("Test not found");
+  }
+
   const allowedFields = ["name", "price", "subTests", "departmentId"];
   const updates = {};
 
@@ -113,14 +126,38 @@ const updateTest = asyncHandler(async (req, res) => {
     throw new BadRequestError("Please provide at least one valid field to update");
   }
 
+  if (!isSystemAdmin && updates.subTests) {
+    const origSubTests = existingTest.subTests || [];
+    const newSubTests = updates.subTests;
+
+    if (!Array.isArray(newSubTests) || newSubTests.length !== origSubTests.length) {
+      throw new ForbiddenError("Only System Admin can add or remove test parameters. Laboratory users can only update prices.");
+    }
+
+    for (let i = 0; i < origSubTests.length; i++) {
+      const orig = origSubTests[i];
+      const updated = newSubTests[i];
+      if (
+        (updated.name !== undefined && updated.name !== orig.name) ||
+        (updated.type !== undefined && updated.type !== orig.type) ||
+        (updated.unit !== undefined && updated.unit !== orig.unit) ||
+        (updated.normalRange !== undefined && updated.normalRange !== orig.normalRange) ||
+        (updated.isCalculated !== undefined && updated.isCalculated !== orig.isCalculated) ||
+        (updated.isListParameter !== undefined && updated.isListParameter !== orig.isListParameter) ||
+        (updated.isTextBlock !== undefined && updated.isTextBlock !== orig.isTextBlock)
+      ) {
+        throw new ForbiddenError("Only System Admin can modify parameter definitions or formulas. Laboratory users can only update prices.");
+      }
+    }
+  }
+
   if (updates.subTests) {
     validateSubTests(updates.subTests);
   }
 
   updates.updatedBy = req.user._id;
 
-  const query = { _id: req.params.id, isGlobal: false, ...req.tenantFilter };
-  const test = await Test.findOneAndUpdate(query, updates, {
+  const test = await Test.findOneAndUpdate({ _id: req.params.id, isGlobal: false, ...req.tenantFilter }, updates, {
     new: true,
     returnDocument: "after",
     runValidators: true,
@@ -128,10 +165,6 @@ const updateTest = asyncHandler(async (req, res) => {
     .populate('departmentId')
     .populate('createdBy', 'username _id')
     .populate('updatedBy', 'username _id');
-
-  if (!test) {
-    throw new NotFoundError("Test not found");
-  }
 
   await invalidateCachePattern("*test*");
 

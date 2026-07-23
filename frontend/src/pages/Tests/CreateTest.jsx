@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { useNavigate, Link, useLocation } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth";
+import { useLaboratory } from "../../context/LaboratoryContext";
 import { useCreateTestMutation } from "../../services/testApi";
 import { departmentService } from "../../services/departmentService";
 import { ArrowLeft, ShieldAlert, Trash2, Globe } from "lucide-react";

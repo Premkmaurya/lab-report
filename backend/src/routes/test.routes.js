@@ -92,18 +92,18 @@ router.get(
   getTestById,
 );
 
-// Create test
+// Create test (system_admin only)
 router.post(
   "/",
   injectTenantOnCreate,
-  authMiddleware.authorizePermissions("manage_tests"),
+  authMiddleware.authorizeRoles("system_admin"),
   validateCreateTest,
   validateRequest,
   auditMiddleware("CREATED", "Test"),
   createTest
 );
 
-// Update test
+// Update test (system_admin full edit; lab users price update only)
 router.patch(
   "/:id",
   authMiddleware.authorizePermissions("manage_tests"),
@@ -114,10 +114,10 @@ router.patch(
   updateTest
 );
 
-// Delete test
+// Delete test (system_admin only)
 router.delete(
   "/:id",
-  authMiddleware.authorizePermissions("manage_tests"),
+  authMiddleware.authorizeRoles("system_admin"),
   authMiddleware.authorizeOwnership(Test),
   validateDeleteTest,
   validateRequest,
