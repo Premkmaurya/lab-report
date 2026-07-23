@@ -1,4 +1,5 @@
 const Laboratory = require('../models/laboratory.model');
+const Patient = require('../models/patient.model');
 
 /**
  * Injects tenant filter query criteria based on authenticated user's role and laboratoryId.
@@ -36,22 +37,42 @@ const injectTenantFilter = async (req, res, next) => {
 /**
  * Automatically attaches laboratoryId to request body for creation endpoints.
  */
-const injectTenantOnCreate = (req, res, next) => {
-  if (!req.user) {
-    return res.status(401).json({ message: 'Authentication required' });
-  }
-
-  if (req.user.role === 'system_admin') {
-    const labId = req.body.laboratoryId || req.tenantFilter?.laboratoryId;
-    if (!labId) {
-      return res.status(400).json({ message: 'laboratoryId is required when creating resources as System Admin' });
+const injectTenantOnCreate = async (req, res, next) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ message: 'Authentication required' });
     }
-    req.body.laboratoryId = labId;
-    return next();
-  }
 
-  req.body.laboratoryId = req.user.laboratoryId;
-  next();
+    if (!req.body) {
+      req.body = {};
+    }
+
+    if (req.user.role === 'system_admin') {
+      let labId = req.body.laboratoryId || req.tenantFilter?.laboratoryId;
+
+      // If laboratoryId is not explicitly provided, attempt resolving from patient if patientId exists
+      if (!labId && req.body.patientId) {
+        const patient = await Patient.findById(req.body.patientId);
+        if (patient && patient.laboratoryId) {
+          labId = patient.laboratoryId.toString();
+        }
+      }
+
+      if (!labId) {
+        return res.status(400).json({ message: 'laboratoryId is required when creating resources as System Admin' });
+      }
+
+      req.body.laboratoryId = labId;
+      req.tenantFilter = { laboratoryId: labId };
+      req.laboratoryId = labId;
+      return next();
+    }
+
+    req.body.laboratoryId = req.user.laboratoryId;
+    next();
+  } catch (error) {
+    next(error);
+  }
 };
 
 /**

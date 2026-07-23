@@ -1,6 +1,6 @@
 const Test = require("../models/test.model");
 const asyncHandler = require("../utils/asyncHandler");
-const { BadRequestError, NotFoundError } = require("../utils/errors");
+const { BadRequestError, NotFoundError, ConflictError } = require("../utils/errors");
 const { invalidateCacheKey } = require("../services/cache.service");
 
 const validateSubTests = (subTests) => {
@@ -171,7 +171,7 @@ const getGlobalTests = asyncHandler(async (req, res) => {
   const { search, departmentId } = req.query;
   const filter = { isGlobal: true };
 
-  if (departmentId) {
+  if (departmentId && departmentId !== 'undefined' && departmentId !== 'null' && departmentId !== 'ALL') {
     filter.departmentId = departmentId;
   }
 
@@ -356,6 +356,17 @@ const importGlobalTest = asyncHandler(async (req, res) => {
 
   if (!targetLabId) {
     throw new BadRequestError("Target laboratory ID is required for test import");
+  }
+
+  const existingImport = await Test.findOne({
+    laboratoryId: targetLabId,
+    sourceTestId: globalTest._id,
+    isGlobal: false,
+    deleted: { $ne: true },
+  });
+
+  if (existingImport) {
+    throw new ConflictError("This global test has already been imported into your laboratory.");
   }
 
   // Perform complete deep-clone of sub-tests

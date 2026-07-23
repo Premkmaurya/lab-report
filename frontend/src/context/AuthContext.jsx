@@ -1,10 +1,13 @@
 import React, { createContext, useState, useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { setAuthUser, setAuthError as setReduxAuthError, setUnauthorizedUser, clearAuth } from "../features/auth/authSlice";
 import API from "../services/api";
 import { toast } from "../lib/toast";
 
 export const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
+  const dispatch = useDispatch();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isAuthorizedUser, setIsAuthorizedUser] = useState(false);
@@ -18,21 +21,20 @@ export const AuthProvider = ({ children }) => {
         setUser(currentUser);
         setIsAuthorizedUser(currentUser.isAuthorized);
         setAuthError("");
+        dispatch(setAuthUser(currentUser));
       }
     } catch (error) {
       if (error.response?.status === 403) {
-        // Logged in but not authorized yet
         setUser({ isAuthorized: false });
         setIsAuthorizedUser(false);
-        setAuthError(
-          error.response.data.message ||
-            "Your account is not authorized yet. Please contact the administrator."
-        );
+        const msg = error.response.data.message || "Your account is not authorized yet. Please contact the administrator.";
+        setAuthError(msg);
+        dispatch(setUnauthorizedUser(msg));
       } else {
-        // Not authenticated
         setUser(null);
         setIsAuthorizedUser(false);
         setAuthError("");
+        dispatch(clearAuth());
       }
     } finally {
       setLoading(false);
@@ -52,18 +54,21 @@ export const AuthProvider = ({ children }) => {
         const loggedUser = response.data.user;
         setUser(loggedUser);
         setIsAuthorizedUser(loggedUser.isAuthorized);
+        dispatch(setAuthUser(loggedUser));
         if (!loggedUser.isAuthorized) {
-          setAuthError(
-            "Your account is not authorized yet. Please contact the administrator."
-          );
+          const msg = "Your account is not authorized yet. Please contact the administrator.";
+          setAuthError(msg);
+          dispatch(setUnauthorizedUser(msg));
         }
         return response.data;
       }
     } catch (error) {
       setUser(null);
       setIsAuthorizedUser(false);
+      dispatch(clearAuth());
       const msg = error.response?.data?.message || "Login failed";
       setAuthError(msg);
+      dispatch(setReduxAuthError(msg));
       throw new Error(msg);
     } finally {
       setLoading(false);
@@ -83,16 +88,19 @@ export const AuthProvider = ({ children }) => {
         const loggedUser = response.data.user;
         setUser(loggedUser);
         setIsAuthorizedUser(loggedUser.isAuthorized);
-        setAuthError(
-          "Your account is not authorized yet. Please contact the administrator."
-        );
+        dispatch(setAuthUser(loggedUser));
+        const msg = "Your account is not authorized yet. Please contact the administrator.";
+        setAuthError(msg);
+        dispatch(setUnauthorizedUser(msg));
         return response.data;
       }
     } catch (error) {
       setUser(null);
       setIsAuthorizedUser(false);
+      dispatch(clearAuth());
       const msg = error.response?.data?.message || "Signup failed";
       setAuthError(msg);
+      dispatch(setReduxAuthError(msg));
       throw new Error(msg);
     } finally {
       setLoading(false);
@@ -111,6 +119,7 @@ export const AuthProvider = ({ children }) => {
       setUser(null);
       setIsAuthorizedUser(false);
       setAuthError("");
+      dispatch(clearAuth());
       setLoading(false);
     }
   };

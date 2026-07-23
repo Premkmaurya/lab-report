@@ -1,47 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Building2, Plus, Search, CheckCircle, XCircle, AlertTriangle, Edit, RefreshCw, Eye } from 'lucide-react';
-import laboratoryService from '../../services/laboratoryService';
-import { toast } from '../../lib/toast';
+import { useGetLaboratoriesQuery, useUpdateLaboratoryStatusMutation } from '../../services/laboratoryApi';
 
 const LaboratoryList = () => {
   const navigate = useNavigate();
-  const [laboratories, setLaboratories] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
 
-  const fetchLaboratories = async () => {
-    setLoading(true);
-    try {
-      const res = await laboratoryService.getAllLaboratories({
-        search,
-        status: statusFilter,
-      });
-      if (res.success) {
-        setLaboratories(res.data || []);
-      }
-    } catch (err) {
-      toast.error('Failed to load laboratories');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { data, isLoading: loading, refetch } = useGetLaboratoriesQuery({
+    search,
+    status: statusFilter,
+  });
 
-  useEffect(() => {
-    fetchLaboratories();
-  }, [search, statusFilter]);
+  const [updateStatus] = useUpdateLaboratoryStatusMutation();
+
+  const laboratories = data?.data || [];
 
   const handleStatusChange = async (id, newStatus) => {
-    try {
-      const res = await laboratoryService.updateStatus(id, newStatus);
-      if (res.success) {
-        toast.success(`Laboratory status set to ${newStatus}`);
-        fetchLaboratories();
-      }
-    } catch (err) {
-      toast.error('Failed to update laboratory status');
-    }
+    toast.promise(updateStatus({ id, status: newStatus }).unwrap(), {
+      loading: 'Updating status...',
+      success: `Laboratory status set to ${newStatus}`,
+      error: 'Failed to update laboratory status',
+    });
   };
 
   const getStatusBadge = (status) => {
@@ -119,7 +100,7 @@ const LaboratoryList = () => {
         </select>
 
         <button
-          onClick={fetchLaboratories}
+          onClick={() => refetch()}
           className="p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition"
           title="Refresh List"
         >

@@ -2,12 +2,13 @@ import React from "react";
 import { Helmet } from "react-helmet-async";
 import { BrowserRouter as Router } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Provider } from "react-redux";
+import { store } from "./store/appStore";
 import { AuthProvider } from "./context/AuthContext";
 import { AppRoutes } from "./routes/AppRoutes";
 import { OfflineFallback } from "./components/OfflineFallback";
 import { PrintTemplateProvider } from "./context/PrintTemplateContext";
 import { Toaster } from "sonner";
-
 import { LaboratoryProvider } from "./context/LaboratoryContext";
 
 const queryClient = new QueryClient({
@@ -22,7 +23,7 @@ const queryClient = new QueryClient({
 
 export const App = () => {
   return (
-    <>
+    <Provider store={store}>
       <Helmet>
         <title>UltraPath - Laboratory Management System</title>
         <meta
@@ -52,7 +53,7 @@ export const App = () => {
           </LaboratoryProvider>
         </AuthProvider>
       </QueryClientProvider>
-    </>
+    </Provider>
   );
 };
 export default App;

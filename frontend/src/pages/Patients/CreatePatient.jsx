@@ -56,8 +56,9 @@ export const CreatePatient = () => {
 
   useEffect(() => {
     const fetchInitialData = async () => {
+      const params = watchedLabId ? { laboratoryId: watchedLabId } : {};
       try {
-        const docData = await doctorService.getAllDoctors();
+        const docData = await doctorService.getAllDoctors(params);
         // Only show active doctors
         setDoctors((docData.doctors || []).filter((d) => d.isActive !== false));
       } catch (err) {
@@ -65,14 +66,14 @@ export const CreatePatient = () => {
       }
 
       try {
-        const testData = await testService.getAllTests();
+        const testData = await testService.getAllTests(params);
         setTests(testData.tests || []);
       } catch (err) {
         console.warn("Could not load test listings", err);
       }
     };
     fetchInitialData();
-  }, []);
+  }, [watchedLabId]);
 
   const handleNext = async () => {
     const isValid = await trigger();
@@ -86,6 +87,7 @@ export const CreatePatient = () => {
     
     const payload = {
       ...data,
+      laboratoryId: data.laboratoryId || watchedLabId || selectedLabId,
       age: parseInt(data.age, 10),
       name: [data.title, data.firstName, data.lastName].filter(Boolean).join(" ").trim(),
       date: data.date ? new Date(data.date).toISOString() : new Date().toISOString(),
@@ -95,12 +97,13 @@ export const CreatePatient = () => {
       loading: "Saving Patient...",
       success: (response) => {
         if (response.success && response.patient) {
+          const targetLabId = response.patient.laboratoryId || payload.laboratoryId;
           if (selectedTestIds.length > 0) {
             const tests = selectedTestIds.map((t) => ({
               testId: t.testId,
               testName: t.testName,
             }));
-            patientService.createPatientTests(response.patient._id, tests)
+            patientService.createPatientTests(response.patient._id, tests, targetLabId)
               .catch((testErr) => {
                 console.warn("Failed to assign tests to patient", testErr);
                 toast.warning("Patient created, but failed to assign some tests.");
@@ -122,20 +125,18 @@ export const CreatePatient = () => {
     });
   };
 
+  const onFormSubmit = async (data) => {
+    if (step === 1) {
+      await handleNext();
+      return;
+    }
+
+    await onSubmit(data);
+  };
+
   return (
     <div className="space-y-6 max-w-2xl">
       {/* Back Link */}
-      <div>
-        <Link
-          to="/patients"
-          className="inline-flex items-center space-x-2 text-sm text-stone hover:text-charcoal transition-colors duration-200"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          <span>Back to Directory</span>
-        </Link>
-      </div>
-
-      {/* Header */}
       <div>
         <span className="font-abcfavoritvariable text-xs font-bold text-electric-cobalt uppercase tracking-widest block mb-2">
           PATIENT REGISTRATION
@@ -152,7 +153,7 @@ export const CreatePatient = () => {
 
       {/* Form Card */}
       <div className="bg-paper-white border border-cream-border rounded-cards p-6 md:p-8">
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+        <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-5">
           <div className={step === 1 ? "block space-y-5" : "hidden"}>
             {/* Laboratory Selection for System Admin Only */}
             {isSystemAdmin && (

@@ -17,7 +17,7 @@ import { PrintOrchestrator } from "../../components/print/PrintOrchestrator";
 import { PrintWarningModal } from "../../components/report/PrintWarningModal";
 import { toast } from "../../lib/toast";
 
-import { useQuery } from "@tanstack/react-query";
+import { useGetReportsQuery } from "../../services/reportApi";
 
 export const PatientList = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -81,11 +81,8 @@ export const PatientList = () => {
     data,
     isLoading: loading,
     error,
-  } = useQuery({
-    queryKey: ["reports", queryParams],
-    queryFn: () => reportService.getAllReports(queryParams),
-    enabled: isCustomValid,
-    refetchInterval: 60000,
+  } = useGetReportsQuery(queryParams, {
+    skip: !isCustomValid,
   });
 
   const reports = data?.patientTests || [];

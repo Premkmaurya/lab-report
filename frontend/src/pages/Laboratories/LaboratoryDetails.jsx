@@ -24,87 +24,48 @@ import {
   FileSpreadsheet,
   Settings as SettingsIcon,
 } from 'lucide-react';
-import laboratoryService from '../../services/laboratoryService';
-import { toast } from '../../lib/toast';
+import {
+  useGetLaboratoryByIdQuery,
+  useGetLaboratoryUsersQuery,
+  useGetLaboratoryPatientsQuery,
+  useGetLaboratoryDoctorsQuery,
+  useGetLaboratoryTestsQuery,
+  useGetLaboratoryReportsQuery,
+  useUpdateLaboratoryStatusMutation,
+} from '../../services/laboratoryApi';
 
 export const LaboratoryDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const [laboratory, setLaboratory] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
-
-  // Sub-resource states
-  const [users, setUsers] = useState([]);
-  const [patients, setPatients] = useState([]);
-  const [doctors, setDoctors] = useState([]);
-  const [tests, setTests] = useState([]);
-  const [reports, setReports] = useState([]);
-
-  const [loadingTab, setLoadingTab] = useState(false);
   const [patientSearch, setPatientSearch] = useState('');
 
-  const fetchLabDetails = async () => {
-    setLoading(true);
-    try {
-      const res = await laboratoryService.getLaboratoryById(id);
-      if (res.success) {
-        setLaboratory(res.data);
-      }
-    } catch (err) {
-      toast.error('Failed to load laboratory details');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { data: labRes, isLoading: loading } = useGetLaboratoryByIdQuery(id);
+  const laboratory = labRes?.data || null;
 
-  useEffect(() => {
-    fetchLabDetails();
-  }, [id]);
+  const { data: usersRes, isLoading: loadingUsers } = useGetLaboratoryUsersQuery(id, { skip: activeTab !== 'users' });
+  const { data: patientsRes, isLoading: loadingPatients } = useGetLaboratoryPatientsQuery({ id, search: patientSearch }, { skip: activeTab !== 'patients' });
+  const { data: doctorsRes, isLoading: loadingDoctors } = useGetLaboratoryDoctorsQuery(id, { skip: activeTab !== 'doctors' });
+  const { data: testsRes, isLoading: loadingTests } = useGetLaboratoryTestsQuery(id, { skip: activeTab !== 'tests' });
+  const { data: reportsRes, isLoading: loadingReports } = useGetLaboratoryReportsQuery(id, { skip: activeTab !== 'reports' });
 
-  // Fetch tab data on demand
-  useEffect(() => {
-    if (!id) return;
-    const fetchTabData = async () => {
-      setLoadingTab(true);
-      try {
-        if (activeTab === 'users') {
-          const res = await laboratoryService.getLaboratoryUsers(id);
-          if (res.success) setUsers(res.data || []);
-        } else if (activeTab === 'patients') {
-          const res = await laboratoryService.getLaboratoryPatients(id, { search: patientSearch });
-          if (res.success) setPatients(res.data || []);
-        } else if (activeTab === 'doctors') {
-          const res = await laboratoryService.getLaboratoryDoctors(id);
-          if (res.success) setDoctors(res.data || []);
-        } else if (activeTab === 'tests') {
-          const res = await laboratoryService.getLaboratoryTests(id);
-          if (res.success) setTests(res.data || []);
-        } else if (activeTab === 'reports') {
-          const res = await laboratoryService.getLaboratoryReports(id);
-          if (res.success) setReports(res.data || []);
-        }
-      } catch (err) {
-        toast.error(`Failed to load ${activeTab} data`);
-      } finally {
-        setLoadingTab(false);
-      }
-    };
+  const [updateStatus] = useUpdateLaboratoryStatusMutation();
 
-    fetchTabData();
-  }, [id, activeTab, patientSearch]);
+  const users = usersRes?.data || [];
+  const patients = patientsRes?.data || [];
+  const doctors = doctorsRes?.data || [];
+  const tests = testsRes?.data || [];
+  const reports = reportsRes?.data || [];
+
+  const loadingTab = loadingUsers || loadingPatients || loadingDoctors || loadingTests || loadingReports;
 
   const handleStatusChange = async (newStatus) => {
-    try {
-      const res = await laboratoryService.updateStatus(id, newStatus);
-      if (res.success) {
-        toast.success(`Laboratory status updated to ${newStatus}`);
-        fetchLabDetails();
-      }
-    } catch (err) {
-      toast.error('Failed to update status');
-    }
+    toast.promise(updateStatus({ id, status: newStatus }).unwrap(), {
+      loading: 'Updating status...',
+      success: `Laboratory status updated to ${newStatus}`,
+      error: 'Failed to update status',
+    });
   };
 
   const getStatusBadge = (status) => {

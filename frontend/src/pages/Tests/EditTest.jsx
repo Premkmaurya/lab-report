@@ -302,8 +302,21 @@ export const EditTest = () => {
              tests = [...tests, { _id: generateObjectId(), name: "", type: "parameter", price: "", unit: "", normalRange: "", isListParameter: false, allowedValues: [], isCalculated: false, isTextBlock: false, formula: { leftParameterId: "", operator: "+", rightParameterId: "" }, textBlockSettings: { defaultText: "" } }];
           }
 
+          const targetDeptId = t.departmentId?._id || t.departmentId || "";
+          const targetDeptName = t.departmentId?.name;
+
+          if (targetDeptId) {
+            setDepartments((prev) => {
+              const exists = prev.some((d) => d._id === targetDeptId);
+              if (!exists && targetDeptName) {
+                return [{ _id: targetDeptId, name: targetDeptName }, ...prev];
+              }
+              return prev;
+            });
+          }
+
           reset({
-            departmentId: t.departmentId?._id || t.departmentId || "",
+            departmentId: targetDeptId,
             name: t.name,
             subTests: tests
           });

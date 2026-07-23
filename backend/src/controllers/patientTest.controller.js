@@ -1,5 +1,6 @@
 const PatientTest = require("../models/patientTest.model");
 const Test = require("../models/test.model");
+const Patient = require("../models/patient.model");
 const asyncHandler = require("../utils/asyncHandler");
 const { BadRequestError, NotFoundError } = require("../utils/errors");
 
@@ -189,9 +190,33 @@ const createPatientTest = asyncHandler(async (req, res) => {
     throw new BadRequestError("Please provide patientId and at least one test");
   }
 
+  // 1. Fetch patient document to verify existence and laboratory scope
+  const patient = await Patient.findById(patientId);
+  if (!patient) {
+    throw new NotFoundError("Patient not found");
+  }
+
+  // Target laboratory is the patient's laboratory (or explicitly provided laboratoryId)
+  const targetLabId = (laboratoryId || patient.laboratoryId || req.user.laboratoryId)?.toString();
+
+  if (!targetLabId) {
+    throw new BadRequestError("Laboratory ID is required");
+  }
+
+  // Verify patient's laboratory matches targetLabId
+  if (patient.laboratoryId && patient.laboratoryId.toString() !== targetLabId) {
+    throw new BadRequestError("Patient does not belong to the target laboratory");
+  }
+
   const testsWithResults = await Promise.all(
     tests.map(async (t) => {
-      const template = await Test.findOne({ _id: t.testId, ...req.tenantFilter });
+      // Find test template belonging to the target laboratory
+      const template = await Test.findOne({ _id: t.testId, laboratoryId: targetLabId, isGlobal: false });
+      
+      if (!template) {
+        throw new BadRequestError(`Test '${t.testName || t.testId}' is not available in the patient's laboratory`);
+      }
+
       let result = [];
       if (template && template.subTests) {
         result = template.subTests.map((st) => {
@@ -221,7 +246,7 @@ const createPatientTest = asyncHandler(async (req, res) => {
     patientId,
     tests: testsWithResults,
     createdBy: req.user._id,
-    laboratoryId: laboratoryId || req.user.laboratoryId,
+    laboratoryId: targetLabId,
     date: new Date(),
   });
 
@@ -325,7 +350,11 @@ const addTestToReport = asyncHandler(async (req, res) => {
     throw new BadRequestError("Test already exists in report");
   }
 
-  const template = await Test.findOne({ _id: testId, ...req.tenantFilter });
+  const targetLabId = patientTest.laboratoryId ? patientTest.laboratoryId.toString() : req.laboratoryId;
+  const template = await Test.findOne({ _id: testId, laboratoryId: targetLabId, isGlobal: false });
+  if (!template) {
+    throw new BadRequestError(`Test '${testName || testId}' is not available in the report's laboratory`);
+  }
   let result = [];
   if (template && template.subTests) {
     result = template.subTests.map((st) => {

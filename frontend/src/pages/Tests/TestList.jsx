@@ -4,14 +4,13 @@ import { Plus, Edit2, Search, ChevronDown, ChevronRight, Globe, FlaskConical } f
 import { useAuth } from "../../hooks/useAuth";
 import { canManageTests } from "../../config/permissions";
 import { testService } from "../../services/testService";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useGetTestsQuery } from "../../services/testApi";
 import GlobalTestLibrary from "./GlobalTestLibrary";
 
 export const TestList = () => {
   const { user } = useAuth();
   const canManage = canManageTests(user);
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("local"); // "local" | "global"
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedDepts, setExpandedDepts] = useState({});
@@ -23,20 +22,13 @@ export const TestList = () => {
     }));
   };
 
-  const { data, isLoading: loading, error: fetchError, refetch } = useQuery({
-    queryKey: ['tests'],
-    queryFn: () => testService.getAllTests(),
-    staleTime: 5 * 60 * 1000,
-  });
+  const { data, isLoading: loading, error: fetchError, refetch } = useGetTestsQuery();
 
   const tests = data?.tests || [];
   const error = fetchError ? "Failed to load test catalog." : "";
 
   const handleTabChange = (newTab) => {
     setActiveTab(newTab);
-    if (newTab === "local") {
-      refetch();
-    }
   };
 
   const filteredTests = tests.filter((test) => {

@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { useNavigate, Link, useLocation } from "react-router-dom";
-import { testService } from "../../services/testService";
+import { useCreateTestMutation } from "../../services/testApi";
 import { departmentService } from "../../services/departmentService";
 import { ArrowLeft, ShieldAlert, Trash2, Globe } from "lucide-react";
 import { toast } from "../../lib/toast";
@@ -13,7 +13,6 @@ const ParameterSelect = ({ index, field, watch, setValue, register, errors }) =>
   const [search, setSearch] = React.useState("");
   const currentId = watch(`subTests.${index}.formula.${field}`);
   
-  // We can't use watch("subTests") infinitely in effect without care, so we just get current values when needed or let the parent pass options.
   const options = watch("subTests").filter((f, i) => i !== index && f.name && f.type !== "section");
   
   React.useEffect(() => {
@@ -68,8 +67,10 @@ const ParameterSelect = ({ index, field, watch, setValue, register, errors }) =>
 export const CreateTest = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const isGlobalMode = new URLSearchParams(location.search).get("global") === "true";
+  const queryParams = new URLSearchParams(location.search);
+  const isGlobalMode = queryParams.get("global") === "true";
 
+  const [createTest] = useCreateTestMutation();
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [departments, setDepartments] = useState([]);

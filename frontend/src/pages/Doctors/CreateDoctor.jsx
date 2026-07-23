@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate, Link } from "react-router-dom";
-import { doctorService } from "../../services/doctorService";
 import { ArrowLeft, ShieldAlert, Upload } from "lucide-react";
 import LaboratorySelect from "../../components/LaboratorySelect";
 import { useAuth } from "../../hooks/useAuth";
 import { useLaboratory } from "../../context/LaboratoryContext";
 import { toast } from "../../lib/toast";
+import { useCreateDoctorMutation } from "../../services/doctorApi";
 
 export const CreateDoctor = () => {
   const navigate = useNavigate();
@@ -14,6 +14,7 @@ export const CreateDoctor = () => {
   const { laboratories, selectedLabId } = useLaboratory();
   const isSystemAdmin = user?.role === "system_admin";
 
+  const [createDoctor] = useCreateDoctorMutation();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [fileName, setFileName] = useState("");
 
@@ -67,13 +68,13 @@ export const CreateDoctor = () => {
       return;
     }
 
-    toast.promise(doctorService.createDoctor(formData), {
+    toast.promise(createDoctor(formData).unwrap(), {
       loading: "Saving doctor profile...",
       success: () => {
         navigate("/doctors");
         return "Doctor added successfully";
       },
-      error: (err) => err.response?.data?.message || "Failed to add doctor. Please try again.",
+      error: (err) => err.data?.message || "Failed to add doctor. Please try again.",
       finally: () => setIsSubmitting(false)
     });
   };

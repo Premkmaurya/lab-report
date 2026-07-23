@@ -36,10 +36,11 @@ export const patientService = {
     return response.data;
   },
 
-  createPatientTests: async (patientId, testIds) => {
+  createPatientTests: async (patientId, testIds, laboratoryId) => {
     const response = await API.post("/patient-tests", {
       patientId,
       tests: testIds,
+      ...(laboratoryId ? { laboratoryId } : {}),
     });
     return response.data;
   },

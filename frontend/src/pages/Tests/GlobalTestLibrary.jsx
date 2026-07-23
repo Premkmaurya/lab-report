@@ -10,47 +10,39 @@ import {
   Trash2,
   Building2,
   Globe,
-  Layers,
-  Sparkles,
+  Loader2,
 } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
-import { testService } from "../../services/testService";
+import { canManageTests } from "../../config/permissions";
 import { toast } from "../../lib/toast";
-import { useQueryClient } from "@tanstack/react-query";
+import { useGetGlobalTestsQuery, useImportGlobalTestMutation, useDeleteTestMutation } from "../../services/testApi";
 
 export const GlobalTestLibrary = ({ onImportSuccess }) => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const isSystemAdmin = user?.role === "system_admin";
+  const canImport = canManageTests(user) && !isSystemAdmin;
 
-  const [globalTests, setGlobalTests] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDept, setSelectedDept] = useState("ALL");
   const [previewTest, setPreviewTest] = useState(null);
   const [importingId, setImportingId] = useState(null);
 
-  const fetchGlobalLibrary = async () => {
-    setLoading(true);
-    try {
-      const res = await testService.getGlobalTests({
-        search: searchQuery,
-        departmentId: selectedDept !== "ALL" ? selectedDept : undefined,
-      });
-      if (res.success) {
-        setGlobalTests(res.globalTests || []);
-      }
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to load global test library.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { data, isLoading: loading, error: fetchError, refetch } = useGetGlobalTestsQuery({
+    search: searchQuery,
+    departmentId: selectedDept !== "ALL" ? selectedDept : undefined,
+  });
+
+  const [importGlobalTest] = useImportGlobalTestMutation();
+  const [deleteTest] = useDeleteTestMutation();
+
+  const globalTests = data?.globalTests || [];
 
   useEffect(() => {
-    fetchGlobalLibrary();
-  }, [searchQuery, selectedDept]);
+    if (fetchError) {
+      toast.error("Failed to load global test library.");
+    }
+  }, [fetchError]);
 
   // Extract unique departments for filter
   const departmentsMap = {};
@@ -62,58 +54,30 @@ export const GlobalTestLibrary = ({ onImportSuccess }) => {
 
   const handleImport = async (globalTest) => {
     setImportingId(globalTest._id);
-    toast.promise(testService.importGlobalTest(globalTest._id), {
-      loading: `Importing "${globalTest.name}" into your laboratory...`,
-      success: (res) => {
-        // 1. Refresh local Global Library state badge
-        setGlobalTests((prev) =>
-          prev.map((item) =>
-            item._id === globalTest._id
-              ? { ...item, isImported: true, importedCount: (item.importedCount || 0) + 1 }
-              : item
-          )
-        );
-
-        // 2. Instantly update React Query cache for Laboratory Tests
-        if (res?.test) {
-          queryClient.setQueryData(['tests'], (old) => {
-            if (!old?.tests) return { success: true, tests: [res.test] };
-            const exists = old.tests.some((t) => t._id === res.test._id);
-            if (exists) return old;
-            return {
-              ...old,
-              tests: [res.test, ...old.tests],
-            };
-          });
-        }
-
-        // 3. Invalidate queries to guarantee fresh background refetch
-        queryClient.invalidateQueries({ queryKey: ['tests'] });
-        queryClient.invalidateQueries({ queryKey: ['summary'] });
-
-        if (onImportSuccess) {
-          onImportSuccess(res?.test);
-        }
-
-        return `Successfully imported "${globalTest.name}" into your laboratory catalog!`;
-      },
-      error: (err) => err.response?.data?.message || "Failed to import test template.",
-      finally: () => setImportingId(null),
-    });
+    try {
+      const res = await importGlobalTest(globalTest._id).unwrap();
+      toast.success(`Successfully imported "${globalTest.name}" into your laboratory catalog!`);
+      if (onImportSuccess) {
+        onImportSuccess(res?.test);
+      }
+      refetch();
+    } catch (err) {
+      toast.error(err.data?.message || "Failed to import test template.");
+    } finally {
+      setImportingId(null);
+    }
   };
 
   const handleDeleteGlobal = async (id, name) => {
     if (!window.confirm(`Are you sure you want to delete global test template "${name}"?`)) {
       return;
     }
-    toast.promise(testService.deleteGlobalTest(id), {
-      loading: "Deleting global test template...",
-      success: () => {
-        setGlobalTests((prev) => prev.filter((item) => item._id !== id));
-        return "Global test template removed.";
-      },
-      error: (err) => err.response?.data?.message || "Failed to delete template.",
-    });
+    try {
+      await deleteTest(id).unwrap();
+      toast.success("Global test template removed.");
+    } catch (err) {
+      toast.error(err.data?.message || "Failed to delete template.");
+    }
   };
 
   return (
@@ -177,6 +141,8 @@ export const GlobalTestLibrary = ({ onImportSuccess }) => {
           {globalTests.map((gt) => {
             const totalPrice =
               gt.subTests?.reduce((sum, st) => sum + (st.price || 0), 0) || gt.price || 0;
+
+            const isThisImporting = importingId === gt._id;
 
             return (
               <div
@@ -267,20 +233,35 @@ export const GlobalTestLibrary = ({ onImportSuccess }) => {
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
-                    ) : (
-                      <button
-                        onClick={() => handleImport(gt)}
-                        disabled={importingId === gt._id}
-                        className={`inline-flex items-center space-x-1.5 px-4 py-2 rounded-buttons text-xs font-semibold transition ${
-                          gt.isImported
-                            ? "bg-paper-white border border-cream-border text-graphite hover:bg-warm-canvas"
-                            : "bg-electric-cobalt text-paper-white hover:bg-opacity-90"
-                        } disabled:opacity-50`}
-                      >
-                        <Download className="w-3.5 h-3.5" />
-                        <span>{gt.isImported ? "Re-Import" : "Import Test"}</span>
-                      </button>
-                    )}
+                    ) : canImport ? (
+                      gt.isImported ? (
+                        <button
+                          disabled
+                          className="inline-flex items-center space-x-1.5 px-4 py-2 rounded-buttons border border-cream-border bg-paper-white text-stone text-xs font-semibold"
+                        >
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                          <span>Already Imported</span>
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => handleImport(gt)}
+                          disabled={isThisImporting}
+                          className="inline-flex items-center space-x-1.5 px-4 py-2 rounded-buttons text-xs font-semibold transition bg-electric-cobalt text-paper-white hover:bg-opacity-90 disabled:opacity-50"
+                        >
+                          {isThisImporting ? (
+                            <>
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                              <span>Importing...</span>
+                            </>
+                          ) : (
+                            <>
+                              <Download className="w-3.5 h-3.5" />
+                              <span>Import Test</span>
+                            </>
+                          )}
+                        </button>
+                      )
+                    ) : null}
                   </div>
                 </div>
               </div>
@@ -370,17 +351,38 @@ export const GlobalTestLibrary = ({ onImportSuccess }) => {
                 >
                   Close
                 </button>
-                {!isSystemAdmin && (
-                  <button
-                    onClick={() => {
-                      const target = previewTest;
-                      setPreviewTest(null);
-                      handleImport(target);
-                    }}
-                    className="px-4 py-2 bg-electric-cobalt text-paper-white rounded-buttons text-xs font-semibold hover:bg-opacity-90"
-                  >
-                    Import Test
-                  </button>
+                {canImport && (
+                  previewTest.isImported ? (
+                    <button
+                      disabled
+                      className="px-4 py-2 rounded-buttons border border-cream-border bg-paper-white text-stone text-xs font-semibold inline-flex items-center gap-1.5"
+                    >
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>Already Imported</span>
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        const target = previewTest;
+                        setPreviewTest(null);
+                        handleImport(target);
+                      }}
+                      disabled={importingId === previewTest._id}
+                      className="px-4 py-2 bg-electric-cobalt text-paper-white rounded-buttons text-xs font-semibold hover:bg-opacity-90 disabled:opacity-50 inline-flex items-center gap-1.5"
+                    >
+                      {importingId === previewTest._id ? (
+                        <>
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          <span>Importing...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Download className="w-3.5 h-3.5" />
+                          <span>Import Test</span>
+                        </>
+                      )}
+                    </button>
+                  )
                 )}
               </div>
             </div>
@@ -392,3 +394,4 @@ export const GlobalTestLibrary = ({ onImportSuccess }) => {
 };
 
 export default GlobalTestLibrary;
+

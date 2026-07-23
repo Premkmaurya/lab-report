@@ -39,9 +39,9 @@ router.get(
 
 router.post(
   "/",
+  upload.single("signature"),
   injectTenantOnCreate,
   authMiddleware.authorizePermissions("manage_doctors"),
-  upload.single("signature"),
   validateCreateDoctor,
   validateRequest,
   auditMiddleware("CREATED", "Doctor"),

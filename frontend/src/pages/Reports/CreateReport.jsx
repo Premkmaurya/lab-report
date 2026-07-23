@@ -20,13 +20,12 @@ export const CreateReport = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [patientData, testData] = await Promise.all([
-          patientService.getPatientById(id),
-          testService.getAllTests(),
-        ]);
-
+        const patientData = await patientService.getPatientById(id);
         const patientDetails = patientData.patient;
         setPatient(patientDetails);
+
+        const labId = patientDetails?.laboratoryId?._id || patientDetails?.laboratoryId;
+        const testData = await testService.getAllTests(labId ? { laboratoryId: labId } : {});
 
         const tests = testData.tests || [];
         setAllTests(tests);
@@ -84,8 +83,11 @@ export const CreateReport = () => {
 
     setIsSubmitting(true);
 
+    const labId = patient?.laboratoryId?._id || patient?.laboratoryId;
+
     const payload = {
       patientId: id,
+      laboratoryId: labId,
       tests: selectedTests.map((test) => ({
         testId: test._id,
         testName: test.name,

@@ -1,11 +1,57 @@
 const Department = require("../models/department.model");
 const asyncHandler = require("../utils/asyncHandler");
 const { BadRequestError, NotFoundError } = require("../utils/errors");
-const { invalidateCacheKey } = require("../services/cache.service");
+const { invalidateCacheKey, invalidateCachePattern } = require("../services/cache.service");
+
+const DEFAULT_DEPARTMENTS = [
+  "Hematology",
+  "Biochemistry",
+  "Microbiology",
+  "Pathology",
+  "Clinical Pathology",
+  "Serology",
+  "Radiology",
+  "General",
+];
 
 const getDepartments = asyncHandler(async (req, res) => {
-  const query = { isActive: true, ...req.tenantFilter };
-  const departments = await Department.find(query).sort({ name: 1 });
+  let targetLabId = null;
+
+  if (req.user.role === 'system_admin') {
+    targetLabId = req.query.laboratoryId || req.headers['x-laboratory-id'] || null;
+  } else {
+    targetLabId = req.user.laboratoryId || null;
+  }
+
+  let filter = { isActive: true };
+  if (targetLabId) {
+    filter = {
+      isActive: true,
+      $or: [
+        { laboratoryId: targetLabId },
+        { laboratoryId: null },
+        { laboratoryId: { $exists: false } }
+      ]
+    };
+  }
+
+  let departments = await Department.find(filter).sort({ name: 1 });
+
+  // Auto-seed default departments for laboratory if 0 departments exist
+  if (departments.length === 0 && targetLabId) {
+    try {
+      const seedDocs = DEFAULT_DEPARTMENTS.map((name) => ({
+        name,
+        laboratoryId: targetLabId,
+        isActive: true,
+      }));
+      await Department.insertMany(seedDocs, { ordered: false });
+      departments = await Department.find(filter).sort({ name: 1 });
+    } catch (seedErr) {
+      departments = await Department.find(filter).sort({ name: 1 });
+    }
+  }
+
   res.status(200).json({
     success: true,
     departments,
@@ -30,7 +76,7 @@ const createDepartment = asyncHandler(async (req, res) => {
     laboratoryId: laboratoryId || req.user.laboratoryId,
   });
 
-  await invalidateCacheKey("departments:all");
+  await invalidateCachePattern("*departments*");
 
   res.status(201).json({
     success: true,
@@ -55,7 +101,7 @@ const updateDepartment = asyncHandler(async (req, res) => {
     throw new NotFoundError("Department not found");
   }
 
-  await invalidateCacheKey("departments:all");
+  await invalidateCachePattern("*departments*");
 
   res.status(200).json({
     success: true,
@@ -81,7 +127,7 @@ const deleteDepartment = asyncHandler(async (req, res) => {
 
   await department.delete();
 
-  await invalidateCacheKey("departments:all");
+  await invalidateCachePattern("*departments*");
 
   res.status(200).json({
     success: true,

@@ -2,22 +2,16 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { canManageDoctors } from "../../config/permissions";
-import { doctorService } from "../../services/doctorService";
 import { Plus, Edit2, Trash2, ShieldAlert } from "lucide-react";
 import { toast } from "../../lib/toast";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useGetDoctorsQuery, useDeleteDoctorMutation } from "../../services/doctorApi";
 
 export const DoctorList = () => {
   const { user } = useAuth();
-  const queryClient = useQueryClient();
-
   const canManage = canManageDoctors(user);
 
-  const { data, isLoading: loading, error: fetchError } = useQuery({
-    queryKey: ['doctors'],
-    queryFn: () => doctorService.getAllDoctors(),
-    staleTime: 5 * 60 * 1000,
-  });
+  const { data, isLoading: loading, error: fetchError } = useGetDoctorsQuery();
+  const [deleteDoctor] = useDeleteDoctorMutation();
 
   const doctors = data?.doctors || [];
   
@@ -32,19 +26,10 @@ export const DoctorList = () => {
       return;
     }
     
-    toast.promise(doctorService.deleteDoctor(id), {
+    toast.promise(deleteDoctor(id).unwrap(), {
       loading: "Deleting doctor...",
-      success: () => {
-        queryClient.setQueryData(['doctors'], (old) => {
-          if (!old) return old;
-          return {
-            ...old,
-            doctors: old.doctors.filter((d) => d._id !== id)
-          };
-        });
-        return "Doctor removed successfully.";
-      },
-      error: (err) => err.response?.data?.message || "Failed to delete doctor entry."
+      success: "Doctor removed successfully.",
+      error: (err) => err.data?.message || "Failed to delete doctor entry."
     });
   };
 

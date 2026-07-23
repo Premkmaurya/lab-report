@@ -1,112 +1,75 @@
-import React, { useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import React, { useState } from "react";
 import { useAuth } from "../hooks/useAuth";
-import { patientService } from "../services/patientService";
-import { doctorService } from "../services/doctorService";
-import { testService } from "../services/testService";
-import { reportService } from "../services/reportService";
-import {
-  Users,
-  HeartPulse,
-  FlaskConical,
-  FileSpreadsheet,
-  ArrowRight,
-  TrendingUp,
-  Download,
-  ShieldAlert,
-  CheckCircle,
-  Plus,
-} from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { Filter, Calendar, Search, FileText } from "lucide-react";
+import {
+  ArrowRight,
+  Download,
+  Plus,
+  Filter,
+  Calendar,
+  Search,
+  FileText,
+} from "lucide-react";
 import { toast } from "../lib/toast";
+import { patientService } from "../services/patientService";
+import { useGetPatientsQuery } from "../services/patientApi";
+import { useGetDoctorsQuery } from "../services/doctorApi";
+import { useGetTestsQuery } from "../services/testApi";
+import { useGetReportsQuery } from "../services/reportApi";
 
 export const Dashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [stats, setStats] = useState({
-    patients: 0,
-    doctors: 0,
-    tests: 0,
-    reports: 0,
-  });
-  const [recentReports, setRecentReports] = useState([]);
   
   // Feed state
-  const [feedReports, setFeedReports] = useState([]);
-  const [feedLoading, setFeedLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState("today");
   const [customStartDate, setCustomStartDate] = useState("");
   const [customEndDate, setCustomEndDate] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-
-  // Summary card state (admin only)
-  const [summaryStats, setSummaryStats] = useState({ today: 0, week: 0, month: 0 });
   const [downloadingPeriod, setDownloadingPeriod] = useState("");
 
   const isAdmin = user?.role === "admin";
 
-  const { data: patientsData } = useQuery({ queryKey: ['patients'], queryFn: () => patientService.getAllPatients() });
-  const { data: testsData } = useQuery({ queryKey: ['tests'], queryFn: () => testService.getAllTests() });
-  const { data: reportsData } = useQuery({ queryKey: ['reports'], queryFn: () => reportService.getAllReports() });
-  const { data: doctorsData } = useQuery({ queryKey: ['doctors'], queryFn: () => doctorService.getAllDoctors() });
+  const { data: patientsData } = useGetPatientsQuery();
+  const { data: testsData } = useGetTestsQuery();
+  const { data: reportsData } = useGetReportsQuery();
+  const { data: doctorsData } = useGetDoctorsQuery();
 
-  const { data: summaryDataObj, isLoading: isSummaryLoading } = useQuery({
-    queryKey: ['summary', 'today'],
-    queryFn: () => patientService.getSummary("today", new Date().getTimezoneOffset()),
-    enabled: !!(user?.role === "admin"),
+  const tzOffset = new Date().getTimezoneOffset();
+  const feedQueryParams = {
+    date: activeFilter,
+    timezoneOffset: tzOffset,
+    ...(activeFilter === "custom" && customStartDate && customEndDate
+      ? { startDate: customStartDate, endDate: customEndDate }
+      : {}),
+  };
+
+  const isCustomValid = !!(
+    activeFilter !== "custom" ||
+    (customStartDate && customEndDate)
+  );
+
+  const { data: feedData, isLoading: feedLoading } = useGetReportsQuery(feedQueryParams, {
+    skip: !isCustomValid,
   });
 
-  useEffect(() => {
-    let doctorsCount = doctorsData?.doctors?.length || 0;
-    setStats({
-      patients: patientsData?.patients?.length || 0,
-      doctors: doctorsCount,
-      tests: testsData?.tests?.length || 0,
-      reports: reportsData?.patientTests?.length || 0,
-    });
-    setRecentReports((reportsData?.patientTests || []).slice(0, 5));
+  const feedReports = feedData?.patientTests || [];
 
-    if (summaryDataObj?.success && summaryDataObj?.summary) {
-      setSummaryStats(summaryDataObj.summary);
-    }
-  }, [patientsData, testsData, reportsData, doctorsData, summaryDataObj]);
+  const stats = {
+    patients: patientsData?.patients?.length || 0,
+    doctors: doctorsData?.doctors?.length || 0,
+    tests: testsData?.tests?.length || 0,
+    reports: reportsData?.patientTests?.length || 0,
+  };
+
+  const summaryStats = {
+    today: feedReports.length,
+    week: reportsData?.patientTests?.length || 0,
+    month: reportsData?.patientTests?.length || 0,
+  };
 
   const loading = !patientsData || !testsData || !reportsData;
-  const summaryLoading = isSummaryLoading;
-
-  // Feed fetcher
-  useEffect(() => {
-    const fetchFeed = async () => {
-      setFeedLoading(true);
-      try {
-        const tzOffset = new Date().getTimezoneOffset();
-        const params = {
-          date: activeFilter,
-          timezoneOffset: tzOffset,
-        };
-
-        if (activeFilter === "custom") {
-          if (!customStartDate || !customEndDate) {
-            setFeedLoading(false);
-            return;
-          }
-          params.startDate = customStartDate;
-          params.endDate = customEndDate;
-        }
-
-        const data = await reportService.getAllReports(params);
-        setFeedReports(data.patientTests || []);
-      } catch (err) {
-        console.error("Failed to load feed", err);
-      } finally {
-        setFeedLoading(false);
-      }
-    };
-    fetchFeed();
-    const interval = setInterval(fetchFeed, 60000);
-    return () => clearInterval(interval);
-  }, [activeFilter, customStartDate, customEndDate]);
+  const summaryLoading = false;
 
   const filteredFeed = feedReports.filter((report) => {
     const patientName = report.patientId?.name || "";

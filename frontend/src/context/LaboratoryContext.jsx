@@ -1,10 +1,13 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import { setSelectedLabId as setReduxSelectedLabId, setTenantLaboratories, clearTenant } from '../features/tenant/tenantSlice';
 import laboratoryService from '../services/laboratoryService';
 import { useAuth } from '../hooks/useAuth';
 
 const LaboratoryContext = createContext(null);
 
 export const LaboratoryProvider = ({ children }) => {
+  const dispatch = useDispatch();
   const { user } = useAuth();
   const [laboratories, setLaboratories] = useState([]);
   const [selectedLabId, setSelectedLabId] = useState(null);
@@ -19,6 +22,7 @@ export const LaboratoryProvider = ({ children }) => {
       const res = await laboratoryService.getAllLaboratories({ limit: 100 });
       if (res.success) {
         setLaboratories(res.data || []);
+        dispatch(setTenantLaboratories(res.data || []));
       }
     } catch (err) {
       console.error('Failed to fetch laboratories for System Admin context:', err);
@@ -33,13 +37,13 @@ export const LaboratoryProvider = ({ children }) => {
     } else {
       setLaboratories([]);
       setSelectedLabId(null);
-      window.__ACTIVE_LABORATORY_ID__ = null;
+      dispatch(clearTenant());
     }
   }, [user?.role]);
 
   const handleSetSelectedLabId = (labId) => {
     setSelectedLabId(labId);
-    window.__ACTIVE_LABORATORY_ID__ = labId || null;
+    dispatch(setReduxSelectedLabId(labId));
   };
 
   const getTenantQueryParam = () => {
