@@ -49,6 +49,10 @@ const patientSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    visitNumber: {
+      type: Number,
+      sparse: true,
+    },
     visitId: {
       type: String,
       sparse: true,
@@ -62,24 +66,21 @@ const patientSchema = new mongoose.Schema(
 patientSchema.plugin(tenantPlugin);
 
 patientSchema.pre("validate", async function () {
-  if (!this.visitId) {
-    let unique = false;
-    let attempts = 0;
-    while (!unique && attempts < 10) {
-      const id = String(Math.floor(10000 + Math.random() * 90000));
-      const existing = await mongoose.model("Patient").findOne({ visitId: id, laboratoryId: this.laboratoryId });
-      if (!existing) {
-        this.visitId = id;
-        unique = true;
-      }
-      attempts++;
-    }
-    if (!unique) {
-      // Fallback: use timestamp-based ID
-      this.visitId = String(Date.now()).slice(-5);
+  if (!this.visitId && this.laboratoryId) {
+    const Laboratory = mongoose.model("Laboratory");
+    const lab = await Laboratory.findById(this.laboratoryId).select("code");
+    const labCode = lab && lab.code ? lab.code.toUpperCase().trim() : "LAB";
+
+    if (!this.visitNumber) {
+      const { getNextVisitNumber, formatVisitId } = require("../services/sequence.service");
+      this.visitNumber = await getNextVisitNumber(this.laboratoryId);
+      this.visitId = formatVisitId(labCode, this.visitNumber);
+    } else {
+      const { formatVisitId } = require("../services/sequence.service");
+      this.visitId = formatVisitId(labCode, this.visitNumber);
     }
   }
-  
+
   if (this.firstName) {
     this.name = [this.title, this.firstName, this.lastName].filter(Boolean).join(" ");
   }
@@ -90,6 +91,7 @@ patientSchema.index(
   { visitId: 1, laboratoryId: 1 },
   { unique: true, partialFilterExpression: { visitId: { $type: "string" } } }
 );
+patientSchema.index({ visitNumber: 1, laboratoryId: 1 });
 patientSchema.index({ date: -1 });
 patientSchema.index({ createdAt: -1 });
 patientSchema.index({ laboratoryId: 1, createdAt: -1 });

@@ -119,7 +119,7 @@ const getLaboratoryPatients = async (req, res, next) => {
       query.$or = [
         { name: { $regex: search, $options: 'i' } },
         { phone: { $regex: search, $options: 'i' } },
-        { patientId: { $regex: search, $options: 'i' } },
+        { visitId: { $regex: search, $options: 'i' } },
       ];
     }
 

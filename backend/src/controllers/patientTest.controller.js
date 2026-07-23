@@ -23,7 +23,7 @@ const getReportAndTestTemplate = asyncHandler(async (req, res) => {
 
   const query = { _id: id, ...req.tenantFilter };
   const patientTest = await PatientTest.findOne(query)
-    .populate("patientId", "name age")
+    .populate("patientId", "name age visitId visitNumber gender date registeredAt referredDoctor")
     .populate("createdBy", "username email");
 
   if (!patientTest) {
@@ -251,7 +251,7 @@ const createPatientTest = asyncHandler(async (req, res) => {
   });
 
   const populatedPatientTest = await PatientTest.findById(patientTest._id)
-    .populate("patientId", "name age")
+    .populate("patientId", "name age visitId visitNumber gender date registeredAt referredDoctor")
     .populate("createdBy", "username email")
     .populate({
       path: "tests.testId",
@@ -294,7 +294,7 @@ const updatePatientTest = asyncHandler(async (req, res) => {
       runValidators: true,
     },
   )
-    .populate("patientId", "name age")
+    .populate("patientId", "name age visitId visitNumber gender date registeredAt referredDoctor")
     .populate("createdBy", "username email")
     .populate({
       path: "tests.testId",
@@ -381,7 +381,7 @@ const addTestToReport = asyncHandler(async (req, res) => {
   await patientTest.save();
 
   const updatedTest = await PatientTest.findById(req.params.id)
-    .populate("patientId", "name age")
+    .populate("patientId", "name age visitId visitNumber gender date registeredAt referredDoctor")
     .populate("createdBy", "username email")
     .populate({
       path: "tests.testId",
