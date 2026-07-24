@@ -67,7 +67,36 @@ const createTest = asyncHandler(async (req, res) => {
 
   validateSubTests(subTests);
 
-  const targetLabId = req.user.role === 'system_admin' && laboratoryId ? laboratoryId : req.user.laboratoryId;
+  const isSystemAdmin = req.user.role === 'system_admin';
+
+  if (isSystemAdmin) {
+    let test = await Test.create({
+      name,
+      departmentId,
+      price,
+      subTests,
+      isGlobal: true,
+      createdBySystem: true,
+      sourceTestId: null,
+      laboratoryId: null,
+      createdBy: req.user._id,
+      updatedBy: req.user._id,
+    });
+
+    test = await Test.findById(test._id)
+      .populate('departmentId')
+      .populate('createdBy', 'username _id')
+      .populate('updatedBy', 'username _id');
+
+    await invalidateCachePattern("*test*");
+
+    return res.status(201).json({
+      success: true,
+      test,
+    });
+  }
+
+  const targetLabId = req.user.role === 'system_admin' ? (laboratoryId || req.laboratoryId) : req.user.laboratoryId;
 
   if (!targetLabId) {
     throw new BadRequestError("Laboratory ID is required for laboratory test creation");

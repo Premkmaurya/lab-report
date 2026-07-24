@@ -595,10 +595,11 @@ export const InlineTestEditor = ({
                               <td className="py-2 px-3 text-sm text-charcoal">
                                 {item.value ? (
                                   (() => {
-                                    const { isAbnormal, formattedValue } = checkAbnormalResult(item.value, item.normalRange);
+                                    const { isAbnormal, status, formattedValue } = checkAbnormalResult(item.value, item.normalRange, item.isListParameter);
+                                    const symbol = status === 'high' ? '↑ ' : status === 'low' ? '↓ ' : '';
                                     return (
-                                      <span className={`font-semibold ${isAbnormal ? 'font-bold' : ''}`}>
-                                        {formattedValue}
+                                      <span className={`font-semibold ${isAbnormal ? 'font-bold text-red-600' : ''}`}>
+                                        {isAbnormal ? `${symbol}${formattedValue}` : formattedValue}
                                       </span>
                                     );
                                   })()

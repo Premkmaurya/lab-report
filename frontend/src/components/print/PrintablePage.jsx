@@ -234,7 +234,8 @@ export const PrintablePage = ({
 
     if (row.type === 'parameter') {
       const res = row.content;
-      const { isAbnormal, formattedValue } = checkAbnormalResult(res.value, res.normalRange);
+      const { isAbnormal, status, formattedValue } = checkAbnormalResult(res.value, res.normalRange, res.isListParameter);
+      const symbol = status === 'high' ? '↑ ' : status === 'low' ? '↓ ' : '';
       return (
         <tr key={i} style={{ background: 'white' }}>
           <td style={{
@@ -248,10 +249,11 @@ export const PrintablePage = ({
           </td>
           <td style={{
             padding:    `${rowPad}px 12px`,
-            fontWeight: isAbnormal ? '700' : undefined,
             ...resultStyles,
+            fontWeight: isAbnormal ? '700' : (resultStyles.fontWeight || '400'),
+            color:      '#000000',
           }}>
-            {formattedValue}
+            {isAbnormal ? `${symbol}${formattedValue}` : formattedValue}
           </td>
           <td style={{
             padding:   `${rowPad}px 12px`,

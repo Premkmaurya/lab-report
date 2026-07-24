@@ -3,7 +3,9 @@ import { useForm, useFieldArray } from "react-hook-form";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { useLaboratory } from "../../context/LaboratoryContext";
+import LaboratorySelect from "../../components/LaboratorySelect";
 import { useCreateTestMutation } from "../../services/testApi";
+import { testService } from "../../services/testService";
 import { departmentService } from "../../services/departmentService";
 import { ArrowLeft, ShieldAlert, Trash2, Globe } from "lucide-react";
 import { toast } from "../../lib/toast";
@@ -68,13 +70,12 @@ const ParameterSelect = ({ index, field, watch, setValue, register, errors }) =>
 
 export const CreateTest = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   const { user } = useAuth();
-  const { laboratories } = useLaboratory();
   const isSystemAdmin = user?.role === "system_admin";
-  const isGlobalMode = isSystemAdmin && new URLSearchParams(location.search).get("global") === "true";
 
-  const [createTest, { isLoading: isSubmitting }] = useCreateTestMutation();
+  const [isManualSubmitting, setIsManualSubmitting] = useState(false);
+  const [createTest, { isLoading: isMutationLoading }] = useCreateTestMutation();
+  const isSubmitting = isMutationLoading || isManualSubmitting;
   const [step, setStep] = useState(1);
   const [departments, setDepartments] = useState([]);
   const [loadingDepts, setLoadingDepts] = useState(true);
@@ -113,7 +114,7 @@ export const CreateTest = () => {
     fetchDepts();
   }, []);
 
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append } = useFieldArray({
     control,
     name: "subTests",
   });
@@ -121,132 +122,65 @@ export const CreateTest = () => {
   const testName = watch("name");
   const watchedTypes = watch(fields.map((_, i) => `subTests.${i}.type`));
   const watchedTextBlocks = watch(fields.map((_, i) => `subTests.${i}.isTextBlock`)) || [];
-  const inputRefs = useRef({});
 
-  const isEmptyRow = (st) => {
-    if (!st) return true;
-    if (st.type === "section") {
-      return !st.name;
-    }
-    return (
-      !st.name &&
-      !st.unit &&
-      !st.normalRange &&
-      (st.price === "" || st.price === null || st.price === undefined)
-    );
+  const isRowComplete = (row) => {
+    if (!row) return false;
+    if (!row.name || !row.name.trim()) return false;
+    if (row.type === "section") return true;
+    if (row.isTextBlock) return true;
+    if (row.isCalculated) return !!(row.formula && row.formula.leftParameterId && row.formula.rightParameterId);
+    if (row.price === "" || row.price === null || row.price === undefined) return false;
+    return true;
   };
 
-  const isRowComplete = (st) => {
-    if (!st) return false;
-    if (st.type === "section") {
-      return !!st.name;
-    }
-    return (
-      !!st.name &&
-      st.price !== "" &&
-      st.price !== null &&
-      st.price !== undefined
-    );
+  const isEmptyRow = (row) => {
+    if (!row) return true;
+    return !row.name && !row.unit && !row.normalRange && (row.price === "" || row.price === null || row.price === undefined);
   };
+
+  const inputRefs = useRef([]);
+  if (inputRefs.current.length !== fields.length) {
+    inputRefs.current = Array(fields.length).fill(0).map((_, i) => inputRefs.current[i] || {});
+  }
 
   const handleKeyDown = (e, index, fieldName) => {
-    const fieldsOrder = ["name", "price", "unit", "normalRange"];
-    const fieldIndex = fieldsOrder.indexOf(fieldName);
-    const currentValues = getValues("subTests");
-    const isSection = currentValues[index]?.type === "section";
-
     if (e.key === "Enter") {
       e.preventDefault();
-      if (e.shiftKey) {
-        // Move to previous field
-        if (fieldIndex > 0) {
-          inputRefs.current[index]?.[fieldsOrder[fieldIndex - 1]]?.focus();
-        } else if (index > 0) {
-          const prevIsSection = currentValues[index - 1]?.type === "section";
-          inputRefs.current[index - 1]?.[
-            prevIsSection ? "name" : fieldsOrder[fieldsOrder.length - 1]
-          ]?.focus();
-        }
-      } else {
-        // Move to next field
-        if (fieldIndex < fieldsOrder.length - 1 && !isSection) {
-          inputRefs.current[index]?.[fieldsOrder[fieldIndex + 1]]?.focus();
+      const currentValues = getValues("subTests");
+      const isSection = currentValues[index]?.type === "section";
+
+      if ((fieldName === "normalRange" || (isSection && fieldName === "name")) && isRowComplete(currentValues[index])) {
+        if (index === fields.length - 1) {
+          append({ _id: generateObjectId(), name: "", type: "parameter", price: "", unit: "", normalRange: "", isListParameter: false, allowedValues: [], isCalculated: false, isTextBlock: false, formula: { leftParameterId: "", operator: "+", rightParameterId: "" }, textBlockSettings: { defaultText: "" } });
+          setTimeout(() => {
+            if (inputRefs.current[index + 1] && inputRefs.current[index + 1].name) {
+              inputRefs.current[index + 1].name.focus();
+            }
+          }, 50);
         } else {
-          // On last field, check completion
-          if (
-            index === fields.length - 1 &&
-            isRowComplete(currentValues[index])
-          ) {
-            append({ _id: generateObjectId(), name: "", type: "parameter", price: "", unit: "", normalRange: "", isListParameter: false, allowedValues: [], isCalculated: false, isTextBlock: false, formula: { leftParameterId: "", operator: "+", rightParameterId: "" }, textBlockSettings: { defaultText: "" } });
-            setTimeout(() => {
-              inputRefs.current[index + 1]?.name?.focus();
-            }, 0);
-          } else if (index < fields.length - 1) {
-            inputRefs.current[index + 1]?.name?.focus();
+          if (inputRefs.current[index + 1] && inputRefs.current[index + 1].name) {
+            inputRefs.current[index + 1].name.focus();
           }
         }
-      }
-    } else if (e.key === "ArrowDown") {
-      e.preventDefault();
-      if (index < fields.length - 1) {
-        const nextIsSection = currentValues[index + 1]?.type === "section";
-        inputRefs.current[index + 1]?.[nextIsSection ? "name" : fieldName]?.focus();
-      }
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault();
-      if (index > 0) {
-        const prevIsSection = currentValues[index - 1]?.type === "section";
-        inputRefs.current[index - 1]?.[prevIsSection ? "name" : fieldName]?.focus();
-      }
-    } else if (e.key === "ArrowRight") {
-      let isAtEnd = false;
-      try {
-        if (typeof e.target.selectionStart === "number") {
-          isAtEnd = e.target.selectionStart === e.target.value.length;
-        }
-      } catch {
-        isAtEnd = true; // Fallback for type="number"
-      }
-      if (isAtEnd) {
-        e.preventDefault();
-        if (fieldIndex < fieldsOrder.length - 1 && !isSection) {
-          inputRefs.current[index]?.[fieldsOrder[fieldIndex + 1]]?.focus();
-        } else if (index < fields.length - 1) {
-          inputRefs.current[index + 1]?.[fieldsOrder[0]]?.focus();
-        }
-      }
-    } else if (e.key === "ArrowLeft") {
-      let isAtStart = false;
-      try {
-        if (typeof e.target.selectionStart === "number") {
-          isAtStart = e.target.selectionStart === 0;
-        }
-      } catch {
-        isAtStart = true; // Fallback for type="number"
-      }
-      if (isAtStart) {
-        e.preventDefault();
-        if (fieldIndex > 0) {
-          inputRefs.current[index]?.[fieldsOrder[fieldIndex - 1]]?.focus();
-        } else if (index > 0) {
-          const prevIsSection = currentValues[index - 1]?.type === "section";
-          inputRefs.current[index - 1]?.[
-            prevIsSection ? "name" : fieldsOrder[fieldsOrder.length - 1]
-          ]?.focus();
+      } else {
+        const fieldsOrder = ["name", "price", "unit", "normalRange"];
+        const currentIndex = fieldsOrder.indexOf(fieldName);
+        if (currentIndex !== -1 && currentIndex < fieldsOrder.length - 1) {
+          const nextField = fieldsOrder[currentIndex + 1];
+          if (inputRefs.current[index] && inputRefs.current[index][nextField]) {
+            inputRefs.current[index][nextField].focus();
+          }
         }
       }
     }
   };
 
   const handleBlur = (index, fieldName) => {
-    if (index === fields.length - 1) {
+    const currentValues = getValues("subTests");
+    const isSection = currentValues[index]?.type === "section";
+    if ((fieldName === "normalRange" || (isSection && fieldName === "name")) && isRowComplete(currentValues[index])) {
       setTimeout(() => {
-        const currentValues = getValues("subTests");
-        const isSection = currentValues[index]?.type === "section";
-        if ((fieldName === "normalRange" || (isSection && fieldName === "name")) && isRowComplete(currentValues[index])) {
-          // Do not append on blur to avoid duplicate rows since Enter might have already appended
-          // Actually the user requirement states: "When the final required field of a completed row is confirmed, create the next row."
-          // But appending on blur might cause issues if they click elsewhere. Let's keep it but check if the last row is actually complete and no blank row exists.
+        if (index === fields.length - 1) {
           if (isRowComplete(currentValues[currentValues.length - 1])) {
             append({ _id: generateObjectId(), name: "", type: "parameter", price: "", unit: "", normalRange: "", isListParameter: false, allowedValues: [], isCalculated: false, isTextBlock: false, formula: { leftParameterId: "", operator: "+", rightParameterId: "" }, textBlockSettings: { defaultText: "" } });
           }
@@ -258,8 +192,10 @@ export const CreateTest = () => {
   const handleCreateDepartment = async () => {
     if (!newDeptName.trim()) return;
     setIsSavingDept(true);
+
+    const deptPayload = { name: newDeptName };
     
-    toast.promise(departmentService.createDepartment({ name: newDeptName }), {
+    toast.promise(departmentService.createDepartment(deptPayload), {
       loading: "Creating department...",
       success: (res) => {
         const newDept = res.department;
@@ -285,13 +221,12 @@ export const CreateTest = () => {
   };
 
   const onSubmit = async (data) => {
-    setIsSubmitting(true);
+    if (isSubmitting) return;
     
     const validSubTests = data.subTests.filter((st) => !isEmptyRow(st));
 
     if (validSubTests.length === 0) {
       toast.error("Please provide at least one complete parameter.");
-      setIsSubmitting(false);
       return;
     }
 
@@ -314,25 +249,26 @@ export const CreateTest = () => {
       }),
     };
 
-    const apiCall = isGlobalMode
+    setIsManualSubmitting(true);
+    const apiCall = isSystemAdmin
       ? testService.createGlobalTest(payload)
       : createTest({ ...payload, isGlobal: false }).unwrap();
 
     toast.promise(apiCall, {
-      loading: isGlobalMode ? "Saving global test template..." : "Saving test...",
+      loading: isSystemAdmin ? "Publishing global test template..." : "Saving test...",
       success: () => {
         navigate("/tests");
-        return isGlobalMode
+        return isSystemAdmin
           ? "Global test template published successfully"
           : "Test created successfully";
       },
       error: (err) => err.data?.message || err.response?.data?.message || "Failed to create test profile. Please try again.",
+      finally: () => setIsManualSubmitting(false),
     });
   };
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
-      {/* Back Link */}
       <div>
         <Link
           to="/tests"
@@ -343,10 +279,9 @@ export const CreateTest = () => {
         </Link>
       </div>
 
-      {/* Header */}
       <div>
         <span className="font-abcfavoritvariable text-xs font-bold text-electric-cobalt uppercase tracking-widest block mb-2">
-          {isGlobalMode ? "GLOBAL TEMPLATE CREATION" : "CREATION"}
+          {isSystemAdmin ? "GLOBAL TEST TEMPLATE CREATION" : "TEST CREATION"}
         </span>
         <h1 className="font-martinaplantijn text-4xl text-ink-navy">
           {step === 1 ? (
@@ -355,7 +290,7 @@ export const CreateTest = () => {
             </>
           ) : step === 2 ? (
             <>
-              Create <span className="italic font-light">{isGlobalMode ? "Global Test Template" : "Laboratory Test"}</span>
+              Create <span className="italic font-light">{isSystemAdmin ? "Global Test Template" : "Laboratory Test"}</span>
             </>
           ) : (
             <>
@@ -372,7 +307,6 @@ export const CreateTest = () => {
         </p>
       </div>
 
-      {/* Form Card */}
       <div className="bg-paper-white border border-cream-border rounded-cards p-6 md:p-8">
         <form onSubmit={e => e.preventDefault()} className="space-y-6">
           {step === 1 && (
