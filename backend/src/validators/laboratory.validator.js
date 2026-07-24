@@ -8,6 +8,8 @@ const validateCreateLaboratory = [
 
 const validateUpdateLaboratory = [
   body('name').optional().trim().notEmpty().withMessage('Laboratory name cannot be empty'),
+  body('code').optional().trim().notEmpty().withMessage('Laboratory code cannot be empty')
+    .isLength({ min: 2, max: 10 }).withMessage('Laboratory code must be 2-10 characters'),
   body('email').optional().isEmail().withMessage('Invalid email address'),
 ];
 

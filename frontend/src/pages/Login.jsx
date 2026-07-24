@@ -110,16 +110,6 @@ export const Login = () => {
           {isSubmitting ? "Signing in..." : "Continue"}
         </button>
       </form>
-
-      <div className="mt-6 text-center text-sm border-t border-cream-border pt-4">
-        <span className="text-stone">New to the portal?</span>{" "}
-        <Link
-          to="/signup"
-          className="text-electric-cobalt font-medium hover:underline ml-1"
-        >
-          Create an account
-        </Link>
-      </div>
     </div>
   );
 };

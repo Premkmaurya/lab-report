@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { Building2, ArrowLeft, Save, Shield, CheckCircle } from 'lucide-react';
 import laboratoryService from '../../services/laboratoryService';
+import { useLaboratory } from '../../context/LaboratoryContext';
 import { toast } from '../../lib/toast';
 
 const LaboratoryForm = () => {
   const { id } = useParams();
   const isEdit = Boolean(id);
   const navigate = useNavigate();
+  const { fetchLaboratories } = useLaboratory();
 
   const [loading, setLoading] = useState(isEdit);
   const [submitting, setSubmitting] = useState(false);
@@ -73,12 +75,14 @@ const LaboratoryForm = () => {
         const res = await laboratoryService.updateLaboratory(id, formData);
         if (res.success) {
           toast.success('Laboratory updated successfully');
+          fetchLaboratories();
           navigate('/laboratories');
         }
       } else {
         const res = await laboratoryService.createLaboratory(formData);
         if (res.success) {
           toast.success('Laboratory created successfully');
+          fetchLaboratories();
           navigate('/laboratories');
         }
       }
@@ -148,11 +152,10 @@ const LaboratoryForm = () => {
               type="text"
               name="code"
               required
-              disabled={isEdit}
               placeholder="e.g. CITYPATH"
               value={formData.code}
               onChange={handleChange}
-              className="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 font-mono uppercase disabled:bg-slate-50 disabled:text-slate-500"
+              className="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 font-mono uppercase"
             />
           </div>
 

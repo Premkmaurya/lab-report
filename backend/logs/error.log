@@ -675,3 +675,9 @@
 {"level":"error","message":"Error invalidating cache pattern *patient*: \"arguments[1]\" must be of type \"string | Buffer\", got number instead.","service":"laboratory-management-system","timestamp":"2026-07-23 15:10:03"}
 {"level":"error","message":"Error invalidating cache pattern dashboard:stats:*: \"arguments[1]\" must be of type \"string | Buffer\", got number instead.","service":"laboratory-management-system","timestamp":"2026-07-23 15:10:03"}
 {"level":"error","message":"Error invalidating cache pattern *test*: \"arguments[1]\" must be of type \"string | Buffer\", got number instead.","service":"laboratory-management-system","timestamp":"2026-07-23 15:20:11"}
+{"level":"error","message":"Error invalidating cache pattern *patient*: \"arguments[1]\" must be of type \"string | Buffer\", got number instead.","service":"laboratory-management-system","timestamp":"2026-07-24 00:22:45"}
+{"level":"error","message":"Error invalidating cache pattern dashboard:stats:*: \"arguments[1]\" must be of type \"string | Buffer\", got number instead.","service":"laboratory-management-system","timestamp":"2026-07-24 00:22:45"}
+{"level":"error","message":"Error invalidating cache pattern dashboard:stats:*: \"arguments[1]\" must be of type \"string | Buffer\", got number instead.","service":"laboratory-management-system","timestamp":"2026-07-24 00:39:44"}
+{"level":"error","message":"Redis Client Error: read ECONNRESET","service":"laboratory-management-system","timestamp":"2026-07-24 13:54:53"}
+{"level":"error","message":"Error invalidating cache pattern *laboratory*: \"arguments[1]\" must be of type \"string | Buffer\", got number instead.","service":"laboratory-management-system","timestamp":"2026-07-24 14:17:51"}
+{"level":"error","message":"Error invalidating cache pattern dashboard:stats:*: \"arguments[1]\" must be of type \"string | Buffer\", got number instead.","service":"laboratory-management-system","timestamp":"2026-07-24 14:19:09"}

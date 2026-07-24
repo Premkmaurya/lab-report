@@ -19,9 +19,6 @@ const LoadingScreen = () => (
 const Login = lazy(() =>
   import("../pages/Login").then((m) => ({ default: m.Login })),
 );
-const Signup = lazy(() =>
-  import("../pages/Signup").then((m) => ({ default: m.Signup })),
-);
 const Pending = lazy(() =>
   import("../pages/Pending").then((m) => ({ default: m.Pending })),
 );
@@ -118,7 +115,6 @@ export const AppRoutes = () => {
         {/* Public Auth Routes */}
         <Route element={<AuthLayout />}>
           <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
         </Route>
 
         {/* Pending Authorization Route */}

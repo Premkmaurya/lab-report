@@ -5,6 +5,7 @@ const Doctor = require('../models/doctor.model');
 const Test = require('../models/test.model');
 const PatientTest = require('../models/patientTest.model');
 const Department = require('../models/department.model');
+const { invalidateCachePattern } = require('../services/cache.service');
 
 /**
  * Get all laboratories (System Admin only)
@@ -241,11 +242,28 @@ const createLaboratory = async (req, res, next) => {
  */
 const updateLaboratory = async (req, res, next) => {
   try {
-    const { name, logo, address, letterheadAddressLine, phone, email, gstNumber, licenseNumber, settings } = req.body;
+    const { name, code, logo, address, letterheadAddressLine, phone, email, gstNumber, licenseNumber, settings } = req.body;
 
     const laboratory = await Laboratory.findById(req.params.id);
     if (!laboratory) {
       return res.status(404).json({ success: false, message: 'Laboratory not found' });
+    }
+
+    if (code !== undefined && String(code).trim() !== '') {
+      const formattedCode = String(code).toUpperCase().trim();
+      if (formattedCode !== laboratory.code) {
+        const existingCode = await Laboratory.findOne({
+          code: formattedCode,
+          _id: { $ne: laboratory._id },
+        });
+        if (existingCode) {
+          return res.status(400).json({
+            success: false,
+            message: `Laboratory code "${formattedCode}" is already in use by another laboratory`,
+          });
+        }
+        laboratory.code = formattedCode;
+      }
     }
 
     if (name) laboratory.name = name;
@@ -259,6 +277,8 @@ const updateLaboratory = async (req, res, next) => {
     if (settings) laboratory.settings = { ...laboratory.settings, ...settings };
 
     await laboratory.save();
+
+    await invalidateCachePattern("*laboratory*");
 
     res.json({
       success: true,
