@@ -25,25 +25,26 @@ const validateSignup = [
 
 /**
  * Login Validator
- * Validates: username or email (at least one required), password
+ * Validates: identifier (username or email), password
  */
 const validateLogin = [
+  body("identifier")
+    .optional()
+    .trim(),
+
   body("username")
     .optional()
     .trim(),
   
   body("email")
     .optional()
-    .trim()
-    .toLowerCase()
-    .if((value) => value)
-    .isEmail()
-    .withMessage("Please provide a valid email address"),
+    .trim(),
   
   body()
     .custom((value, { req }) => {
-      if (!req.body.username && !req.body.email) {
-        throw new Error("Please provide either username or email");
+      const raw = req.body.identifier || req.body.username || req.body.email;
+      if (!raw || !String(raw).trim()) {
+        throw new Error("Please provide username or email");
       }
       return true;
     }),

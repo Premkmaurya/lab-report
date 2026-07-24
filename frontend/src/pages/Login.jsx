@@ -22,15 +22,15 @@ export const Login = () => {
     setIsSubmitting(true);
     setLocalError("");
 
-    toast.promise(login(data.username, data.password), {
+    toast.promise(login(data.identifier, data.password), {
       loading: "Signing in...",
       success: () => {
         navigate("/");
         return "Logged in successfully";
       },
       error: (err) => {
-        setLocalError(err.message || "Invalid credentials");
-        return err.message || "Invalid credentials";
+        setLocalError(err.message || "Invalid username/email or password.");
+        return err.message || "Invalid username/email or password.";
       },
       finally: () => setIsSubmitting(false)
     });
@@ -56,21 +56,18 @@ export const Login = () => {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>
           <label className="block text-xs font-bold text-charcoal uppercase tracking-wider mb-2">
-            username Address
+            Username or Email
           </label>
           <input
             type="text"
-            placeholder="johndoe123"
-            className={`w-full border border-black/40 focus:border-[#2545FF] ${errors.username ? "border-red-500 focus:border-red-500" : ""}`}
-            {...register("username", {
-              required: "username is required",
-              pattern: {
-                message: "Please enter a valid username address",
-              },
+            placeholder="Enter username or email address"
+            className={`w-full border border-black/40 focus:border-[#2545FF] ${errors.identifier ? "border-red-500 focus:border-red-500" : ""}`}
+            {...register("identifier", {
+              required: "Username or email is required",
             })}
           />
-          {errors.username && (
-            <p className="text-xs text-red-500 mt-1">{errors.username.message}</p>
+          {errors.identifier && (
+            <p className="text-xs text-red-500 mt-1">{errors.identifier.message}</p>
           )}
         </div>
 

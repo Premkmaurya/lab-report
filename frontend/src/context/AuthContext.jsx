@@ -45,11 +45,14 @@ export const AuthProvider = ({ children }) => {
     checkAuth();
   }, []);
 
-  const login = async (username, password) => {
+  const login = async (identifier, password) => {
     setLoading(true);
     setAuthError("");
     try {
-      const response = await API.post("/auth/login", { username, password });
+      const payload = typeof identifier === "object"
+        ? identifier
+        : { identifier, password };
+      const response = await API.post("/auth/login", payload);
       if (response.data?.success) {
         const loggedUser = response.data.user;
         setUser(loggedUser);
@@ -66,7 +69,7 @@ export const AuthProvider = ({ children }) => {
       setUser(null);
       setIsAuthorizedUser(false);
       dispatch(clearAuth());
-      const msg = error.response?.data?.message || "Login failed";
+      const msg = error.response?.data?.message || "Invalid username/email or password.";
       setAuthError(msg);
       dispatch(setReduxAuthError(msg));
       throw new Error(msg);

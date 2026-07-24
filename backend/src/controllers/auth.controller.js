@@ -50,10 +50,10 @@ const signup = asyncHandler(async (req, res) => {
 });
 
 const login = asyncHandler(async (req, res) => {
-  const { username, email, password } = req.body;
-  const loginIdentifier = email || username;
+  const { identifier, username, email, password } = req.body;
+  const rawIdentifier = identifier || email || username;
 
-  if (!loginIdentifier) {
+  if (!rawIdentifier || !String(rawIdentifier).trim()) {
     throw new BadRequestError("Please provide username or email");
   }
 
@@ -61,18 +61,24 @@ const login = asyncHandler(async (req, res) => {
     throw new BadRequestError("Please provide password");
   }
 
+  const cleanIdentifier = String(rawIdentifier).trim();
+  const escapedIdentifier = cleanIdentifier.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
   const user = await User.findOne({
-    $or: [{ email: loginIdentifier.toLowerCase() }, { username: loginIdentifier }],
+    $or: [
+      { email: { $regex: `^${escapedIdentifier}$`, $options: "i" } },
+      { username: { $regex: `^${escapedIdentifier}$`, $options: "i" } },
+    ],
   });
 
   if (!user) {
-    throw new NotFoundError("User not found");
+    throw new UnauthorizedError("Invalid username/email or password.");
   }
 
   const isMatch = await bcrypt.compare(password, user.password);
 
   if (!isMatch) {
-    throw new UnauthorizedError("Invalid credentials");
+    throw new UnauthorizedError("Invalid username/email or password.");
   }
 
   sendTokenResponse(user, 200, res);
