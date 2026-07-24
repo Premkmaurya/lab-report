@@ -21,8 +21,8 @@ export const Login = () => {
   const onSubmit = async (data) => {
     setIsSubmitting(true);
     setLocalError("");
-    
-    toast.promise(login(data.email, data.password), {
+
+    toast.promise(login(data.username, data.password), {
       loading: "Signing in...",
       success: () => {
         navigate("/");
@@ -56,22 +56,21 @@ export const Login = () => {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>
           <label className="block text-xs font-bold text-charcoal uppercase tracking-wider mb-2">
-            Email Address
+            username Address
           </label>
           <input
-            type="email"
-            placeholder="name@company.com"
-            className={`w-full ${errors.email ? "border-red-500 focus:border-red-500" : ""}`}
-            {...register("email", {
-              required: "Email is required",
+            type="text"
+            placeholder="johndoe123"
+            className={`w-full border border-black/40 focus:border-[#2545FF] ${errors.username ? "border-red-500 focus:border-red-500" : ""}`}
+            {...register("username", {
+              required: "username is required",
               pattern: {
-                value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
-                message: "Please enter a valid email address",
+                message: "Please enter a valid username address",
               },
             })}
           />
-          {errors.email && (
-            <p className="text-xs text-red-500 mt-1">{errors.email.message}</p>
+          {errors.username && (
+            <p className="text-xs text-red-500 mt-1">{errors.username.message}</p>
           )}
         </div>
 
@@ -83,13 +82,13 @@ export const Login = () => {
             <input
               type={showPassword ? "text" : "password"}
               placeholder="••••••••"
-              className={`w-full pr-10 ${errors.password ? "border-red-500 focus:border-red-500" : ""}`}
+              className={`w-full pr-10 border border-black/40 focus:border-[#2545FF] ${errors.password ? "border-red-500 focus:border-red-500" : ""}`}
               {...register("password", { required: "Password is required" })}
             />
             <button
               type="button"
               onClick={() => setShowPassword((prev) => !prev)}
-              className="absolute inset-y-0 right-3 flex items-center text-stone hover:text-charcoal"
+              className="absolute inset-y-0 right-3 flex items-center text-black/90 hover:text-charcoal"
               aria-label={showPassword ? "Hide password" : "Show password"}
             >
               {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}

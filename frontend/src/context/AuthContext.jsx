@@ -45,11 +45,11 @@ export const AuthProvider = ({ children }) => {
     checkAuth();
   }, []);
 
-  const login = async (email, password) => {
+  const login = async (username, password) => {
     setLoading(true);
     setAuthError("");
     try {
-      const response = await API.post("/auth/login", { email, password });
+      const response = await API.post("/auth/login", { username, password });
       if (response.data?.success) {
         const loggedUser = response.data.user;
         setUser(loggedUser);

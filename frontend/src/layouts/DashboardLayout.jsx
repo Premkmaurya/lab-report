@@ -152,9 +152,9 @@ export const DashboardLayout = () => {
             <img
               src="/logo.png"
               alt="UltraPath Logo"
-              className="h-14 object-cover"
+              className="h-15 object-cover"
             />
-            <div className="logo-header absolute -bottom-6 text-lg text-charcoal text-left">
+            <div className="logo-header absolute -bottom-1 text-base whitespace-nowrap text-charcoal text-left">
               Laboratory information system
             </div>
           </div>
