@@ -96,33 +96,49 @@ export const paginateRows = (rows, measurements, template) => {
     }
   };
 
+  const isHeading = (type) => type === 'department' || type === 'test' || type === 'section';
+  const isResultRow = (type) => type === 'parameter' || type === 'text_block';
+
   /**
-   * Returns the minimum block of height that must fit together to avoid
-   * stranding a heading without at least one parameter beneath it.
+   * Returns the minimum block height that must fit together on a page to avoid
+   * stranding a heading without at least one parameter/result row beneath it.
    *
-   * For parameter / blank rows: just their own height.
-   * For heading rows: heading + all intervening headings + first parameter found.
+   * Minimum Block Requirements:
+   *  - Department Block = Department Heading + First Test Heading (+ any intervening Section Headings) + First Printable Parameter/Result
+   *  - Test Block       = Test Heading (+ any intervening Section Headings) + First Printable Parameter/Result
+   *  - Section Block    = Section Heading + First Printable Parameter/Result
+   *  - Non-headings     = Only their own height
    */
   const getRequiredLookaheadHeight = (startIndex) => {
+    const row = rows[startIndex];
     let height = rowHeights[startIndex] || 20;
-    const row  = rows[startIndex];
 
-    // Parameters, text blocks, and blanks only need their own height.
-    if (row.type === 'parameter' || row.type === 'text_block' || row.type === 'blank') return height;
+    if (!isHeading(row.type)) {
+      return height;
+    }
 
-    // For headings: accumulate until the first parameter is found.
     for (let i = startIndex + 1; i < rows.length; i++) {
       const next = rows[i];
+
+      // Stop scanning if we cross boundaries of equal or higher-level structural sections
+      if (row.type === 'section' && isHeading(next.type)) {
+        break;
+      }
+      if (row.type === 'test' && (next.type === 'test' || next.type === 'department')) {
+        break;
+      }
+      if (row.type === 'department' && next.type === 'department') {
+        break;
+      }
+
       height += rowHeights[i] || 20;
 
-      if (next.type === 'parameter') {
-        break; // found at least one parameter beneath — enough
-      }
-      if (next.type === 'department') {
-        // Another major section started before any parameter — stop here
+      // Stop as soon as we include the first child result row (parameter or text_block)
+      if (isResultRow(next.type)) {
         break;
       }
     }
+
     return height;
   };
 
