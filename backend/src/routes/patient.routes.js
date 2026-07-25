@@ -35,7 +35,7 @@ router.get("/", getPatients);
 router.get(
   "/summary/:period",
   authMiddleware.authorizeRoles("admin"),
-  cacheMiddleware(300, (req) => `dashboard:stats:${req.params.period}:${req.query.timezoneOffset || 0}`),
+  cacheMiddleware(300, (req) => `dashboard:stats:${req.params.period}:${req.query.timezoneOffset || 0}:${req.laboratoryId || req.tenantFilter?.laboratoryId || 'all'}`),
   getPatientsSummary
 );
 

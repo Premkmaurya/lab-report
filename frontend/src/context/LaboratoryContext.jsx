@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { setSelectedLabId as setReduxSelectedLabId, setTenantLaboratories, clearTenant } from '../features/tenant/tenantSlice';
 import laboratoryService from '../services/laboratoryService';
+import { apiSlice } from '../services/apiSlice';
 import { useAuth } from '../hooks/useAuth';
 
 const LaboratoryContext = createContext(null);
@@ -38,12 +39,14 @@ export const LaboratoryProvider = ({ children }) => {
       setLaboratories([]);
       setSelectedLabId(null);
       dispatch(clearTenant());
+      dispatch(apiSlice.util.resetApiState());
     }
   }, [user?.role]);
 
   const handleSetSelectedLabId = (labId) => {
     setSelectedLabId(labId);
     dispatch(setReduxSelectedLabId(labId));
+    dispatch(apiSlice.util.resetApiState());
   };
 
   const getTenantQueryParam = () => {

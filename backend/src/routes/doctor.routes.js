@@ -28,7 +28,7 @@ const upload = multer({ storage: multer.memoryStorage() });
 
 router.use(authMiddleware.userAuth, injectTenantFilter);
 
-router.get("/", cacheMiddleware(86400, () => "doctors:all"), getAllDoctors);
+router.get("/", cacheMiddleware(86400, (req) => `doctors:${req.laboratoryId || req.tenantFilter?.laboratoryId || 'all'}`), getAllDoctors);
 router.get(
   "/:id",
   validateGetDoctorById,

@@ -687,3 +687,15 @@
 {"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-07-24 22:29:01"}
 {"level":"error","message":"Error invalidating cache pattern *test*: \"arguments[1]\" must be of type \"string | Buffer\", got number instead.","service":"laboratory-management-system","timestamp":"2026-07-24 23:23:30"}
 {"level":"error","message":"Error invalidating cache pattern *test*: \"arguments[1]\" must be of type \"string | Buffer\", got number instead.","service":"laboratory-management-system","timestamp":"2026-07-24 23:26:25"}
+{"level":"error","message":"Redis Client Error: read ECONNRESET","service":"laboratory-management-system","timestamp":"2026-07-25 21:50:22"}
+{"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-07-25 21:50:22"}
+{"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-07-25 21:50:24"}
+{"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-07-25 21:50:25"}
+{"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-07-25 21:50:26"}
+{"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-07-25 21:50:27"}
+{"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-07-25 21:50:27"}
+{"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-07-25 21:50:28"}
+{"level":"error","message":"Redis Client Error: read ECONNRESET","service":"laboratory-management-system","timestamp":"2026-07-25 22:02:11"}
+{"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-07-25 22:02:12"}
+{"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-07-25 22:02:12"}
+{"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-07-25 22:02:12"}

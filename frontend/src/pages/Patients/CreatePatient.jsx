@@ -53,8 +53,8 @@ export const CreatePatient = () => {
   const watchedLabId = watch('laboratoryId', selectedLabId || '');
 
   useEffect(() => {
-    if (isSystemAdmin && selectedLabId && !watchedLabId) {
-      setValue("laboratoryId", selectedLabId);
+    if (isSystemAdmin) {
+      setValue("laboratoryId", selectedLabId || "");
     }
   }, [selectedLabId, isSystemAdmin]);
 

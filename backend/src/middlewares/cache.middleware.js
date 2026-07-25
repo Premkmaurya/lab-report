@@ -15,7 +15,8 @@ const cacheMiddleware = (ttl = 3600, keyGenerator = null) => {
 
     let cacheKey;
     try {
-      const tenantPrefix = req.user?.laboratoryId ? req.user.laboratoryId.toString() : 'global';
+      const targetLabId = req.laboratoryId || req.tenantFilter?.laboratoryId || req.user?.laboratoryId;
+      const tenantPrefix = targetLabId ? targetLabId.toString() : 'global';
       if (keyGenerator) {
         cacheKey = `tenant:${tenantPrefix}:${keyGenerator(req)}`;
       } else {

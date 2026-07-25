@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
+import { useLaboratory } from "../context/LaboratoryContext";
 import axios from "axios";
 import { labDetailsService } from "../services/labDetailsService";
 import { Shield, Settings as SettingsIcon, User, Save, CheckCircle, Printer } from "lucide-react";
@@ -8,6 +9,7 @@ import { toast } from "../lib/toast";
 
 export const Settings = () => {
   const { user } = useAuth();
+  const { selectedLabId } = useLaboratory();
   const [labSettings, setLabSettings] = useState({
     labName: "Balaji Diagnostics",
     labAddress: "Plot 12, Medical Square, Sector 4, Nagpur - 440012",
@@ -28,7 +30,7 @@ export const Settings = () => {
       }
     }
     fetchLabSettings();
-  }, []);
+  }, [selectedLabId]);
 
   const handleSaveLabSettings = async (e) => {
     e.preventDefault();

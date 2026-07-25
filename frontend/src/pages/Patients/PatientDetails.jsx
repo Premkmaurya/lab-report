@@ -13,10 +13,12 @@ import { InlineTestEditor } from "../../components/report/InlineTestEditor";
 import SearchableTestSelector from "../../components/SearchableTestSelector";
 import { toast } from "../../lib/toast";
 import { formatDateTime } from "../../utils/dateFormatter";
+import { useLaboratory } from "../../context/LaboratoryContext";
 
 export const PatientDetails = () => {
   const { id } = useParams();
   const { user } = useAuth();
+  const { selectedLabId } = useLaboratory();
   const [patient, setPatient] = useState(null);
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -143,7 +145,7 @@ export const PatientDetails = () => {
       }
     };
     fetchDetails();
-  }, [id]);
+  }, [id, selectedLabId]);
 
 
 
