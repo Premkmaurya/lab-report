@@ -10,36 +10,12 @@ import { toast } from "../../lib/toast";
 
 // Default element styles derived from backend schema
 const DEFAULT_ELEMENT_STYLES = {
-  patientName: {
-    fontSize: "16px",
-    fontWeight: "600",
-    textAlign: "left",
-    textTransform: "capitalize",
-    textDecoration: "none",
-    color: "",
-  },
-  profileName: {
-    fontSize: "14px",
-    fontWeight: "600",
-    textAlign: "left",
-    textTransform: "capitalize",
-    textDecoration: "none",
-    color: "",
-  },
-  testHeading: {
+   testHeading: {
     fontSize: "18px",
     fontWeight: "600",
     textAlign: "left",
     textTransform: "uppercase",
     textDecoration: "underline",
-    color: "",
-  },
-  sectionHeader: {
-    fontSize: "16px",
-    fontWeight: "700",
-    textAlign: "left",
-    textTransform: "uppercase",
-    textDecoration: "none",
     color: "",
   },
   departmentHeading: {
@@ -50,19 +26,11 @@ const DEFAULT_ELEMENT_STYLES = {
     textDecoration: "underline",
     color: "",
   },
-  tableHeader: {
-    fontSize: "20px",
-    fontWeight: "500",
-    textAlign: "center",
-    textTransform: "uppercase",
-    textDecoration: "underline",
-    color: "",
-  },
   parameter: {
     fontSize: "20px",
     fontWeight: "500",
     textAlign: "left",
-    textTransform: "capitalize",
+    textTransform: "none",
     textDecoration: "none",
     color: "",
   },
@@ -70,7 +38,7 @@ const DEFAULT_ELEMENT_STYLES = {
     fontSize: "20px",
     fontWeight: "400",
     textAlign: "center",
-    textTransform: "uppercase",
+    textTransform: "none",
     textDecoration: "none",
     color: "",
   },
@@ -78,7 +46,7 @@ const DEFAULT_ELEMENT_STYLES = {
     fontSize: "20px",
     fontWeight: "400",
     textAlign: "center",
-    textTransform: "capitalize",
+    textTransform: "none",
     textDecoration: "none",
     color: "",
   },
@@ -132,19 +100,22 @@ export const PrintTemplateDesigner = () => {
 
   const [template, setTemplate] = useState(null);
   const [activeTab, setActiveTab] = useState("page"); // page, typography, elements, footer
-  const [selectedElement, setSelectedElement] = useState("patientName");
+  const [selectedElement, setSelectedElement] = useState("departmentHeading"); // departmentHeading, testHeading, sectionHeader, tableHeader, parameter, result, unit, footer
   const [error, setError] = useState(null);
   const [retrying, setRetrying] = useState(false);
 
+  // Fetch template on mount or when active laboratory changes
   useEffect(() => {
-    if (isSystemAdmin) {
-      const initialLabId = selectedLabId || globalSelectedLabId || (laboratories[0]?._id || "");
-      if (initialLabId && initialLabId !== selectedLabId) {
-        setSelectedLabId(initialLabId);
-        fetchTemplate(initialLabId);
-      }
+    const targetLabId = isSystemAdmin
+      ? (selectedLabId || globalSelectedLabId || (laboratories[0]?._id || ""))
+      : (user?.laboratoryId || globalSelectedLabId || "");
+
+    if (targetLabId) {
+      fetchTemplate(targetLabId);
+    } else if (!isSystemAdmin) {
+      fetchTemplate();
     }
-  }, [isSystemAdmin, globalSelectedLabId, laboratories]);
+  }, [isSystemAdmin, selectedLabId, globalSelectedLabId, laboratories, user]);
 
   const handleLabChange = (newLabId) => {
     setSelectedLabId(newLabId);
@@ -159,7 +130,10 @@ export const PrintTemplateDesigner = () => {
     setRetrying(true);
     setError(null);
     try {
-      await fetchTemplate(isSystemAdmin ? selectedLabId : undefined);
+      const targetLabId = isSystemAdmin
+        ? (selectedLabId || globalSelectedLabId)
+        : (user?.laboratoryId || globalSelectedLabId);
+      await fetchTemplate(targetLabId);
     } catch (err) {
       console.error("[PrintTemplateDesigner] Retry fetch template failed:", err);
       setError(err.message || "Failed to load template");
@@ -171,10 +145,10 @@ export const PrintTemplateDesigner = () => {
   // Helper function to get element value with default fallback
   const getElementValue = (field, elementKey = selectedElement) => {
     const value = template?.elements?.[elementKey]?.[field];
-    if (value !== undefined && value !== null && value !== "") {
+    if (value !== undefined && value !== null) {
       return value;
     }
-    return DEFAULT_ELEMENT_STYLES[elementKey]?.[field] || "";
+    return DEFAULT_ELEMENT_STYLES[elementKey]?.[field] ?? "";
   };
 
   const getBarcodeValue = (field) => getElementValue(field, "barcode");
@@ -185,7 +159,7 @@ export const PrintTemplateDesigner = () => {
       elements: {
         ...prev.elements,
         [elementKey]: {
-          ...prev.elements[elementKey],
+          ...prev?.elements?.[elementKey],
           [field]: value,
         },
       },
@@ -198,57 +172,89 @@ export const PrintTemplateDesigner = () => {
       elements: {
         ...prev.elements,
         barcode: {
-          ...prev.elements.barcode,
+          ...prev?.elements?.barcode,
           [key]: value,
         },
       },
     }));
   };
 
-  // Initialize local state with context template or fallback to default template
+  // Initialize local form state whenever savedTemplate is loaded or updated
   useEffect(() => {
-    if (!loading) {
-      // Use savedTemplate if available, otherwise construct default template
-      const baseTemplate = savedTemplate || {
-        page: { ...DEFAULT_PAGE_SETTINGS },
-        typography: { baseFont: "Times New Roman, serif", lineHeight: "1.5" },
-        elements: JSON.parse(JSON.stringify(DEFAULT_ELEMENT_STYLES)),
+    if (!loading && savedTemplate) {
+      const base = JSON.parse(JSON.stringify(savedTemplate));
+
+      const merged = {
+        ...base,
+        page: {
+          ...DEFAULT_PAGE_SETTINGS,
+          ...(base.page || {}),
+        },
+        typography: {
+          baseFont: "Inter, system-ui, sans-serif",
+          lineHeight: "1.5",
+          ...(base.typography || {}),
+        },
+        elements: {
+          ...JSON.parse(JSON.stringify(DEFAULT_ELEMENT_STYLES)),
+          ...(base.elements || {}),
+        },
         signatures: {
-          technician: { name: "Lab Technician", designation: "System Admin", show: true, signatureImage: "", showSignatureImage: false },
-          pathologist: { name: "", designation: "Pathologist", qualification: "", registrationNumber: "", show: true, signatureImage: "", showSignatureImage: false }
-        }
+          technician: {
+            name: "Lab Technician",
+            designation: "Lab Technician",
+            show: true,
+            signatureImage: "",
+            showSignatureImage: false,
+            ...(base.signatures?.technician || {}),
+          },
+          pathologist: {
+            name: "",
+            designation: "Pathologist",
+            qualification: "",
+            registrationNumber: "",
+            show: true,
+            signatureImage: "",
+            showSignatureImage: false,
+            ...(base.signatures?.pathologist || {}),
+          },
+        },
       };
 
-      const initialTemplate = JSON.parse(JSON.stringify(baseTemplate));
-
-      // Ensure the elements object exists
-      initialTemplate.elements = initialTemplate.elements || {};
-
-      // Merge each element with its schema defaults
+      // Ensure element-level properties retain saved values while providing default fallbacks for missing keys
       Object.keys(DEFAULT_ELEMENT_STYLES).forEach((elementKey) => {
-        initialTemplate.elements[elementKey] = {
+        merged.elements[elementKey] = {
           ...DEFAULT_ELEMENT_STYLES[elementKey],
-          ...(initialTemplate.elements[elementKey] || {}),
+          ...(base.elements?.[elementKey] || {}),
         };
       });
 
-      // Apply page defaults for print margins
-      initialTemplate.page = {
-        ...DEFAULT_PAGE_SETTINGS,
-        ...(initialTemplate.page || {}),
-      };
+      // Preserve barcode settings
+      if (base.elements?.barcode) {
+        merged.elements.barcode = {
+          ...DEFAULT_ELEMENT_STYLES.barcode,
+          ...base.elements.barcode,
+        };
+        if (base.elements.barcode.show !== undefined) {
+          merged.elements.barcode.enabled = base.elements.barcode.show;
+        }
+        if (base.elements.barcode.barcodeType) {
+          merged.elements.barcode.format = base.elements.barcode.barcodeType;
+        }
+      }
 
-      const savedBarcode = baseTemplate.elements?.barcode || {};
-      if (savedBarcode.show !== undefined)
-        initialTemplate.elements.barcode.enabled = savedBarcode.show;
-      if (savedBarcode.barcodeType)
-        initialTemplate.elements.barcode.format = savedBarcode.barcodeType;
-      if (savedBarcode.x === undefined)
-        initialTemplate.elements.barcode.x = 620;
-      if (savedBarcode.y === undefined)
-        initialTemplate.elements.barcode.y = 30;
-
-      setTemplate(initialTemplate);
+      setTemplate(merged);
+      setError(null);
+    } else if (!loading && !savedTemplate) {
+      setTemplate({
+        page: { ...DEFAULT_PAGE_SETTINGS },
+        typography: { baseFont: "Inter, system-ui, sans-serif", lineHeight: "1.5" },
+        elements: JSON.parse(JSON.stringify(DEFAULT_ELEMENT_STYLES)),
+        signatures: {
+          technician: { name: "Lab Technician", designation: "Lab Technician", show: true, signatureImage: "", showSignatureImage: false },
+          pathologist: { name: "", designation: "Pathologist", qualification: "", registrationNumber: "", show: true, signatureImage: "", showSignatureImage: false },
+        },
+      });
       setError(null);
     }
   }, [loading, savedTemplate, contextError]);
@@ -294,11 +300,21 @@ export const PrintTemplateDesigner = () => {
   };
 
   const handleSave = async () => {
-    toast.promise(updateTemplate(template, isSystemAdmin ? selectedLabId : undefined), {
-      loading: "Saving template...",
-      success: "Template saved successfully!",
-      error: "Failed to save template.",
-    });
+    const targetLabId = isSystemAdmin ? (selectedLabId || globalSelectedLabId) : undefined;
+    try {
+      const res = await updateTemplate(template, targetLabId);
+      if (res && (res.data || res.template)) {
+        const updatedData = res.data || res.template;
+        setTemplate((prev) => ({
+          ...prev,
+          ...updatedData,
+        }));
+      }
+      toast.success("Template saved successfully!");
+    } catch (err) {
+      console.error("[PrintTemplateDesigner] Save error:", err);
+      toast.error(err.response?.data?.message || "Failed to save template.");
+    }
   };
 
   const handleReset = async () => {
@@ -307,11 +323,21 @@ export const PrintTemplateDesigner = () => {
         "Are you sure you want to restore the factory default layout? This cannot be undone.",
       )
     ) {
-      toast.promise(resetTemplate(isSystemAdmin ? selectedLabId : undefined), {
-        loading: "Resetting template...",
-        success: "Template reset to default!",
-        error: "Failed to reset template.",
-      });
+      const targetLabId = isSystemAdmin ? (selectedLabId || globalSelectedLabId) : undefined;
+      try {
+        const res = await resetTemplate(targetLabId);
+        if (res && (res.data || res.template)) {
+          const resetData = res.data || res.template;
+          setTemplate((prev) => ({
+            ...prev,
+            ...resetData,
+          }));
+        }
+        toast.success("Template reset to defaults!");
+      } catch (err) {
+        console.error("[PrintTemplateDesigner] Reset error:", err);
+        toast.error("Failed to reset template.");
+      }
     }
   };
 
@@ -337,7 +363,7 @@ export const PrintTemplateDesigner = () => {
     }
   };
 
-  if (loading) return <div className="p-8 text-slate-600 font-medium">Loading template designer...</div>;
+  if (loading || !template) return <div className="p-8 text-slate-600 font-medium">Loading template designer...</div>;
   if (error || contextError)
     return (
       <div className="p-8 flex flex-col items-start space-y-4 max-w-xl bg-white rounded-lg shadow-sm border border-slate-200 m-6">
@@ -430,12 +456,8 @@ export const PrintTemplateDesigner = () => {
   };
 
   const elementOptions = [
-    { value: "patientName", label: "Patient Name" },
     { value: "departmentHeading", label: "Department Heading" },
     { value: "testHeading", label: "Test Heading" },
-    { value: "sectionHeader", label: "Section Header" },
-    { value: "profileName", label: "Profile Name" },
-    { value: "tableHeader", label: "Table Header" },
     { value: "parameter", label: "Parameter" },
     { value: "result", label: "Result" },
     { value: "unit", label: "Normal Range & Unit" },

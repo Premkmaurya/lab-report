@@ -596,10 +596,10 @@ export const InlineTestEditor = ({
                                 {item.value ? (
                                   (() => {
                                     const { isAbnormal, status, formattedValue } = checkAbnormalResult(item.value, item.normalRange, item.isListParameter);
-                                    const symbol = status === 'high' ? '↑ ' : status === 'low' ? '↓ ' : '';
+                                    
                                     return (
                                       <span className={`font-semibold ${isAbnormal ? 'font-bold text-red-600' : ''}`}>
-                                        {isAbnormal ? `${symbol}${formattedValue}` : formattedValue}
+                                        {isAbnormal ? `${formattedValue}` : formattedValue}
                                       </span>
                                     );
                                   })()

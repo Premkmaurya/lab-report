@@ -699,3 +699,12 @@
 {"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-07-25 22:02:12"}
 {"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-07-25 22:02:12"}
 {"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-07-25 22:02:12"}
+{"level":"error","message":"Error invalidating cache pattern *test*: \"arguments[1]\" must be of type \"string | Buffer\", got number instead.","service":"laboratory-management-system","timestamp":"2026-07-26 21:49:11"}
+{"level":"error","message":"Redis Client Error: read ECONNRESET","service":"laboratory-management-system","timestamp":"2026-07-27 11:29:51"}
+{"level":"error","message":"Redis Client Error: Connection timeout","service":"laboratory-management-system","timestamp":"2026-07-27 11:29:56"}
+{"level":"error","message":"Redis Client Error: Connection timeout","service":"laboratory-management-system","timestamp":"2026-07-27 11:30:02"}
+{"level":"error","message":"Redis Client Error: Connection timeout","service":"laboratory-management-system","timestamp":"2026-07-27 11:30:08"}
+{"level":"error","message":"Redis Client Error: Connection timeout","service":"laboratory-management-system","timestamp":"2026-07-27 11:30:14"}
+{"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-07-27 11:30:15"}
+{"level":"error","message":"Redis Client Error: Connection timeout","service":"laboratory-management-system","timestamp":"2026-07-27 11:30:20"}
+{"level":"error","message":"Redis Client Error: Connection timeout","service":"laboratory-management-system","timestamp":"2026-07-27 11:30:26"}

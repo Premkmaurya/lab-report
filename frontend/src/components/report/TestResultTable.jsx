@@ -49,7 +49,6 @@ export const TestResultTable = ({ test, rowSpacing = 4, template }) => {
           }
 
           const { isAbnormal, status, formattedValue } = checkAbnormalResult(res.value, res.normalRange, res.isListParameter);
-          const symbol = status === 'high' ? '↑ ' : status === 'low' ? '↓ ' : '';
 
           return (
             <tr key={index} className="bg-white">
@@ -76,7 +75,7 @@ export const TestResultTable = ({ test, rowSpacing = 4, template }) => {
                   ...resultStyles,
                 }}
               >
-                {isAbnormal ? `${symbol}${formattedValue}` : formattedValue}
+                {isAbnormal ? `${formattedValue}` : formattedValue}
               </td>
               <td
                 className="px-3 text-center text-[#475569]"
@@ -84,6 +83,7 @@ export const TestResultTable = ({ test, rowSpacing = 4, template }) => {
                   paddingTop: `${rowSpacing}px`,
                   paddingBottom: `${rowSpacing}px`,
                   ...unitStyles,
+                  textTransform: 'none',
                 }}
               >
                 {res.unit}

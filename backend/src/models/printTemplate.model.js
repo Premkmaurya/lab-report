@@ -99,16 +99,6 @@ const printTemplateSchema = new mongoose.Schema(
           textDecoration: "underline",
         }),
       },
-      sectionHeader: {
-        type: elementStyleSchema,
-        default: () => ({
-          fontSize: "16px",
-          fontWeight: "700",
-          textAlign: "left",
-          textTransform: "uppercase",
-          textDecoration: "none",
-        }),
-      },
       departmentHeading: {
         type: elementStyleSchema,
         default: () => ({
@@ -140,16 +130,6 @@ const printTemplateSchema = new mongoose.Schema(
         lineColor: { type: String, default: "#000000" },
         background: { type: String, default: "transparent" },
       },
-      tableHeader: {
-        type: elementStyleSchema,
-         default: () => ({
-          fontSize: "16px",
-          fontWeight: "500",
-          textAlign: "center",
-          textTransform: "uppercase",
-          textDecoration: "underline",
-        }),
-      },
       parameter: {
         type: elementStyleSchema,
          default: () => ({
@@ -176,7 +156,7 @@ const printTemplateSchema = new mongoose.Schema(
           fontSize: "14px",
           fontWeight: "400",
           textAlign: "center",
-          textTransform: "capitalize",
+          textTransform: "none",
           textDecoration: "none",
         }),
       },
