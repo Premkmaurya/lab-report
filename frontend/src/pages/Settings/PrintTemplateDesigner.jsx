@@ -104,22 +104,40 @@ export const PrintTemplateDesigner = () => {
   const [error, setError] = useState(null);
   const [retrying, setRetrying] = useState(false);
 
-  // Fetch template on mount or when active laboratory changes
-  useEffect(() => {
-    const targetLabId = isSystemAdmin
-      ? (selectedLabId || globalSelectedLabId || (laboratories[0]?._id || ""))
-      : (user?.laboratoryId || globalSelectedLabId || "");
-
-    if (targetLabId) {
-      fetchTemplate(targetLabId);
-    } else if (!isSystemAdmin) {
-      fetchTemplate();
+  // Resolve the laboratory ID for this designer session.
+  const resolveLabId = () => {
+    if (isSystemAdmin) {
+      return selectedLabId || globalSelectedLabId || (laboratories.length > 0 ? laboratories[0]._id : "");
     }
-  }, [isSystemAdmin, selectedLabId, globalSelectedLabId, laboratories, user]);
+    return user?.laboratoryId || globalSelectedLabId || "";
+  };
+
+  // Fetch template on mount and when the selected laboratory changes.
+  const hasFetchedRef = React.useRef(false);
+  useEffect(() => {
+    const labId = resolveLabId();
+    if (labId) {
+      hasFetchedRef.current = true;
+      fetchTemplate(labId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedLabId]);
+
+  // On first mount, also trigger a fetch (selectedLabId may already be set via useState initializer).
+  useEffect(() => {
+    if (!hasFetchedRef.current) {
+      const labId = resolveLabId();
+      if (labId) {
+        hasFetchedRef.current = true;
+        fetchTemplate(labId);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleLabChange = (newLabId) => {
     setSelectedLabId(newLabId);
-    fetchTemplate(newLabId);
+    // The useEffect watching selectedLabId will fire fetchTemplate.
   };
 
   // Zoom state
@@ -130,10 +148,7 @@ export const PrintTemplateDesigner = () => {
     setRetrying(true);
     setError(null);
     try {
-      const targetLabId = isSystemAdmin
-        ? (selectedLabId || globalSelectedLabId)
-        : (user?.laboratoryId || globalSelectedLabId);
-      await fetchTemplate(targetLabId);
+      await fetchTemplate(resolveLabId());
     } catch (err) {
       console.error("[PrintTemplateDesigner] Retry fetch template failed:", err);
       setError(err.message || "Failed to load template");
@@ -179,76 +194,88 @@ export const PrintTemplateDesigner = () => {
     }));
   };
 
-  // Initialize local form state whenever savedTemplate is loaded or updated
+  /**
+   * Build the local template state from a saved (DB) template.
+   * 
+   * The saved template from the database is the single source of truth.
+   * Default values are used ONLY to fill in keys that the DB document
+   * does not contain (e.g. a newly added setting that older documents lack).
+   */
+  const buildTemplateFromSaved = (saved) => {
+    // Deep-clone so we never mutate the context's state.
+    const base = JSON.parse(JSON.stringify(saved));
+
+    // Page: DB values take priority; defaults fill gaps.
+    const page = {
+      ...DEFAULT_PAGE_SETTINGS,
+      ...(base.page || {}),
+    };
+
+    // Typography: DB values take priority.
+    const typography = {
+      baseFont: "Times New Roman, serif",
+      lineHeight: "1.5",
+      ...(base.typography || {}),
+    };
+
+    // Elements: For each element key, merge defaults first, then DB values on top.
+    const elements = {};
+    const allElementKeys = new Set([
+      ...Object.keys(DEFAULT_ELEMENT_STYLES),
+      ...Object.keys(base.elements || {}),
+    ]);
+    allElementKeys.forEach((key) => {
+      elements[key] = {
+        ...(DEFAULT_ELEMENT_STYLES[key] || {}),
+        ...(base.elements?.[key] || {}),
+      };
+    });
+
+    // Handle legacy barcode field names.
+    if (base.elements?.barcode) {
+      if (base.elements.barcode.show !== undefined && base.elements.barcode.enabled === undefined) {
+        elements.barcode.enabled = base.elements.barcode.show;
+      }
+      if (base.elements.barcode.barcodeType && !base.elements.barcode.format) {
+        elements.barcode.format = base.elements.barcode.barcodeType;
+      }
+    }
+
+    // Signatures: DB values take priority.
+    const signatures = {
+      technician: {
+        name: "Lab Technician",
+        designation: "Lab Technician",
+        show: true,
+        signatureImage: "",
+        showSignatureImage: false,
+        ...(base.signatures?.technician || {}),
+      },
+      pathologist: {
+        name: "",
+        designation: "Pathologist",
+        qualification: "",
+        registrationNumber: "",
+        show: true,
+        signatureImage: "",
+        showSignatureImage: false,
+        ...(base.signatures?.pathologist || {}),
+      },
+    };
+
+    return { ...base, page, typography, elements, signatures };
+  };
+
+  // Initialize local form state whenever savedTemplate changes (after fetch completes).
   useEffect(() => {
     if (!loading && savedTemplate) {
-      const base = JSON.parse(JSON.stringify(savedTemplate));
-
-      const merged = {
-        ...base,
-        page: {
-          ...DEFAULT_PAGE_SETTINGS,
-          ...(base.page || {}),
-        },
-        typography: {
-          baseFont: "Inter, system-ui, sans-serif",
-          lineHeight: "1.5",
-          ...(base.typography || {}),
-        },
-        elements: {
-          ...JSON.parse(JSON.stringify(DEFAULT_ELEMENT_STYLES)),
-          ...(base.elements || {}),
-        },
-        signatures: {
-          technician: {
-            name: "Lab Technician",
-            designation: "Lab Technician",
-            show: true,
-            signatureImage: "",
-            showSignatureImage: false,
-            ...(base.signatures?.technician || {}),
-          },
-          pathologist: {
-            name: "",
-            designation: "Pathologist",
-            qualification: "",
-            registrationNumber: "",
-            show: true,
-            signatureImage: "",
-            showSignatureImage: false,
-            ...(base.signatures?.pathologist || {}),
-          },
-        },
-      };
-
-      // Ensure element-level properties retain saved values while providing default fallbacks for missing keys
-      Object.keys(DEFAULT_ELEMENT_STYLES).forEach((elementKey) => {
-        merged.elements[elementKey] = {
-          ...DEFAULT_ELEMENT_STYLES[elementKey],
-          ...(base.elements?.[elementKey] || {}),
-        };
-      });
-
-      // Preserve barcode settings
-      if (base.elements?.barcode) {
-        merged.elements.barcode = {
-          ...DEFAULT_ELEMENT_STYLES.barcode,
-          ...base.elements.barcode,
-        };
-        if (base.elements.barcode.show !== undefined) {
-          merged.elements.barcode.enabled = base.elements.barcode.show;
-        }
-        if (base.elements.barcode.barcodeType) {
-          merged.elements.barcode.format = base.elements.barcode.barcodeType;
-        }
-      }
-
-      setTemplate(merged);
+      setTemplate(buildTemplateFromSaved(savedTemplate));
       setError(null);
     } else if (!loading && !savedTemplate) {
+      // No template in DB yet — use pure defaults (first-time setup).
       setTemplate({
         page: { ...DEFAULT_PAGE_SETTINGS },
-        typography: { baseFont: "Inter, system-ui, sans-serif", lineHeight: "1.5" },
+        typography: { baseFont: "Times New Roman, serif", lineHeight: "1.5" },
         elements: JSON.parse(JSON.stringify(DEFAULT_ELEMENT_STYLES)),
         signatures: {
           technician: { name: "Lab Technician", designation: "Lab Technician", show: true, signatureImage: "", showSignatureImage: false },
@@ -257,7 +284,8 @@ export const PrintTemplateDesigner = () => {
       });
       setError(null);
     }
-  }, [loading, savedTemplate, contextError]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, savedTemplate]);
 
   const handlePageChange = (field, value) => {
     setTemplate((prev) => ({
@@ -300,16 +328,11 @@ export const PrintTemplateDesigner = () => {
   };
 
   const handleSave = async () => {
-    const targetLabId = isSystemAdmin ? (selectedLabId || globalSelectedLabId) : undefined;
+    const targetLabId = isSystemAdmin ? resolveLabId() : undefined;
     try {
-      const res = await updateTemplate(template, targetLabId);
-      if (res && (res.data || res.template)) {
-        const updatedData = res.data || res.template;
-        setTemplate((prev) => ({
-          ...prev,
-          ...updatedData,
-        }));
-      }
+      await updateTemplate(template, targetLabId);
+      // The context's updateTemplate already updates savedTemplate,
+      // which triggers the init useEffect to rebuild local state.
       toast.success("Template saved successfully!");
     } catch (err) {
       console.error("[PrintTemplateDesigner] Save error:", err);
@@ -323,16 +346,11 @@ export const PrintTemplateDesigner = () => {
         "Are you sure you want to restore the factory default layout? This cannot be undone.",
       )
     ) {
-      const targetLabId = isSystemAdmin ? (selectedLabId || globalSelectedLabId) : undefined;
+      const targetLabId = isSystemAdmin ? resolveLabId() : undefined;
       try {
-        const res = await resetTemplate(targetLabId);
-        if (res && (res.data || res.template)) {
-          const resetData = res.data || res.template;
-          setTemplate((prev) => ({
-            ...prev,
-            ...resetData,
-          }));
-        }
+        await resetTemplate(targetLabId);
+        // The context's resetTemplate already updates savedTemplate,
+        // which triggers the init useEffect to rebuild local state.
         toast.success("Template reset to defaults!");
       } catch (err) {
         console.error("[PrintTemplateDesigner] Reset error:", err);
