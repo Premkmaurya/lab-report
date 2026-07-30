@@ -52,6 +52,17 @@ export const PatientDetails = () => {
     setShowWarningModal(false);
     setSelectedReportForPrint(null);
 
+    // Record print action on backend
+    if (report && report._id) {
+      reportService.recordReportPrint(report._id).then((res) => {
+        if (res?.patientTest) {
+          setReports((prev) =>
+            prev.map((r) => (r._id === res.patientTest._id ? res.patientTest : r))
+          );
+        }
+      }).catch(() => {});
+    }
+
     // openPrintWindow() MUST be called here (synchronously within the user-gesture
     // chain) so the browser does not classify it as a popup and block it.
     const win = openPrintWindow();
@@ -314,8 +325,13 @@ export const PatientDetails = () => {
                           <button
                             onClick={() => triggerPrintRequest(report)}
                             className="text-xs font-semibold text-electric-cobalt hover:underline flex items-center space-x-1"
+                            title={
+                              report.hasBeenPrinted && report.firstPrintedAt
+                                ? `Previously printed on ${formatDateTime(report.firstPrintedAt)} by ${report.firstPrintedBy?.username || report.firstPrintedBy?.email || report.firstPrintedBy || 'User'}`
+                                : undefined
+                            }
                           >
-                            <span>Print Report</span>
+                            <span>{report.hasBeenPrinted ? "Reprint Report" : "Print Report"}</span>
                             <Printer className="h-3 w-3" />
                           </button>
                         )}

@@ -17,7 +17,7 @@ import { PrintOrchestrator } from "../../components/print/PrintOrchestrator";
 import { PrintWarningModal } from "../../components/report/PrintWarningModal";
 import { toast } from "../../lib/toast";
 
-import { useGetReportsQuery } from "../../services/reportApi";
+import { useGetReportsQuery, useRecordReportPrintMutation } from "../../services/reportApi";
 
 export const PatientList = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -29,6 +29,8 @@ export const PatientList = () => {
   const [selectedReportForPrint, setSelectedReportForPrint] = useState(null);
   const { user } = useAuth();
   const navigate = useNavigate();
+
+  const [recordPrintMutation] = useRecordReportPrintMutation();
 
   // Holds the dedicated print window opened synchronously in executePrint().
   const printWindowRef = useRef(null);
@@ -47,6 +49,11 @@ export const PatientList = () => {
   const executePrint = (report) => {
     setShowWarningModal(false);
     setSelectedReportForPrint(null);
+
+    // Record print action on backend
+    if (report && report._id) {
+      recordPrintMutation(report._id).catch(() => {});
+    }
 
     // Must be called synchronously (user-gesture chain) to avoid popup blocking.
     const win = openPrintWindow();
@@ -283,9 +290,14 @@ export const PatientList = () => {
                                     triggerPrintRequest(e, report)
                                   }
                                   className="inline-flex items-center space-x-1 border border-electric-cobalt text-electric-cobalt bg-paper-white hover:bg-lavender-mist/40 px-3 py-1.5 rounded-buttons text-xs transition duration-200 cursor-pointer"
+                                  title={
+                                    report.hasBeenPrinted && report.firstPrintedAt
+                                      ? `Previously printed on ${formatDateTime(report.firstPrintedAt)} by ${report.firstPrintedBy?.username || report.firstPrintedBy?.email || report.firstPrintedBy || 'User'}`
+                                      : undefined
+                                  }
                                 >
                                   <Printer className="h-3.5 w-3.5" />
-                                  <span>Print</span>
+                                  <span>{report.hasBeenPrinted ? "Reprint Report" : "Print Report"}</span>
                                 </button>
                               )}
                               <Link

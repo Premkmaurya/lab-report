@@ -10,6 +10,7 @@ const {
   deletePatientTest,
   addTestToReport,
   getReportAndTestTemplate,
+  recordPrint,
 } = require("../controllers/patientTest.controller");
 const authMiddleware = require("../middlewares/auth.middleware");
 const {
@@ -94,6 +95,15 @@ router.patch(
   validateRequest,
   auditMiddleware("UPDATED", "Report"),
   addTestToReport
+);
+
+// Record report print
+router.post(
+  "/:id/print",
+  validateGetPatientTestById,
+  validateRequest,
+  auditMiddleware("PRINTED", "Report"),
+  recordPrint
 );
 
 module.exports = router;

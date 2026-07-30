@@ -79,6 +79,19 @@ const patientTestSchema = new mongoose.Schema(
       type: Date,
       default: Date.now,
     },
+    hasBeenPrinted: {
+      type: Boolean,
+      default: false,
+    },
+    firstPrintedAt: {
+      type: Date,
+      default: null,
+    },
+    firstPrintedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
   },
   {
     timestamps: true,

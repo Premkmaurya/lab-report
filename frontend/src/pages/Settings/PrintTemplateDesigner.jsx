@@ -10,7 +10,18 @@ import { toast } from "../../lib/toast";
 
 // Default element styles derived from backend schema
 const DEFAULT_ELEMENT_STYLES = {
-   testHeading: {
+  patientHeader: {
+    fontSize: "14px",
+    color: "#0F172A",
+    letterSpacing: "0px",
+    textTransform: "none",
+    textAlign: "left",
+    labelFontWeight: "600",
+    labelColor: "#000000",
+    valueFontWeight: "400",
+    valueColor: "#0F172A",
+  },
+  testHeading: {
     fontSize: "18px",
     fontWeight: "600",
     textAlign: "left",
@@ -100,7 +111,7 @@ export const PrintTemplateDesigner = () => {
 
   const [template, setTemplate] = useState(null);
   const [activeTab, setActiveTab] = useState("page"); // page, typography, elements, footer
-  const [selectedElement, setSelectedElement] = useState("departmentHeading"); // departmentHeading, testHeading, sectionHeader, tableHeader, parameter, result, unit, footer
+  const [selectedElement, setSelectedElement] = useState("patientHeader"); // patientHeader, departmentHeading, testHeading, sectionHeader, tableHeader, parameter, result, unit, footer
   const [error, setError] = useState(null);
   const [retrying, setRetrying] = useState(false);
 
@@ -474,6 +485,7 @@ export const PrintTemplateDesigner = () => {
   };
 
   const elementOptions = [
+    { value: "patientHeader", label: "Patient Information Header" },
     { value: "departmentHeading", label: "Department Heading" },
     { value: "testHeading", label: "Test Heading" },
     { value: "parameter", label: "Parameter" },
@@ -688,104 +700,274 @@ export const PrintTemplateDesigner = () => {
               </div>
 
               <div className="p-4 bg-slate-50 border border-slate-200 rounded space-y-4 mt-4">
-                <>
-                  <div>
-                    <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
-                      Font Size
-                    </label>
-                    <input
-                      type="text"
-                      className="w-full text-sm border-slate-300 rounded"
-                      value={getElementValue("fontSize")}
-                      onChange={(e) =>
-                        handleElementChange("fontSize", e.target.value)
-                      }
-                      placeholder="e.g. 14px"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
-                      Font Weight
-                    </label>
-                    <select
-                      className="w-full text-sm border-slate-300 rounded"
-                      value={getElementValue("fontWeight")}
-                      onChange={(e) =>
-                        handleElementChange("fontWeight", e.target.value)
-                      }
-                    >
-                      <option value="">Inherit</option>
-                      <option value="400">Normal (400)</option>
-                      <option value="500">Medium (500)</option>
-                      <option value="600">Semibold (600)</option>
-                      <option value="700">Bold (700)</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
-                      Text Color
-                    </label>
-                    <input
-                      type="text"
-                      className="w-full text-sm border-slate-300 rounded"
-                      value={getElementValue("color")}
-                      onChange={(e) =>
-                        handleElementChange("color", e.target.value)
-                      }
-                      placeholder="e.g. #0F172A"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
-                      Text Alignment
-                    </label>
-                    <select
-                      className="w-full text-sm border-slate-300 rounded"
-                      value={getElementValue("textAlign")}
-                      onChange={(e) =>
-                        handleElementChange("textAlign", e.target.value)
-                      }
-                    >
-                      <option value="">Inherit</option>
-                      <option value="left">Left</option>
-                      <option value="center">Center</option>
-                      <option value="right">Right</option>
-                    </select>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
+                {selectedElement === "patientHeader" ? (
+                  <>
+                    <div className="text-xs font-bold text-electric-cobalt uppercase tracking-wider mb-1 border-b border-slate-200 pb-2">
+                      Patient Header Shared Styles
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-3">
+                      <div>
+                        <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
+                          Font Size
+                        </label>
+                        <input
+                          type="text"
+                          className="w-full text-sm border-slate-300 rounded"
+                          value={getElementValue("fontSize", "patientHeader")}
+                          onChange={(e) =>
+                            handleElementChange("fontSize", e.target.value, "patientHeader")
+                          }
+                          placeholder="e.g. 14px"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
+                          Font Color
+                        </label>
+                        <input
+                          type="text"
+                          className="w-full text-sm border-slate-300 rounded"
+                          value={getElementValue("color", "patientHeader")}
+                          onChange={(e) =>
+                            handleElementChange("color", e.target.value, "patientHeader")
+                          }
+                          placeholder="e.g. #0F172A"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
+                          Letter Spacing
+                        </label>
+                        <input
+                          type="text"
+                          className="w-full text-sm border-slate-300 rounded"
+                          value={getElementValue("letterSpacing", "patientHeader")}
+                          onChange={(e) =>
+                            handleElementChange("letterSpacing", e.target.value, "patientHeader")
+                          }
+                          placeholder="e.g. 0px"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
+                          Text Transform
+                        </label>
+                        <select
+                          className="w-full text-sm border-slate-300 rounded"
+                          value={getElementValue("textTransform", "patientHeader")}
+                          onChange={(e) =>
+                            handleElementChange("textTransform", e.target.value, "patientHeader")
+                          }
+                        >
+                          <option value="none">None</option>
+                          <option value="uppercase">Uppercase</option>
+                          <option value="capitalize">Capitalize</option>
+                          <option value="lowercase">Lowercase</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
+                          Alignment
+                        </label>
+                        <select
+                          className="w-full text-sm border-slate-300 rounded"
+                          value={getElementValue("textAlign", "patientHeader")}
+                          onChange={(e) =>
+                            handleElementChange("textAlign", e.target.value, "patientHeader")
+                          }
+                        >
+                          <option value="left">Left</option>
+                          <option value="center">Center</option>
+                          <option value="right">Right</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="border-t border-slate-200 pt-3">
+                      <div className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                        Label Styles (e.g. Patient Name:)
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
+                            Label Font Weight
+                          </label>
+                          <select
+                            className="w-full text-sm border-slate-300 rounded"
+                            value={getElementValue("labelFontWeight", "patientHeader")}
+                            onChange={(e) =>
+                              handleElementChange("labelFontWeight", e.target.value, "patientHeader")
+                            }
+                          >
+                            <option value="600">Semibold (600)</option>
+                            <option value="400">Normal (400)</option>
+                            <option value="500">Medium (500)</option>
+                            <option value="700">Bold (700)</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
+                            Label Color
+                          </label>
+                          <input
+                            type="text"
+                            className="w-full text-sm border-slate-300 rounded"
+                            value={getElementValue("labelColor", "patientHeader")}
+                            onChange={(e) =>
+                              handleElementChange("labelColor", e.target.value, "patientHeader")
+                            }
+                            placeholder="e.g. #000000"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="border-t border-slate-200 pt-3">
+                      <div className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                        Value Styles (e.g. Mr. John Doe)
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
+                            Value Font Weight
+                          </label>
+                          <select
+                            className="w-full text-sm border-slate-300 rounded"
+                            value={getElementValue("valueFontWeight", "patientHeader")}
+                            onChange={(e) =>
+                              handleElementChange("valueFontWeight", e.target.value, "patientHeader")
+                            }
+                          >
+                            <option value="400">Normal (400)</option>
+                            <option value="500">Medium (500)</option>
+                            <option value="600">Semibold (600)</option>
+                            <option value="700">Bold (700)</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
+                            Value Color
+                          </label>
+                          <input
+                            type="text"
+                            className="w-full text-sm border-slate-300 rounded"
+                            value={getElementValue("valueColor", "patientHeader")}
+                            onChange={(e) =>
+                              handleElementChange("valueColor", e.target.value, "patientHeader")
+                            }
+                            placeholder="e.g. #0F172A"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <>
                     <div>
                       <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
-                        Transform
+                        Font Size
+                      </label>
+                      <input
+                        type="text"
+                        className="w-full text-sm border-slate-300 rounded"
+                        value={getElementValue("fontSize")}
+                        onChange={(e) =>
+                          handleElementChange("fontSize", e.target.value)
+                        }
+                        placeholder="e.g. 14px"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
+                        Font Weight
                       </label>
                       <select
                         className="w-full text-sm border-slate-300 rounded"
-                        value={getElementValue("textTransform")}
+                        value={getElementValue("fontWeight")}
                         onChange={(e) =>
-                          handleElementChange("textTransform", e.target.value)
+                          handleElementChange("fontWeight", e.target.value)
                         }
                       >
-                        <option value="">None</option>
-                        <option value="uppercase">Uppercase</option>
-                        <option value="capitalize">Capitalize</option>
+                        <option value="">Inherit</option>
+                        <option value="400">Normal (400)</option>
+                        <option value="500">Medium (500)</option>
+                        <option value="600">Semibold (600)</option>
+                        <option value="700">Bold (700)</option>
                       </select>
                     </div>
                     <div>
                       <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
-                        Decoration
+                        Text Color
+                      </label>
+                      <input
+                        type="text"
+                        className="w-full text-sm border-slate-300 rounded"
+                        value={getElementValue("color")}
+                        onChange={(e) =>
+                          handleElementChange("color", e.target.value)
+                        }
+                        placeholder="e.g. #0F172A"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
+                        Text Alignment
                       </label>
                       <select
                         className="w-full text-sm border-slate-300 rounded"
-                        value={getElementValue("textDecoration")}
+                        value={getElementValue("textAlign")}
                         onChange={(e) =>
-                          handleElementChange("textDecoration", e.target.value)
+                          handleElementChange("textAlign", e.target.value)
                         }
                       >
-                        <option value="">None</option>
-                        <option value="underline">Underline</option>
+                        <option value="">Inherit</option>
+                        <option value="left">Left</option>
+                        <option value="center">Center</option>
+                        <option value="right">Right</option>
                       </select>
                     </div>
-                  </div>
-                </>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
+                          Transform
+                        </label>
+                        <select
+                          className="w-full text-sm border-slate-300 rounded"
+                          value={getElementValue("textTransform")}
+                          onChange={(e) =>
+                            handleElementChange("textTransform", e.target.value)
+                          }
+                        >
+                          <option value="">None</option>
+                          <option value="uppercase">Uppercase</option>
+                          <option value="capitalize">Capitalize</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
+                          Decoration
+                        </label>
+                        <select
+                          className="w-full text-sm border-slate-300 rounded"
+                          value={getElementValue("textDecoration")}
+                          onChange={(e) =>
+                            handleElementChange("textDecoration", e.target.value)
+                          }
+                        >
+                          <option value="">None</option>
+                          <option value="underline">Underline</option>
+                        </select>
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           )}

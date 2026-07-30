@@ -107,6 +107,7 @@ const getPatientTests = asyncHandler(async (req, res) => {
   const patientTests = await PatientTest.find(query)
     .populate("patientId")
     .populate("createdBy", "username email")
+    .populate("firstPrintedBy", "username email")
     .populate({
       path: "tests.testId",
       populate: {
@@ -133,6 +134,7 @@ const getPatientTestById = asyncHandler(async (req, res) => {
   const patientTest = await PatientTest.findOne(query)
     .populate("patientId")
     .populate("createdBy", "username email")
+    .populate("firstPrintedBy", "username email")
     .populate({
       path: "tests.testId",
       populate: {
@@ -162,6 +164,7 @@ const getTestsByPatientId = asyncHandler(async (req, res) => {
   const patientTests = await PatientTest.find(query)
     .populate("patientId")
     .populate("createdBy", "username email")
+    .populate("firstPrintedBy", "username email")
     .populate({
       path: "tests.testId",
       populate: {
@@ -401,6 +404,43 @@ const addTestToReport = asyncHandler(async (req, res) => {
   });
 });
 
+const recordPrint = asyncHandler(async (req, res) => {
+  const query = { _id: req.params.id, ...req.tenantFilter };
+  const patientTest = await PatientTest.findOne(query);
+
+  if (!patientTest) {
+    throw new NotFoundError("Patient test not found");
+  }
+
+  if (!patientTest.hasBeenPrinted) {
+    patientTest.hasBeenPrinted = true;
+    patientTest.firstPrintedAt = new Date();
+    patientTest.firstPrintedBy = req.user._id;
+    await patientTest.save();
+  }
+
+  const updatedTest = await PatientTest.findById(patientTest._id)
+    .populate("patientId")
+    .populate("createdBy", "username email")
+    .populate("firstPrintedBy", "username email")
+    .populate({
+      path: "tests.testId",
+      populate: {
+        path: "departmentId",
+        select: "name",
+      },
+    });
+
+  const reportObj = updatedTest.toObject();
+  reportObj.totalPrice = computeTotalPrice(reportObj);
+
+  res.status(200).json({
+    success: true,
+    message: "Report print status recorded successfully",
+    patientTest: reportObj,
+  });
+});
+
 module.exports = {
   getPatientTests,
   getPatientTestById,
@@ -410,4 +450,5 @@ module.exports = {
   deletePatientTest,
   addTestToReport,
   getReportAndTestTemplate,
+  recordPrint,
 };

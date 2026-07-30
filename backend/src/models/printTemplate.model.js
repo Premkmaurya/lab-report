@@ -35,8 +35,28 @@ const elementStyleSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    letterSpacing: {
+      type: String,
+      default: "",
+    },
+    labelFontWeight: {
+      type: String,
+      default: "",
+    },
+    labelColor: {
+      type: String,
+      default: "",
+    },
+    valueFontWeight: {
+      type: String,
+      default: "",
+    },
+    valueColor: {
+      type: String,
+      default: "",
+    },
   },
-  { _id: false },
+  { _id: false, strict: false },
 );
 
 const printTemplateSchema = new mongoose.Schema(
@@ -89,6 +109,20 @@ const printTemplateSchema = new mongoose.Schema(
       },
     },
     elements: {
+      patientHeader: {
+        type: elementStyleSchema,
+        default: () => ({
+          fontSize: "14px",
+          color: "#0F172A",
+          letterSpacing: "0px",
+          textTransform: "none",
+          textAlign: "left",
+          labelFontWeight: "600",
+          labelColor: "#000000",
+          valueFontWeight: "400",
+          valueColor: "#0F172A",
+        }),
+      },
       testHeading: {
         type: elementStyleSchema,
         default: () => ({

@@ -45,6 +45,11 @@ export const reportService = {
     const response = await API.patch(`/patient-tests/${id}/add-test`, testData);
     return response.data;
   },
+
+  recordReportPrint: async (id) => {
+    const response = await API.post(`/patient-tests/${id}/print`);
+    return response.data;
+  },
 };
 
 export default reportService;

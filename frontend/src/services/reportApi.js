@@ -82,6 +82,17 @@ export const reportApi = apiSlice.injectEndpoints({
         { type: 'Report', id: 'LIST' },
       ],
     }),
+
+    recordReportPrint: builder.mutation({
+      query: (id) => ({
+        url: `/patient-tests/${id}/print`,
+        method: 'POST',
+      }),
+      invalidatesTags: (result, error, id) => [
+        { type: 'Report', id },
+        { type: 'Report', id: 'LIST' },
+      ],
+    }),
   }),
 });
 
@@ -94,4 +105,5 @@ export const {
   useUpdateReportMutation,
   useDeleteReportMutation,
   useAddTestToReportMutation,
+  useRecordReportPrintMutation,
 } = reportApi;
