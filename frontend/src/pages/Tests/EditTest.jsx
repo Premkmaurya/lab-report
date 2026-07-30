@@ -66,6 +66,70 @@ const ParameterSelect = ({ index, field, watch, setValue, register, errors, disa
   );
 };
 
+const FormulaOperand = ({ index, side, watch, setValue, register, errors, disabled }) => {
+  const typeField = `subTests.${index}.formula.${side}Type`;
+  const constantField = `subTests.${index}.formula.${side}Constant`;
+  const paramField = `subTests.${index}.formula.${side}ParameterId`;
+  const operandType = watch(typeField) || "parameter";
+
+  return (
+    <div className="flex-1 flex flex-col space-y-1">
+      <div className="flex rounded-inputs overflow-hidden border border-cream-border">
+        <button
+          type="button"
+          disabled={disabled}
+          className={`px-2 py-1 text-[11px] font-semibold transition-colors ${operandType === "parameter" ? "bg-electric-cobalt text-white" : "bg-white text-stone hover:bg-warm-canvas"} ${disabled ? "opacity-60 cursor-not-allowed" : ""}`}
+          onClick={() => {
+            setValue(typeField, "parameter", { shouldValidate: true });
+            setValue(constantField, "", { shouldValidate: true });
+          }}
+        >
+          Param
+        </button>
+        <button
+          type="button"
+          disabled={disabled}
+          className={`px-2 py-1 text-[11px] font-semibold border-l border-cream-border transition-colors ${operandType === "constant" ? "bg-electric-cobalt text-white" : "bg-white text-stone hover:bg-warm-canvas"} ${disabled ? "opacity-60 cursor-not-allowed" : ""}`}
+          onClick={() => {
+            setValue(typeField, "constant", { shouldValidate: true });
+            setValue(paramField, "", { shouldValidate: true });
+          }}
+        >
+          Number
+        </button>
+      </div>
+      <input type="hidden" {...register(typeField)} />
+      {operandType === "constant" ? (
+        <input
+          type="number"
+          step="any"
+          disabled={disabled}
+          placeholder="Enter number"
+          className={`w-full text-sm border border-cream-border rounded-inputs px-2 py-2 focus:outline-none focus:border-electric-cobalt ${errors?.subTests?.[index]?.formula?.[`${side}Constant`] ? "border-red-500" : ""} ${disabled ? "bg-transparent text-stone border-transparent" : ""}`}
+          {...register(constantField, {
+            validate: (val) => {
+              if (operandType !== "constant") return true;
+              if (val === "" || val === undefined || val === null) return "Required";
+              if (isNaN(Number(val))) return "Must be a valid number";
+              return true;
+            },
+          })}
+        />
+      ) : (
+        <ParameterSelect
+          index={index}
+          field={`${side}ParameterId`}
+          watch={watch}
+          setValue={setValue}
+          register={register}
+          errors={errors}
+          disabled={disabled}
+        />
+      )}
+    </div>
+  );
+};
+
 export const EditTest = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -157,7 +221,7 @@ export const EditTest = () => {
           inputRefs.current[index]?.[fieldsOrder[fieldIndex + 1]]?.focus();
         } else {
           if (index === fields.length - 1 && isRowComplete(currentValues[index])) {
-            append({ _id: generateObjectId(), name: "", type: "parameter", price: "", unit: "", normalRange: "", isListParameter: false, allowedValues: [], isCalculated: false, isTextBlock: false, formula: { leftParameterId: "", operator: "+", rightParameterId: "" }, textBlockSettings: { defaultText: "" } });
+            append({ _id: generateObjectId(), name: "", type: "parameter", price: "", unit: "", normalRange: "", isListParameter: false, allowedValues: [], isCalculated: false, isTextBlock: false, formula: { leftParameterId: "", leftType: "parameter", leftConstant: "", operator: "+", rightParameterId: "", rightType: "parameter", rightConstant: "" }, textBlockSettings: { defaultText: "" } });
             setTimeout(() => {
               inputRefs.current[index + 1]?.name?.focus();
             }, 0);
@@ -224,7 +288,7 @@ export const EditTest = () => {
         const isSection = currentValues[index]?.type === "section";
         if ((fieldName === "normalRange" || (isSection && fieldName === "name")) && isRowComplete(currentValues[index])) {
           if (isRowComplete(currentValues[currentValues.length - 1])) {
-            append({ _id: generateObjectId(), name: "", type: "parameter", price: "", unit: "", normalRange: "", isListParameter: false, allowedValues: [], isCalculated: false, isTextBlock: false, formula: { leftParameterId: "", operator: "+", rightParameterId: "" }, textBlockSettings: { defaultText: "" } });
+            append({ _id: generateObjectId(), name: "", type: "parameter", price: "", unit: "", normalRange: "", isListParameter: false, allowedValues: [], isCalculated: false, isTextBlock: false, formula: { leftParameterId: "", leftType: "parameter", leftConstant: "", operator: "+", rightParameterId: "", rightType: "parameter", rightConstant: "" }, textBlockSettings: { defaultText: "" } });
           }
         }
       }, 100);
@@ -303,7 +367,7 @@ export const EditTest = () => {
             };
           });
           if (!isReadOnly && (tests.length === 0 || !isEmptyRow(tests[tests.length - 1]))) {
-             tests = [...tests, { _id: generateObjectId(), name: "", type: "parameter", price: "", unit: "", normalRange: "", isListParameter: false, allowedValues: [], isCalculated: false, isTextBlock: false, formula: { leftParameterId: "", operator: "+", rightParameterId: "" }, textBlockSettings: { defaultText: "" } }];
+             tests = [...tests, { _id: generateObjectId(), name: "", type: "parameter", price: "", unit: "", normalRange: "", isListParameter: false, allowedValues: [], isCalculated: false, isTextBlock: false, formula: { leftParameterId: "", leftType: "parameter", leftConstant: "", operator: "+", rightParameterId: "", rightType: "parameter", rightConstant: "" }, textBlockSettings: { defaultText: "" } }];
           }
 
           const targetDeptId = t.departmentId?._id || t.departmentId || "";
@@ -645,7 +709,7 @@ export const EditTest = () => {
                                       }
                                       const currentValues = getValues("subTests");
                                       if (index === currentValues.length - 1 && isRowComplete(currentValues[index])) {
-                                        append({ _id: generateObjectId(), name: "", type: "parameter", price: "", unit: "", normalRange: "", isListParameter: false, allowedValues: [], isCalculated: false, isTextBlock: false, formula: { leftParameterId: "", operator: "+", rightParameterId: "" }, textBlockSettings: { defaultText: "" } });
+                                        append({ _id: generateObjectId(), name: "", type: "parameter", price: "", unit: "", normalRange: "", isListParameter: false, allowedValues: [], isCalculated: false, isTextBlock: false, formula: { leftParameterId: "", leftType: "parameter", leftConstant: "", operator: "+", rightParameterId: "", rightType: "parameter", rightConstant: "" }, textBlockSettings: { defaultText: "" } });
                                         setTimeout(() => {
                                           inputRefs.current[index + 1]?.name?.focus();
                                         }, 0);
@@ -777,7 +841,7 @@ export const EditTest = () => {
                                     remove(index);
                                     const currentValues = watch("subTests");
                                     if (currentValues.length <= 1 && !isReadOnly) {
-                                      append({ _id: generateObjectId(), name: "", type: "parameter", price: "", unit: "", normalRange: "", isListParameter: false, allowedValues: [], isCalculated: false, isTextBlock: false, formula: { leftParameterId: "", operator: "+", rightParameterId: "" }, textBlockSettings: { defaultText: "" } });
+                                      append({ _id: generateObjectId(), name: "", type: "parameter", price: "", unit: "", normalRange: "", isListParameter: false, allowedValues: [], isCalculated: false, isTextBlock: false, formula: { leftParameterId: "", leftType: "parameter", leftConstant: "", operator: "+", rightParameterId: "", rightType: "parameter", rightConstant: "" }, textBlockSettings: { defaultText: "" } });
                                     }
                                   }}
                                   className="text-red-600 hover:text-red-800 p-2 rounded-full hover:bg-red-50 transition-colors"
@@ -842,14 +906,14 @@ export const EditTest = () => {
                             <td colSpan={isReadOnly ? "4" : "5"} className="px-4 py-4">
                               <div className="flex flex-col max-w-2xl pl-4 border-l-2 border-electric-cobalt">
                                 <span className="text-xs font-bold text-charcoal uppercase mb-2">Formula Builder</span>
-                                <div className="flex items-center space-x-4 mb-2">
-                                  <ParameterSelect 
-                                    index={index} 
-                                    field="leftParameterId" 
-                                    watch={watch} 
-                                    setValue={setValue} 
-                                    register={register} 
-                                    errors={errors} 
+                                <div className="flex items-end space-x-4 mb-2">
+                                  <FormulaOperand
+                                    index={index}
+                                    side="left"
+                                    watch={watch}
+                                    setValue={setValue}
+                                    register={register}
+                                    errors={errors}
                                     disabled={isReadOnly}
                                   />
 
@@ -864,18 +928,18 @@ export const EditTest = () => {
                                     <option value="/">/</option>
                                   </select>
 
-                                  <ParameterSelect 
-                                    index={index} 
-                                    field="rightParameterId" 
-                                    watch={watch} 
-                                    setValue={setValue} 
-                                    register={register} 
-                                    errors={errors} 
+                                  <FormulaOperand
+                                    index={index}
+                                    side="right"
+                                    watch={watch}
+                                    setValue={setValue}
+                                    register={register}
+                                    errors={errors}
                                     disabled={isReadOnly}
                                   />
                                 </div>
-                                {!isReadOnly && (errors?.subTests?.[index]?.formula?.leftParameterId || errors?.subTests?.[index]?.formula?.rightParameterId) && (
-                                  <p className="text-xs text-red-500 mt-1">Please select both parameters to calculate.</p>
+                                {!isReadOnly && (errors?.subTests?.[index]?.formula?.leftParameterId || errors?.subTests?.[index]?.formula?.rightParameterId || errors?.subTests?.[index]?.formula?.leftConstant || errors?.subTests?.[index]?.formula?.rightConstant) && (
+                                  <p className="text-xs text-red-500 mt-1">Please provide valid operands for the formula.</p>
                                 )}
                               </div>
                             </td>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { reportService } from "../../services/reportService";
 import { Save, ShieldAlert, ChevronDown, ChevronRight, Edit2 } from "lucide-react";
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm, useFieldArray, useWatch } from "react-hook-form";
 import { checkAbnormalResult } from "../../utils/resultUtils";
 
 export const InlineTestEditor = ({
@@ -22,50 +22,133 @@ export const InlineTestEditor = ({
   const inputRefs = useRef([]);
   const saveButtonRef = useRef(null);
 
-  const { register, handleSubmit, control, reset, setValue, getValues, formState: { isDirty } } = useForm({
+  const { register, handleSubmit, control, reset, setValue, getValues, watch, formState: { isDirty } } = useForm({
     defaultValues: {
       results: [],
     },
   });
+
+  const watchedResults = useWatch({ control, name: "results" });
 
   const { fields } = useFieldArray({
     control,
     name: "results",
   });
 
+  useEffect(() => {
+    if ((isEditing || isExpanded) && watchedResults && watchedResults.length > 0) {
+      recalculateFormulas();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [watchedResults, isEditing, isExpanded]);
+
   const testIdStr = test.testId?._id || test.testId;
+
+  // Helper function to resolve parameter operand by _id, name, or template index
+  const findParamResult = (currentResults, paramIdentifier, template) => {
+    if (!paramIdentifier || !currentResults || currentResults.length === 0) return null;
+    const idStr = String(paramIdentifier).trim().toLowerCase();
+
+    // 1. Direct match by _id (string comparison)
+    let found = currentResults.find(r => r._id && String(r._id).trim().toLowerCase() === idStr);
+    if (found) {
+      return found
+    };
+
+    // 2. Direct match by parameter name (exact or case-insensitive)
+    found = currentResults.find(r => r.parameter && String(r.parameter).trim().toLowerCase() === idStr);
+    if (found) {
+      return found
+    };
+
+    // 3. Fallback: match via template.subTests index if paramIdentifier was an old _id or name
+    if (template && template.subTests && Array.isArray(template.subTests)) {
+      const subIndex = template.subTests.findIndex(st =>
+        (st._id && String(st._id).trim().toLowerCase() === idStr) ||
+        (st.name && String(st.name).trim().toLowerCase() === idStr)
+      );
+      if (subIndex !== -1 && currentResults[subIndex]) {
+        return currentResults[subIndex];
+      }
+    }
+
+    return null;
+  };
 
   const recalculateFormulas = () => {
     // Get the absolute latest state from react-hook-form
     const currentResults = getValues("results");
     if (!currentResults || currentResults.length === 0) return;
-    
-    currentResults.forEach((res, index) => {
-      if (res.isCalculated && res.formula && res.formula.leftParameterId && res.formula.rightParameterId) {
-        const leftParam = currentResults.find(r => r._id === res.formula.leftParameterId);
-        const rightParam = currentResults.find(r => r._id === res.formula.rightParameterId);
-        
-        let calculatedValue = "";
-        
-        if (leftParam && rightParam && leftParam.value && rightParam.value && !isNaN(parseFloat(leftParam.value)) && !isNaN(parseFloat(rightParam.value))) {
-           const leftNum = parseFloat(leftParam.value);
-           const rightNum = parseFloat(rightParam.value);
-           let resultNum;
-           switch(res.formula.operator) {
-             case '+': resultNum = leftNum + rightNum; break;
-             case '-': resultNum = leftNum - rightNum; break;
-             case '*': resultNum = leftNum * rightNum; break;
-             case '/': resultNum = rightNum !== 0 ? leftNum / rightNum : 0; break;
-             default: resultNum = 0; break;
-           }
-           calculatedValue = String(Math.round(resultNum * 1000) / 1000);
+
+    const calculatedParamsCount = currentResults.filter(r => r.isCalculated && r.formula).length;
+    if (calculatedParamsCount === 0) return;
+
+    let changed = true;
+    let pass = 0;
+    const maxPasses = calculatedParamsCount || 1;
+
+    while (changed && pass < maxPasses) {
+      changed = false;
+      pass++;
+
+      currentResults.forEach((res, index) => {
+        if (res.isCalculated && res.formula) {
+          const formula = res.formula;
+
+          // Resolve left operand
+          let leftNum = null;
+          if (formula.leftType === "constant") {
+            if (formula.leftConstant !== undefined && formula.leftConstant !== null && formula.leftConstant !== "" && !isNaN(parseFloat(formula.leftConstant))) {
+              leftNum = parseFloat(formula.leftConstant);
+            }
+          } else {
+            const targetId = formula.leftParameterId;
+            if (targetId) {
+              const leftParam = findParamResult(currentResults, targetId, testTemplate);
+              if (leftParam && leftParam.value !== undefined && leftParam.value !== null && String(leftParam.value).trim() !== "" && !isNaN(parseFloat(leftParam.value))) {
+                leftNum = parseFloat(leftParam.value);
+              }
+            }
+          }
+
+          // Resolve right operand
+          let rightNum = null;
+          if (formula.rightType === "constant") {
+            if (formula.rightConstant !== undefined && formula.rightConstant !== null && formula.rightConstant !== "" && !isNaN(parseFloat(formula.rightConstant))) {
+              rightNum = parseFloat(formula.rightConstant);
+            }
+          } else {
+            const targetId = formula.rightParameterId;
+            if (targetId) {
+              const rightParam = findParamResult(currentResults, targetId, testTemplate);
+              if (rightParam && rightParam.value !== undefined && rightParam.value !== null && String(rightParam.value).trim() !== "" && !isNaN(parseFloat(rightParam.value))) {
+                rightNum = parseFloat(rightParam.value);
+              }
+            }
+          }
+
+          let calculatedValue = "";
+
+          if (leftNum !== null && rightNum !== null) {
+            let resultNum;
+            switch (formula.operator) {
+              case '+': resultNum = leftNum + rightNum; break;
+              case '-': resultNum = leftNum - rightNum; break;
+              case '*': resultNum = leftNum * rightNum; break;
+              case '/': resultNum = rightNum !== 0 ? leftNum / rightNum : 0; break;
+              default: resultNum = 0; break;
+            }
+            calculatedValue = String(Math.round(resultNum * 1000) / 1000);
+          }
+
+          if (res.value !== calculatedValue) {
+            setValue(`results.${index}.value`, calculatedValue, { shouldDirty: true });
+            currentResults[index].value = calculatedValue;
+            changed = true;
+          }
         }
-        
-        if (res.value !== calculatedValue) {
-           setValue(`results.${index}.value`, calculatedValue, { shouldDirty: true });
-        }
-      }
-    });
+      });
+    }
   };
 
   useEffect(() => {
@@ -92,14 +175,14 @@ export const InlineTestEditor = ({
       const mergedResults = testTemplate.subTests.map((sub, index) => {
         const existingResult = test.result?.[index];
         const isTb = sub.isTextBlock || sub.type === 'text_block';
-        
+
         let initialTbVal = "";
         let initialVal = "";
-        
+
         if (existingResult) {
           initialVal = existingResult.value || "";
           initialTbVal = existingResult.textBlockValue !== undefined ? existingResult.textBlockValue : "";
-          
+
           if (isTb) {
             // Legacy report fallback: if textBlockValue is undefined/empty and value is populated, use value
             if (!initialTbVal && existingResult.value) {
@@ -135,6 +218,9 @@ export const InlineTestEditor = ({
         };
       });
       reset({ results: mergedResults });
+      setTimeout(() => {
+        recalculateFormulas();
+      }, 0);
     }
   }, [isEditing, isExpanded, testTemplate, test.result, reset]);
 
@@ -155,14 +241,14 @@ export const InlineTestEditor = ({
       const mergedResults = testTemplate.subTests.map((sub, index) => {
         const existingResult = test.result?.[index];
         const isTb = sub.isTextBlock || sub.type === 'text_block';
-        
+
         let initialTbVal = "";
         let initialVal = "";
-        
+
         if (existingResult) {
           initialVal = existingResult.value || "";
           initialTbVal = existingResult.textBlockValue !== undefined ? existingResult.textBlockValue : "";
-          
+
           if (isTb) {
             // Legacy report fallback: if textBlockValue is undefined/empty and value is populated, use value
             if (!initialTbVal && existingResult.value) {
@@ -216,13 +302,14 @@ export const InlineTestEditor = ({
   }, [isEditing, isDirty]);
 
   const onSubmit = async (data) => {
+    recalculateFormulas();
     setSaving(true);
     setErrorMsg("");
 
     try {
       const reportData = await reportService.getReportAndTestTemplate(reportId, testIdStr);
       const fullReport = reportData.patientTest;
-      
+
       let hasAnyValue = false;
       const updatedTests = fullReport.tests.map((t) => {
         if ((t.testId?._id || t.testId).toString() === testIdStr.toString()) {
@@ -231,10 +318,10 @@ export const InlineTestEditor = ({
               return { parameter: r.parameter, type: "section" };
             }
             if (r.value && r.value.trim() !== '') {
-               hasAnyValue = true;
+              hasAnyValue = true;
             }
             if (r.isTextBlock && r.textBlockValue && r.textBlockValue.trim() !== '') {
-               hasAnyValue = true;
+              hasAnyValue = true;
             }
             return {
               parameter: r.parameter,
@@ -250,22 +337,22 @@ export const InlineTestEditor = ({
           });
           return { ...t, result: updatedResult };
         }
-        
+
         // Check other tests to see if they have any values
         if (t.result && t.result.some(r => r.type !== 'section' && ((r.value && r.value.trim() !== '') || (r.textBlockValue && r.textBlockValue.trim() !== '')))) {
-           hasAnyValue = true;
+          hasAnyValue = true;
         }
         return t;
       });
 
       if (!hasAnyValue) {
-         setErrorMsg("Please enter at least one parameter value to approve the report.");
-         setSaving(false);
-         return;
+        setErrorMsg("Please enter at least one parameter value to approve the report.");
+        setSaving(false);
+        return;
       }
 
       const updatedReportRes = await reportService.updatePatientTest(reportId, { tests: updatedTests });
-      
+
       onSaveSuccess(updatedReportRes.patientTest);
       onCancelEditing();
     } catch (err) {
@@ -298,19 +385,19 @@ export const InlineTestEditor = ({
     }
   };
 
-  const displayResults = testTemplate && fields.length > 0 
-    ? fields 
+  const displayResults = testTemplate && fields.length > 0
+    ? fields
     : test.result || [];
 
   const mappedDisplayResults = displayResults.map((r, resIndex) => {
     const isTb = r.isTextBlock || r.type === 'text_block';
     const subTestTemplate = testTemplate?.subTests?.[resIndex];
-    
+
     let tbVal = r.textBlockValue !== undefined ? r.textBlockValue : (isTb ? r.value : "");
     if (isTb && !tbVal && subTestTemplate?.textBlockSettings?.defaultText) {
       tbVal = subTestTemplate.textBlockSettings.defaultText;
     }
-    
+
     return {
       ...r,
       type: (r.type === 'text_block') ? 'parameter' : r.type,
@@ -321,10 +408,9 @@ export const InlineTestEditor = ({
 
   return (
     <div className={`border-b border-cream-border last:border-0 ${isEditing ? 'bg-white shadow-sm ring-1 ring-cream-border rounded-md my-2' : ''}`}>
-      <div 
-        className={`flex items-center justify-between px-4 py-3 cursor-pointer transition-colors ${
-          isEditing ? 'bg-warm-canvas border-b border-cream-border rounded-t-md cursor-default' : 'hover:bg-gray-300/50 bg-warm-canvas'
-        }`}
+      <div
+        className={`flex items-center justify-between px-4 py-3 cursor-pointer transition-colors ${isEditing ? 'bg-warm-canvas border-b border-cream-border rounded-t-md cursor-default' : 'hover:bg-gray-300/50 bg-warm-canvas'
+          }`}
         onClick={() => {
           if (!isEditing) onToggleExpand();
         }}
@@ -344,7 +430,7 @@ export const InlineTestEditor = ({
             </span>
           )}
         </div>
-        
+
         {!isEditing && (
           <button
             onClick={handleEditClick}
@@ -359,10 +445,10 @@ export const InlineTestEditor = ({
       {isExpanded && (
         <div className="p-4 bg-white">
           {errorMsg && (
-             <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-cards flex items-center space-x-2">
-               <ShieldAlert className="h-4 w-4 shrink-0" />
-               <span>{errorMsg}</span>
-             </div>
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-cards flex items-center space-x-2">
+              <ShieldAlert className="h-4 w-4 shrink-0" />
+              <span>{errorMsg}</span>
+            </div>
           )}
 
           {loadingTemplate ? (
@@ -421,7 +507,7 @@ export const InlineTestEditor = ({
                               <td className="py-3 px-3 align-middle">
                                 {(() => {
                                   const { ref, onChange, ...rest } = register(`results.${index}.value`);
-                                  
+
                                   if (item.isCalculated) {
                                     return (
                                       <input
@@ -438,7 +524,7 @@ export const InlineTestEditor = ({
                                       />
                                     );
                                   }
-                                  
+
                                   if (item.isListParameter) {
                                     return (
                                       <select
@@ -461,7 +547,7 @@ export const InlineTestEditor = ({
                                       </select>
                                     );
                                   }
-                                  
+
                                   return (
                                     <input
                                       type="text"
@@ -596,7 +682,7 @@ export const InlineTestEditor = ({
                                 {item.value ? (
                                   (() => {
                                     const { isAbnormal, status, formattedValue } = checkAbnormalResult(item.value, item.normalRange, item.isListParameter);
-                                    
+
                                     return (
                                       <span className={`font-semibold ${isAbnormal ? 'font-bold text-red-600' : ''}`}>
                                         {isAbnormal ? `${formattedValue}` : formattedValue}

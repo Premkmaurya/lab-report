@@ -68,6 +68,66 @@ const ParameterSelect = ({ index, field, watch, setValue, register, errors }) =>
   );
 };
 
+const FormulaOperand = ({ index, side, watch, setValue, register, errors }) => {
+  const typeField = `subTests.${index}.formula.${side}Type`;
+  const constantField = `subTests.${index}.formula.${side}Constant`;
+  const paramField = `subTests.${index}.formula.${side}ParameterId`;
+  const operandType = watch(typeField) || "parameter";
+
+  return (
+    <div className="flex-1 flex flex-col space-y-1">
+      <div className="flex rounded-inputs overflow-hidden border border-cream-border">
+        <button
+          type="button"
+          className={`px-2 py-1 text-[11px] font-semibold transition-colors ${operandType === "parameter" ? "bg-electric-cobalt text-white" : "bg-white text-stone hover:bg-warm-canvas"}`}
+          onClick={() => {
+            setValue(typeField, "parameter", { shouldValidate: true });
+            setValue(constantField, "", { shouldValidate: true });
+          }}
+        >
+          Param
+        </button>
+        <button
+          type="button"
+          className={`px-2 py-1 text-[11px] font-semibold border-l border-cream-border transition-colors ${operandType === "constant" ? "bg-electric-cobalt text-white" : "bg-white text-stone hover:bg-warm-canvas"}`}
+          onClick={() => {
+            setValue(typeField, "constant", { shouldValidate: true });
+            setValue(paramField, "", { shouldValidate: true });
+          }}
+        >
+          Number
+        </button>
+      </div>
+      <input type="hidden" {...register(typeField)} />
+      {operandType === "constant" ? (
+        <input
+          type="number"
+          step="any"
+          placeholder="Enter number"
+          className={`w-full text-sm border border-cream-border rounded-inputs px-2 py-2 focus:outline-none focus:border-electric-cobalt ${errors?.subTests?.[index]?.formula?.[`${side}Constant`] ? "border-red-500" : ""}`}
+          {...register(constantField, {
+            validate: (val) => {
+              if (operandType !== "constant") return true;
+              if (val === "" || val === undefined || val === null) return "Required";
+              if (isNaN(Number(val))) return "Must be a valid number";
+              return true;
+            },
+          })}
+        />
+      ) : (
+        <ParameterSelect
+          index={index}
+          field={`${side}ParameterId`}
+          watch={watch}
+          setValue={setValue}
+          register={register}
+          errors={errors}
+        />
+      )}
+    </div>
+  );
+};
+
 export const CreateTest = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -96,7 +156,7 @@ export const CreateTest = () => {
     defaultValues: {
       departmentId: "",
       name: "",
-      subTests: [{ _id: generateObjectId(), name: "", type: "parameter", price: "", unit: "", normalRange: "", isListParameter: false, allowedValues: [], isCalculated: false, isTextBlock: false, formula: { leftParameterId: "", operator: "+", rightParameterId: "" }, textBlockSettings: { defaultText: "" } }],
+      subTests: [{ _id: generateObjectId(), name: "", type: "parameter", price: "", unit: "", normalRange: "", isListParameter: false, allowedValues: [], isCalculated: false, isTextBlock: false, formula: { leftParameterId: "", leftType: "parameter", leftConstant: "", operator: "+", rightParameterId: "", rightType: "parameter", rightConstant: "" }, textBlockSettings: { defaultText: "" } }],
     },
   });
 
@@ -128,7 +188,12 @@ export const CreateTest = () => {
     if (!row.name || !row.name.trim()) return false;
     if (row.type === "section") return true;
     if (row.isTextBlock) return true;
-    if (row.isCalculated) return !!(row.formula && row.formula.leftParameterId && row.formula.rightParameterId);
+    if (row.isCalculated) {
+      if (!row.formula) return false;
+      const leftOk = (row.formula.leftType === "constant") ? (row.formula.leftConstant !== "" && row.formula.leftConstant !== undefined && row.formula.leftConstant !== null && !isNaN(Number(row.formula.leftConstant))) : !!row.formula.leftParameterId;
+      const rightOk = (row.formula.rightType === "constant") ? (row.formula.rightConstant !== "" && row.formula.rightConstant !== undefined && row.formula.rightConstant !== null && !isNaN(Number(row.formula.rightConstant))) : !!row.formula.rightParameterId;
+      return leftOk && rightOk;
+    }
     if (row.price === "" || row.price === null || row.price === undefined) return false;
     return true;
   };
@@ -151,7 +216,7 @@ export const CreateTest = () => {
 
       if ((fieldName === "normalRange" || (isSection && fieldName === "name")) && isRowComplete(currentValues[index])) {
         if (index === fields.length - 1) {
-          append({ _id: generateObjectId(), name: "", type: "parameter", price: "", unit: "", normalRange: "", isListParameter: false, allowedValues: [], isCalculated: false, isTextBlock: false, formula: { leftParameterId: "", operator: "+", rightParameterId: "" }, textBlockSettings: { defaultText: "" } });
+          append({ _id: generateObjectId(), name: "", type: "parameter", price: "", unit: "", normalRange: "", isListParameter: false, allowedValues: [], isCalculated: false, isTextBlock: false, formula: { leftParameterId: "", leftType: "parameter", leftConstant: "", operator: "+", rightParameterId: "", rightType: "parameter", rightConstant: "" }, textBlockSettings: { defaultText: "" } });
           setTimeout(() => {
             if (inputRefs.current[index + 1] && inputRefs.current[index + 1].name) {
               inputRefs.current[index + 1].name.focus();
@@ -182,7 +247,7 @@ export const CreateTest = () => {
       setTimeout(() => {
         if (index === fields.length - 1) {
           if (isRowComplete(currentValues[currentValues.length - 1])) {
-            append({ _id: generateObjectId(), name: "", type: "parameter", price: "", unit: "", normalRange: "", isListParameter: false, allowedValues: [], isCalculated: false, isTextBlock: false, formula: { leftParameterId: "", operator: "+", rightParameterId: "" }, textBlockSettings: { defaultText: "" } });
+            append({ _id: generateObjectId(), name: "", type: "parameter", price: "", unit: "", normalRange: "", isListParameter: false, allowedValues: [], isCalculated: false, isTextBlock: false, formula: { leftParameterId: "", leftType: "parameter", leftConstant: "", operator: "+", rightParameterId: "", rightType: "parameter", rightConstant: "" }, textBlockSettings: { defaultText: "" } });
           }
         }
       }, 100);
@@ -508,7 +573,7 @@ export const CreateTest = () => {
                                     }
                                     const currentValues = getValues("subTests");
                                     if (index === currentValues.length - 1 && isRowComplete(currentValues[index])) {
-                                      append({ _id: generateObjectId(), name: "", type: "parameter", price: "", unit: "", normalRange: "", isListParameter: false, allowedValues: [], isCalculated: false, isTextBlock: false, formula: { leftParameterId: "", operator: "+", rightParameterId: "" }, textBlockSettings: { defaultText: "" } });
+                                      append({ _id: generateObjectId(), name: "", type: "parameter", price: "", unit: "", normalRange: "", isListParameter: false, allowedValues: [], isCalculated: false, isTextBlock: false, formula: { leftParameterId: "", leftType: "parameter", leftConstant: "", operator: "+", rightParameterId: "", rightType: "parameter", rightConstant: "" }, textBlockSettings: { defaultText: "" } });
                                       setTimeout(() => {
                                         inputRefs.current[index + 1]?.name?.focus();
                                       }, 0);
@@ -651,7 +716,7 @@ export const CreateTest = () => {
                                   // Ensure one blank row remains if all are deleted
                                   const currentValues = watch("subTests");
                                   if (currentValues.length <= 1) {
-                                    append({ _id: generateObjectId(), name: "", type: "parameter", price: "", unit: "", normalRange: "", isListParameter: false, allowedValues: [], isCalculated: false, isTextBlock: false, formula: { leftParameterId: "", operator: "+", rightParameterId: "" }, textBlockSettings: { defaultText: "" } });
+                                    append({ _id: generateObjectId(), name: "", type: "parameter", price: "", unit: "", normalRange: "", isListParameter: false, allowedValues: [], isCalculated: false, isTextBlock: false, formula: { leftParameterId: "", leftType: "parameter", leftConstant: "", operator: "+", rightParameterId: "", rightType: "parameter", rightConstant: "" }, textBlockSettings: { defaultText: "" } });
                                   }
                                 }}
                                 className="text-red-600 hover:text-red-800 p-2 rounded-full hover:bg-red-50 transition-colors"
@@ -710,14 +775,14 @@ export const CreateTest = () => {
                             <td colSpan="5" className="px-4 py-4">
                               <div className="flex flex-col max-w-2xl pl-4 border-l-2 border-electric-cobalt">
                                 <span className="text-xs font-bold text-charcoal uppercase mb-2">Formula Builder</span>
-                                <div className="flex items-center space-x-4 mb-2">
-                                  <ParameterSelect 
-                                    index={index} 
-                                    field="leftParameterId" 
-                                    watch={watch} 
-                                    setValue={setValue} 
-                                    register={register} 
-                                    errors={errors} 
+                                <div className="flex items-end space-x-4 mb-2">
+                                  <FormulaOperand
+                                    index={index}
+                                    side="left"
+                                    watch={watch}
+                                    setValue={setValue}
+                                    register={register}
+                                    errors={errors}
                                   />
 
                                   <select 
@@ -730,17 +795,17 @@ export const CreateTest = () => {
                                     <option value="/">/</option>
                                   </select>
 
-                                  <ParameterSelect 
-                                    index={index} 
-                                    field="rightParameterId" 
-                                    watch={watch} 
-                                    setValue={setValue} 
-                                    register={register} 
-                                    errors={errors} 
+                                  <FormulaOperand
+                                    index={index}
+                                    side="right"
+                                    watch={watch}
+                                    setValue={setValue}
+                                    register={register}
+                                    errors={errors}
                                   />
                                 </div>
-                                {(errors?.subTests?.[index]?.formula?.leftParameterId || errors?.subTests?.[index]?.formula?.rightParameterId) && (
-                                  <p className="text-xs text-red-500 mt-1">Please select both parameters to calculate.</p>
+                                {(errors?.subTests?.[index]?.formula?.leftParameterId || errors?.subTests?.[index]?.formula?.rightParameterId || errors?.subTests?.[index]?.formula?.leftConstant || errors?.subTests?.[index]?.formula?.rightConstant) && (
+                                  <p className="text-xs text-red-500 mt-1">Please provide valid operands for the formula.</p>
                                 )}
                               </div>
                             </td>

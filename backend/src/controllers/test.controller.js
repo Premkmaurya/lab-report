@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const Test = require("../models/test.model");
 const asyncHandler = require("../utils/asyncHandler");
 const { BadRequestError, NotFoundError, ConflictError, ForbiddenError } = require("../utils/errors");
@@ -258,11 +259,14 @@ const getGlobalTests = asyncHandler(async (req, res) => {
       laboratoryId: targetLabId,
       sourceTestId: { $ne: null },
       isGlobal: false,
-    }).select('sourceTestId _id');
+    }).select('sourceTestId _id importedVersion');
 
     for (const item of localImported) {
       if (item.sourceTestId) {
-        importedSourceIdsMap[item.sourceTestId.toString()] = item._id;
+        importedSourceIdsMap[item.sourceTestId.toString()] = {
+          localTestId: item._id,
+          importedVersion: item.importedVersion || 1,
+        };
       }
     }
   }
@@ -282,17 +286,29 @@ const getGlobalTests = asyncHandler(async (req, res) => {
   const result = globalTests.map(gt => {
     const gtObj = gt.toObject();
     const gtIdStr = gt._id.toString();
+    const importedData = importedSourceIdsMap[gtIdStr];
+    const globalVersion = gt.version || 1;
+    const importedVersion = importedData ? (importedData.importedVersion || 1) : null;
+    const isImported = Boolean(importedData);
+    const hasUpdateAvailable = isImported && globalVersion > importedVersion;
+
     return {
       ...gtObj,
-      isImported: Boolean(importedSourceIdsMap[gtIdStr]),
-      importedLocalTestId: importedSourceIdsMap[gtIdStr] || null,
+      version: globalVersion,
+      isImported,
+      importedLocalTestId: importedData ? importedData.localTestId : null,
+      importedVersion,
+      hasUpdateAvailable,
       importedCount: importCountsMap[gtIdStr] || 0,
     };
   });
 
+  const updatesAvailableCount = result.filter(item => item.hasUpdateAvailable).length;
+
   res.status(200).json({
     success: true,
     globalTests: result,
+    updatesAvailableCount,
   });
 });
 
@@ -327,6 +343,7 @@ const createGlobalTest = asyncHandler(async (req, res) => {
     subTests,
     isGlobal: true,
     createdBySystem: true,
+    version: 1,
     sourceTestId: null,
     laboratoryId: null,
     createdBy: req.user._id,
@@ -346,6 +363,11 @@ const createGlobalTest = asyncHandler(async (req, res) => {
 });
 
 const updateGlobalTest = asyncHandler(async (req, res) => {
+  const existingTest = await Test.findOne({ _id: req.params.id, isGlobal: true });
+  if (!existingTest) {
+    throw new NotFoundError("Global test template not found");
+  }
+
   const allowedFields = ["name", "price", "subTests", "departmentId"];
   const updates = {};
 
@@ -361,6 +383,16 @@ const updateGlobalTest = asyncHandler(async (req, res) => {
 
   if (updates.subTests) {
     validateSubTests(updates.subTests);
+  }
+
+  // Check for structural changes to increment version number
+  const isStructuralChange =
+    (updates.name !== undefined && updates.name !== existingTest.name) ||
+    (updates.departmentId !== undefined && updates.departmentId.toString() !== existingTest.departmentId?.toString()) ||
+    updates.subTests !== undefined;
+
+  if (isStructuralChange) {
+    updates.version = (existingTest.version || 1) + 1;
   }
 
   updates.updatedBy = req.user._id;
@@ -402,6 +434,94 @@ const deleteGlobalTest = asyncHandler(async (req, res) => {
   });
 });
 
+/**
+ * Helper to remap formula leftParameterId / rightParameterId from global test sub-test IDs to new local sub-test IDs.
+ * Also validates that formula parameter references exist in the test definition.
+ */
+const remapSubTestFormulas = (globalSubTests, newSubTests) => {
+  const oldIdToNewIdMap = {};
+  const nameToNewIdMap = {};
+  const validNewIdsSet = new Set();
+
+  newSubTests.forEach((newSt, idx) => {
+    const newIdStr = newSt._id ? newSt._id.toString() : null;
+    if (newIdStr) {
+      validNewIdsSet.add(newIdStr);
+    }
+
+    const origSt = globalSubTests ? globalSubTests[idx] : null;
+    if (origSt && origSt._id && newIdStr) {
+      oldIdToNewIdMap[origSt._id.toString()] = newIdStr;
+    }
+
+    if (newSt.name && newIdStr) {
+      nameToNewIdMap[newSt.name.trim().toLowerCase()] = newIdStr;
+    }
+    if (origSt && origSt.name && newIdStr) {
+      nameToNewIdMap[origSt.name.trim().toLowerCase()] = newIdStr;
+    }
+  });
+
+  newSubTests.forEach((st) => {
+    if (st.isCalculated && st.formula) {
+      const formula = typeof st.formula.toObject === 'function' ? st.formula.toObject() : { ...st.formula };
+
+      const resolveAndValidateParamId = (paramId, operandSide) => {
+        if (!paramId) return paramId;
+        const idStr = String(paramId).trim();
+
+        // 1. Check if already a valid new ID in the new sub-tests
+        if (validNewIdsSet.has(idStr)) {
+          return idStr;
+        }
+
+        // 2. Check if in oldId -> newId map
+        if (oldIdToNewIdMap[idStr]) {
+          return oldIdToNewIdMap[idStr];
+        }
+
+        // 3. Check if matches parameter name
+        const lowerName = idStr.toLowerCase();
+        if (nameToNewIdMap[lowerName]) {
+          return nameToNewIdMap[lowerName];
+        }
+
+        // 4. Validation failed: parameter ID does not exist in imported test
+        console.warn(
+          `[Formula Remap Warning] Calculated parameter "${st.name}" formula references non-existent parameter ID "${paramId}" (${operandSide} operand).`
+        );
+        return null;
+      };
+
+      // Remap left operand
+      if (formula.leftType !== "constant" && formula.leftParameterId) {
+        const remappedLeft = resolveAndValidateParamId(formula.leftParameterId, "left");
+        if (remappedLeft) {
+          formula.leftParameterId = remappedLeft;
+        } else {
+          console.warn(`[Formula Remap Warning] Clearing invalid leftParameterId for "${st.name}".`);
+          formula.leftParameterId = "";
+        }
+      }
+
+      // Remap right operand
+      if (formula.rightType !== "constant" && formula.rightParameterId) {
+        const remappedRight = resolveAndValidateParamId(formula.rightParameterId, "right");
+        if (remappedRight) {
+          formula.rightParameterId = remappedRight;
+        } else {
+          console.warn(`[Formula Remap Warning] Clearing invalid rightParameterId for "${st.name}".`);
+          formula.rightParameterId = "";
+        }
+      }
+
+      st.formula = formula;
+    }
+  });
+
+  return newSubTests;
+};
+
 const importGlobalTest = asyncHandler(async (req, res) => {
   const globalTest = await Test.findOne({ _id: req.params.id, isGlobal: true }).populate('departmentId');
 
@@ -428,12 +548,15 @@ const importGlobalTest = asyncHandler(async (req, res) => {
     throw new ConflictError("This global test has already been imported into your laboratory.");
   }
 
-  // Perform complete deep-clone of sub-tests
+  // Step 1: Create all sub-tests with new explicit ObjectIds first
   const clonedSubTests = globalTest.subTests.map((st) => {
     const stObj = typeof st.toObject === 'function' ? st.toObject() : { ...st };
-    delete stObj._id;
+    stObj._id = new mongoose.Types.ObjectId();
     return stObj;
   });
+
+  // Step 2, 3 & 4: Remap formula references using oldId -> newId mapping & validate
+  remapSubTestFormulas(globalTest.subTests, clonedSubTests);
 
   const importedLocalTest = await Test.create({
     name: globalTest.name,
@@ -443,6 +566,9 @@ const importGlobalTest = asyncHandler(async (req, res) => {
     isGlobal: false,
     createdBySystem: false,
     sourceTestId: globalTest._id,
+    importedVersion: globalTest.version || 1,
+    importedAt: new Date(),
+    lastUpdatedFromGlobalAt: new Date(),
     laboratoryId: targetLabId,
     createdBy: req.user._id,
     updatedBy: req.user._id,
@@ -461,6 +587,92 @@ const importGlobalTest = asyncHandler(async (req, res) => {
   });
 });
 
+const updateImportedGlobalTest = asyncHandler(async (req, res) => {
+  const globalTest = await Test.findOne({ _id: req.params.id, isGlobal: true }).populate('departmentId');
+
+  if (!globalTest) {
+    throw new NotFoundError("Global test template not found");
+  }
+
+  const targetLabId = req.user.role === 'system_admin'
+    ? (req.body.laboratoryId || req.query.laboratoryId || req.headers['x-laboratory-id'])
+    : req.user.laboratoryId;
+
+  if (!targetLabId) {
+    throw new BadRequestError("Target laboratory ID is required");
+  }
+
+  const localTest = await Test.findOne({
+    laboratoryId: targetLabId,
+    sourceTestId: globalTest._id,
+    isGlobal: false,
+    deleted: { $ne: true },
+  });
+
+  if (!localTest) {
+    throw new NotFoundError("No imported laboratory test found corresponding to this global template.");
+  }
+
+  const globalVersion = globalTest.version || 1;
+  const currentImportedVersion = localTest.importedVersion || 1;
+
+  if (currentImportedVersion >= globalVersion) {
+    return res.status(200).json({
+      success: true,
+      alreadyUpToDate: true,
+      message: "This test is already up to date with the latest global version.",
+      test: localTest,
+    });
+  }
+
+  // Map sub-tests from global template, preserving existing local parameter prices by name or index
+  const localSubTestMap = new Map();
+  (localTest.subTests || []).forEach(st => {
+    if (st.name) localSubTestMap.set(st.name.trim().toLowerCase(), st.price);
+  });
+
+  // Step 1: Create updated sub-tests with new explicit ObjectIds first
+  const updatedSubTests = globalTest.subTests.map((st, idx) => {
+    const stObj = typeof st.toObject === 'function' ? st.toObject() : { ...st };
+    stObj._id = new mongoose.Types.ObjectId();
+
+    const lowerName = stObj.name ? stObj.name.trim().toLowerCase() : '';
+    if (localSubTestMap.has(lowerName)) {
+      stObj.price = localSubTestMap.get(lowerName);
+    } else if (localTest.subTests && localTest.subTests[idx] && localTest.subTests[idx].price !== undefined) {
+      stObj.price = localTest.subTests[idx].price;
+    }
+
+    return stObj;
+  });
+
+  // Step 2, 3 & 4: Remap formula references using oldId -> newId mapping & validate
+  remapSubTestFormulas(globalTest.subTests, updatedSubTests);
+
+  localTest.name = globalTest.name;
+  localTest.departmentId = globalTest.departmentId?._id || globalTest.departmentId;
+  localTest.subTests = updatedSubTests;
+  localTest.importedVersion = globalVersion;
+  localTest.lastUpdatedFromGlobalAt = new Date();
+  localTest.updatedBy = req.user._id;
+
+  await localTest.save();
+
+  const populatedTest = await Test.findById(localTest._id)
+    .populate('departmentId')
+    .populate('createdBy', 'username _id')
+    .populate('updatedBy', 'username _id');
+
+  await invalidateCachePattern("*test*");
+
+  res.status(200).json({
+    success: true,
+    alreadyUpToDate: false,
+    test: populatedTest,
+    message: `Successfully updated "${globalTest.name}" to version ${globalVersion}!`,
+  });
+});
+
 module.exports = {
   getTests,
   getTestById,
@@ -473,4 +685,5 @@ module.exports = {
   updateGlobalTest,
   deleteGlobalTest,
   importGlobalTest,
+  updateImportedGlobalTest,
 };

@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Plus, Edit2, Search, ChevronDown, ChevronRight, Globe, FlaskConical, Pencil, Loader2, Check, X } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { canManageTests } from "../../config/permissions";
-import { useGetTestsQuery, useUpdateTestMutation } from "../../services/testApi";
+import { useGetTestsQuery, useGetGlobalTestsQuery, useUpdateTestMutation } from "../../services/testApi";
 import GlobalTestLibrary from "./GlobalTestLibrary";
 import { toast } from "../../lib/toast";
 
@@ -31,8 +31,10 @@ export const TestList = () => {
   };
 
   const { data, isLoading: loading, error: fetchError, refetch } = useGetTestsQuery();
+  const { data: globalData } = useGetGlobalTestsQuery({});
 
   const tests = data?.tests || [];
+  const updatesCount = globalData?.updatesAvailableCount || 0;
   const error = fetchError ? "Failed to load test catalog." : "";
 
   const handleTabChange = (newTab) => {
@@ -161,6 +163,11 @@ export const TestList = () => {
           >
             <Globe className="w-3.5 h-3.5" />
             <span>Global Test Library</span>
+            {updatesCount > 0 && !isSystemAdmin && (
+              <span className="ml-1.5 px-2 py-0.5 text-[10px] font-extrabold bg-amber-500 text-white rounded-full">
+                {updatesCount} {updatesCount === 1 ? 'Update' : 'Updates'}
+              </span>
+            )}
           </button>
         </div>
       </div>
@@ -285,7 +292,14 @@ export const TestList = () => {
                                   }}
                                 >
                                   <td className="px-6 py-3 text-sm font-medium text-charcoal pl-12 group-hover:text-electric-cobalt transition-colors">
-                                    {test.name}
+                                    <div className="flex items-center gap-2">
+                                      <span>{test.name}</span>
+                                      {test.sourceTestId && (
+                                        <span className="text-[10px] font-mono bg-lavender-mist/70 text-electric-cobalt px-2 py-0.5 rounded-full font-semibold">
+                                          Global v{test.importedVersion || 1}
+                                        </span>
+                                      )}
+                                    </div>
                                     <div className="text-[10px] text-stone mt-0.5 font-normal">
                                       {test.createdBy && <span>Owner: {test.createdBy.username}</span>}
                                       {test.updatedBy && test.updatedBy._id !== test.createdBy?._id && <span className="ml-2">• Last Updated by: {test.updatedBy.username}</span>}

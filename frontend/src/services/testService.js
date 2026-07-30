@@ -56,6 +56,11 @@ export const testService = {
     const response = await API.post(`/tests/global/${id}/import`, data);
     return response.data;
   },
+
+  updateImportedGlobalTest: async (id, data = {}) => {
+    const response = await API.post(`/tests/global/${id}/update-imported`, data);
+    return response.data;
+  },
 };
 
 export default testService;

@@ -80,6 +80,19 @@ export const testApi = apiSlice.injectEndpoints({
         'DashboardStats',
       ],
     }),
+
+    updateImportedGlobalTest: builder.mutation({
+      query: (globalTestId) => ({
+        url: `/tests/global/${globalTestId}/update-imported`,
+        method: 'POST',
+      }),
+      invalidatesTags: [
+        { type: 'Test', id: 'LIST' },
+        { type: 'GlobalTest', id: 'LIST' },
+        { type: 'Laboratory', id: 'STATS' },
+        'DashboardStats',
+      ],
+    }),
   }),
 });
 
@@ -91,4 +104,5 @@ export const {
   useUpdateTestMutation,
   useDeleteTestMutation,
   useImportGlobalTestMutation,
+  useUpdateImportedGlobalTestMutation,
 } = testApi;

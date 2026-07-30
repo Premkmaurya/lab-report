@@ -28,8 +28,12 @@ const subTestSchema = new mongoose.Schema(
     },
     formula: {
       leftParameterId: { type: String },
+      leftConstant: { type: Number },
+      leftType: { type: String, enum: ['parameter', 'constant'], default: 'parameter' },
       operator: { type: String, enum: ['+', '-', '*', '/'] },
-      rightParameterId: { type: String }
+      rightParameterId: { type: String },
+      rightConstant: { type: Number },
+      rightType: { type: String, enum: ['parameter', 'constant'], default: 'parameter' },
     },
     allowedValues: {
       type: [String],
@@ -98,6 +102,22 @@ const testSchema = new mongoose.Schema(
       required: function() { return !this.isGlobal; },
       default: null,
       index: true,
+    },
+    version: {
+      type: Number,
+      default: 1,
+    },
+    importedVersion: {
+      type: Number,
+      default: null,
+    },
+    importedAt: {
+      type: Date,
+      default: null,
+    },
+    lastUpdatedFromGlobalAt: {
+      type: Date,
+      default: null,
     },
     createdAt: {
       type: Date,

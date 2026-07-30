@@ -13,6 +13,7 @@ const {
   updateGlobalTest,
   deleteGlobalTest,
   importGlobalTest,
+  updateImportedGlobalTest,
 } = require("../controllers/test.controller");
 const authMiddleware = require("../middlewares/auth.middleware");
 const cacheMiddleware = require("../middlewares/cache.middleware");
@@ -74,6 +75,13 @@ router.post(
   authMiddleware.authorizePermissions("manage_tests"),
   auditMiddleware("IMPORTED", "Test"),
   importGlobalTest
+);
+
+router.post(
+  "/global/:id/update-imported",
+  authMiddleware.authorizePermissions("manage_tests"),
+  auditMiddleware("UPDATED_FROM_GLOBAL", "Test"),
+  updateImportedGlobalTest
 );
 
 // ==========================================

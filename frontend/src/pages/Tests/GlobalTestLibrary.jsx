@@ -11,11 +11,18 @@ import {
   Building2,
   Globe,
   Loader2,
+  AlertTriangle,
+  RefreshCw,
 } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { canManageTests } from "../../config/permissions";
 import { toast } from "../../lib/toast";
-import { useGetGlobalTestsQuery, useImportGlobalTestMutation, useDeleteTestMutation } from "../../services/testApi";
+import {
+  useGetGlobalTestsQuery,
+  useImportGlobalTestMutation,
+  useUpdateImportedGlobalTestMutation,
+  useDeleteTestMutation,
+} from "../../services/testApi";
 
 export const GlobalTestLibrary = ({ onImportSuccess }) => {
   const { user } = useAuth();
@@ -26,7 +33,9 @@ export const GlobalTestLibrary = ({ onImportSuccess }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDept, setSelectedDept] = useState("ALL");
   const [previewTest, setPreviewTest] = useState(null);
+  const [confirmUpdateTest, setConfirmUpdateTest] = useState(null);
   const [importingId, setImportingId] = useState(null);
+  const [updatingId, setUpdatingId] = useState(null);
 
   const { data, isLoading: loading, error: fetchError, refetch } = useGetGlobalTestsQuery({
     search: searchQuery,
@@ -34,9 +43,11 @@ export const GlobalTestLibrary = ({ onImportSuccess }) => {
   });
 
   const [importGlobalTest] = useImportGlobalTestMutation();
+  const [updateImportedGlobalTest] = useUpdateImportedGlobalTestMutation();
   const [deleteTest] = useDeleteTestMutation();
 
   const globalTests = data?.globalTests || [];
+  const updatesAvailableCount = data?.updatesAvailableCount || globalTests.filter(gt => gt.hasUpdateAvailable).length;
 
   useEffect(() => {
     if (fetchError) {
@@ -68,6 +79,22 @@ export const GlobalTestLibrary = ({ onImportSuccess }) => {
     }
   };
 
+  const handleUpdateFromGlobal = async (globalTest) => {
+    setUpdatingId(globalTest._id);
+    try {
+      const res = await updateImportedGlobalTest(globalTest._id).unwrap();
+      toast.success(res.message || `Updated "${globalTest.name}" to version ${globalTest.version}!`);
+      if (onImportSuccess) {
+        onImportSuccess(res?.test);
+      }
+      refetch();
+    } catch (err) {
+      toast.error(err.data?.message || "Failed to update test template.");
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
   const handleDeleteGlobal = async (id, name) => {
     if (!window.confirm(`Are you sure you want to delete global test template "${name}"?`)) {
       return;
@@ -82,6 +109,23 @@ export const GlobalTestLibrary = ({ onImportSuccess }) => {
 
   return (
     <div className="space-y-6">
+      {/* Notification Banner when updates are available */}
+      {updatesAvailableCount > 0 && !isSystemAdmin && (
+        <div className="bg-amber-50 border border-amber-200 text-amber-900 rounded-cards p-4 flex items-center justify-between gap-4 shadow-sm animate-fade-in">
+          <div className="flex items-center space-x-3">
+            <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
+            <div>
+              <h4 className="font-bold text-sm font-abcfavoritvariable">
+                {updatesAvailableCount} {updatesAvailableCount === 1 ? 'Global Test Update Available' : 'Global Test Updates Available'}
+              </h4>
+              <p className="text-xs text-amber-700 mt-0.5 font-inter">
+                Newer global test versions are available. Click <strong>"Update"</strong> on any card to synchronize the latest test template definition while preserving your laboratory pricing.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Search & Filter Header */}
       <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 bg-paper-white border border-cream-border p-4 rounded-cards shadow-sm">
         <div className="relative flex-1">
@@ -143,6 +187,7 @@ export const GlobalTestLibrary = ({ onImportSuccess }) => {
               gt.subTests?.reduce((sum, st) => sum + (st.price || 0), 0) || gt.price || 0;
 
             const isThisImporting = importingId === gt._id;
+            const isThisUpdating = updatingId === gt._id;
 
             return (
               <div
@@ -151,17 +196,29 @@ export const GlobalTestLibrary = ({ onImportSuccess }) => {
               >
                 <div className="space-y-4">
                   {/* Top Badge Row */}
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-lavender-mist/80 text-electric-cobalt">
-                      <Globe className="w-3 h-3" />
-                      {gt.departmentId?.name || "General"}
-                    </span>
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-lavender-mist/80 text-electric-cobalt">
+                        <Globe className="w-3 h-3" />
+                        {gt.departmentId?.name || "General"}
+                      </span>
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold font-mono bg-slate-100 text-slate-700 border border-slate-200">
+                        Global v{gt.version || 1}
+                      </span>
+                    </div>
 
                     {gt.isImported && (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200">
-                        <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                        Imported
-                      </span>
+                      gt.hasUpdateAvailable ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-50 text-amber-700 border border-amber-200">
+                          <AlertTriangle className="w-3 h-3 text-amber-600" />
+                          Update Available (v{gt.importedVersion || 1})
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200">
+                          <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                          Up to Date ✓
+                        </span>
+                      )
                     )}
                   </div>
 
@@ -235,13 +292,34 @@ export const GlobalTestLibrary = ({ onImportSuccess }) => {
                       </div>
                     ) : canImport ? (
                       gt.isImported ? (
-                        <button
-                          disabled
-                          className="inline-flex items-center space-x-1.5 px-4 py-2 rounded-buttons border border-cream-border bg-paper-white text-stone text-xs font-semibold"
-                        >
-                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                          <span>Already Imported</span>
-                        </button>
+                        gt.hasUpdateAvailable ? (
+                          <button
+                            onClick={() => setConfirmUpdateTest(gt)}
+                            disabled={isThisUpdating}
+                            className="inline-flex items-center space-x-1.5 px-4 py-2 rounded-buttons text-xs font-semibold transition bg-amber-600 text-paper-white hover:bg-amber-700 disabled:opacity-50"
+                            title="Update template to latest global version"
+                          >
+                            {isThisUpdating ? (
+                              <>
+                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                <span>Updating...</span>
+                              </>
+                            ) : (
+                              <>
+                                <RefreshCw className="w-3.5 h-3.5" />
+                                <span>Update</span>
+                              </>
+                            )}
+                          </button>
+                        ) : (
+                          <button
+                            disabled
+                            className="inline-flex items-center space-x-1.5 px-4 py-2 rounded-buttons border border-cream-border bg-paper-white text-stone text-xs font-semibold"
+                          >
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                            <span>Up to Date ✓</span>
+                          </button>
+                        )
                       ) : (
                         <button
                           onClick={() => handleImport(gt)}
@@ -267,6 +345,85 @@ export const GlobalTestLibrary = ({ onImportSuccess }) => {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Confirmation Dialog for Update */}
+      {confirmUpdateTest && (
+        <div className="fixed inset-0 z-50 bg-charcoal/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-paper-white border border-cream-border rounded-cards max-w-md w-full p-6 shadow-2xl space-y-5 animate-fade-in">
+            <div className="flex items-start justify-between">
+              <div className="flex items-center space-x-2 text-amber-600 font-bold text-base font-abcfavoritvariable">
+                <AlertTriangle className="w-5 h-5 shrink-0" />
+                <span>Update Global Test Template</span>
+              </div>
+              <button
+                onClick={() => setConfirmUpdateTest(null)}
+                className="text-stone hover:text-charcoal text-sm font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="text-sm text-charcoal space-y-3 font-inter">
+              <p className="font-medium text-stone">
+                A newer version of this Global Test is available for <strong className="text-charcoal font-bold">"{confirmUpdateTest.name}"</strong>.
+              </p>
+
+              <div className="grid grid-cols-2 gap-3 bg-warm-canvas p-3 rounded-md text-xs font-mono border border-cream-border">
+                <div>
+                  <span className="text-stone block uppercase tracking-wider text-[10px]">Current Version</span>
+                  <span className="font-bold text-graphite text-sm">v{confirmUpdateTest.importedVersion || 1}</span>
+                </div>
+                <div>
+                  <span className="text-amber-700 block uppercase tracking-wider text-[10px]">Latest Version</span>
+                  <span className="font-bold text-amber-700 text-sm">v{confirmUpdateTest.version}</span>
+                </div>
+              </div>
+
+              <div className="space-y-1.5 text-xs text-stone bg-slate-50 p-3 rounded border border-slate-200">
+                <p className="font-semibold text-charcoal">Update details:</p>
+                <ul className="list-disc pl-4 space-y-1">
+                  <li>Updating will synchronize the latest test template definition.</li>
+                  <li>Laboratory-specific values such as pricing will be preserved.</li>
+                  <li>Historical reports will NOT be modified.</li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end space-x-3 pt-2 border-t border-cream-border">
+              <button
+                type="button"
+                onClick={() => setConfirmUpdateTest(null)}
+                disabled={updatingId === confirmUpdateTest._id}
+                className="px-4 py-2 border border-cream-border rounded-buttons text-xs font-semibold text-graphite hover:bg-warm-canvas disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  const target = confirmUpdateTest;
+                  setConfirmUpdateTest(null);
+                  await handleUpdateFromGlobal(target);
+                }}
+                disabled={updatingId === confirmUpdateTest._id}
+                className="px-4 py-2 bg-amber-600 text-paper-white rounded-buttons text-xs font-semibold hover:bg-amber-700 disabled:opacity-50 inline-flex items-center space-x-1.5"
+              >
+                {updatingId === confirmUpdateTest._id ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Updating...</span>
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw className="w-3.5 h-3.5" />
+                    <span>Update Test</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
@@ -353,13 +510,37 @@ export const GlobalTestLibrary = ({ onImportSuccess }) => {
                 </button>
                 {canImport && (
                   previewTest.isImported ? (
-                    <button
-                      disabled
-                      className="px-4 py-2 rounded-buttons border border-cream-border bg-paper-white text-stone text-xs font-semibold inline-flex items-center gap-1.5"
-                    >
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                      <span>Already Imported</span>
-                    </button>
+                    previewTest.hasUpdateAvailable ? (
+                      <button
+                        onClick={() => {
+                          const target = previewTest;
+                          setPreviewTest(null);
+                          setConfirmUpdateTest(target);
+                        }}
+                        disabled={updatingId === previewTest._id}
+                        className="px-4 py-2 bg-amber-600 text-paper-white rounded-buttons text-xs font-semibold hover:bg-amber-700 disabled:opacity-50 inline-flex items-center gap-1.5"
+                      >
+                        {updatingId === previewTest._id ? (
+                          <>
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            <span>Updating...</span>
+                          </>
+                        ) : (
+                          <>
+                            <RefreshCw className="w-3.5 h-3.5" />
+                            <span>Update</span>
+                          </>
+                        )}
+                      </button>
+                    ) : (
+                      <button
+                        disabled
+                        className="px-4 py-2 rounded-buttons border border-cream-border bg-paper-white text-stone text-xs font-semibold inline-flex items-center gap-1.5"
+                      >
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                        <span>Up to Date ✓</span>
+                      </button>
+                    )
                   ) : (
                     <button
                       onClick={() => {
