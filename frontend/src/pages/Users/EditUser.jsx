@@ -39,6 +39,7 @@ export const EditUser = () => {
       updateUser({
         id,
         status: newStatus,
+        isAuthorized: newStatus,
         permissions: selectedPermissions,
       }).unwrap(),
       {

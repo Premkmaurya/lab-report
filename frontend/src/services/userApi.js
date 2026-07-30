@@ -20,7 +20,7 @@ export const userApi = apiSlice.injectEndpoints({
 
     createUser: builder.mutation({
       query: (userData) => ({
-        url: '/auth/register',
+        url: '/auth/users',
         method: 'POST',
         body: userData,
       }),
@@ -31,11 +31,23 @@ export const userApi = apiSlice.injectEndpoints({
     }),
 
     updateUser: builder.mutation({
-      query: ({ id, ...userData }) => ({
-        url: `/auth/users/${id}`,
-        method: 'PUT',
-        body: userData,
-      }),
+      query: ({ id, status, isAuthorized, ...userData }) => {
+        const normalizedStatus = typeof status === 'boolean'
+          ? status
+          : typeof isAuthorized === 'boolean'
+            ? isAuthorized
+            : undefined;
+
+        return {
+          url: `/auth/users/${id}/status`,
+          method: 'PATCH',
+          body: {
+            ...userData,
+            status: normalizedStatus,
+            isAuthorized: normalizedStatus,
+          },
+        };
+      },
       invalidatesTags: (result, error, { id }) => [
         { type: 'User', id },
         { type: 'User', id: 'LIST' },

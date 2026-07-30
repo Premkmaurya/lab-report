@@ -216,7 +216,7 @@ const updateUserStatus = asyncHandler(async (req, res) => {
     throw new ForbiddenError("You cannot update your own account status");
   }
 
-  const { status, permissions, role } = req.body;
+    const { status, permissions, role, isAuthorized } = req.body;
 
   const query = { _id: req.params.id, ...req.tenantFilter };
   const user = await User.findOne(query);
@@ -224,8 +224,14 @@ const updateUserStatus = asyncHandler(async (req, res) => {
     throw new NotFoundError("User not found");
   }
 
-  if (typeof status === "boolean") {
-    user.isAuthorized = status;
+  const normalizedStatus = typeof status === "boolean"
+    ? status
+    : typeof isAuthorized === "boolean"
+      ? isAuthorized
+      : undefined;
+
+  if (normalizedStatus !== undefined) {
+    user.isAuthorized = normalizedStatus;
   }
 
   if (permissions !== undefined) {

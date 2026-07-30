@@ -101,10 +101,32 @@ const validateUpdateUserStatus = [
   param("id")
     .isMongoId()
     .withMessage("Invalid user ID format"),
-  
+
+  body("status")
+    .optional()
+    .isBoolean()
+    .withMessage("status must be a boolean value"),
+
   body("isAuthorized")
+    .optional()
     .isBoolean()
     .withMessage("isAuthorized must be a boolean value"),
+
+  body("permissions")
+    .optional()
+    .isArray()
+    .withMessage("Permissions must be an array")
+    .custom((value) => {
+      if (value && value.includes("create_user")) {
+        throw new Error("'create_user' permission cannot be assigned");
+      }
+      return true;
+    }),
+
+  body("role")
+    .optional()
+    .isIn(["user", "admin", "lab_technician", "receptionist"])
+    .withMessage("Role must be a valid user role"),
 ];
 
 module.exports = {
