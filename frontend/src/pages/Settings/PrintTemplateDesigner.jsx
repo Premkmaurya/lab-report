@@ -30,6 +30,8 @@ const DEFAULT_ELEMENT_STYLES = {
     color: "",
   },
   departmentHeading: {
+    enabled: true,
+    show: true,
     fontSize: "25px",
     fontWeight: "700",
     textAlign: "center",
@@ -867,6 +869,29 @@ export const PrintTemplateDesigner = () => {
                   </>
                 ) : (
                   <>
+                    {selectedElement === "departmentHeading" && (
+                      <div className="flex items-center space-x-2 pb-3 mb-3 border-b border-slate-200">
+                        <input
+                          type="checkbox"
+                          id="showDeptHeading"
+                          checked={
+                            getElementValue("enabled", "departmentHeading") !== false &&
+                            getElementValue("show", "departmentHeading") !== false
+                          }
+                          onChange={(e) => {
+                            handleElementChange("enabled", e.target.checked, "departmentHeading");
+                            handleElementChange("show", e.target.checked, "departmentHeading");
+                          }}
+                          className="rounded border-slate-300 text-electric-cobalt focus:ring-electric-cobalt cursor-pointer"
+                        />
+                        <label
+                          htmlFor="showDeptHeading"
+                          className="text-sm font-medium text-slate-700 cursor-pointer"
+                        >
+                          Show Department Headings
+                        </label>
+                      </div>
+                    )}
                     <div>
                       <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
                         Font Size

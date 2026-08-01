@@ -232,6 +232,7 @@ const createPatientTest = asyncHandler(async (req, res) => {
             allowedValues: st.allowedValues || [],
             unit: st.unit || "",
             normalRange: st.normalRange || "",
+            referenceRanges: st.referenceRanges || [],
             value: "",
             textBlockValue: isTb ? (st.textBlockSettings?.defaultText || "") : "",
           };
@@ -370,6 +371,7 @@ const addTestToReport = asyncHandler(async (req, res) => {
         allowedValues: st.allowedValues || [],
         unit: st.unit || "",
         normalRange: st.normalRange || "",
+        referenceRanges: st.referenceRanges || [],
         value: "",
         textBlockValue: isTb ? (st.textBlockSettings?.defaultText || "") : "",
       };

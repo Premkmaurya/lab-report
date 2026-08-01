@@ -4,6 +4,67 @@ const asyncHandler = require("../utils/asyncHandler");
 const { BadRequestError, NotFoundError, ConflictError, ForbiddenError } = require("../utils/errors");
 const { invalidateCacheKey, invalidateCachePattern } = require("../services/cache.service");
 
+const convertToDaysHelper = (age, unit = "Years") => {
+  const numericAge = parseFloat(age);
+  if (isNaN(numericAge) || numericAge < 0) return 0;
+  const normalizedUnit = (unit || "Years").toLowerCase().trim();
+  if (normalizedUnit.startsWith("day")) return numericAge;
+  if (normalizedUnit.startsWith("month")) return numericAge * 30.4375;
+  return numericAge * 365;
+};
+
+const validateReferenceRangesHelper = (rules, paramName = "Parameter") => {
+  if (!Array.isArray(rules) || rules.length === 0) return;
+
+  for (let i = 0; i < rules.length; i++) {
+    const r = rules[i];
+    const fromNum = parseFloat(r.ageFrom);
+    const toNum = parseFloat(r.ageTo);
+
+    if (isNaN(fromNum) || fromNum < 0) {
+      throw new BadRequestError(`"${paramName}" Rule #${i + 1}: Age From cannot be negative or invalid`);
+    }
+    if (isNaN(toNum) || toNum < 0) {
+      throw new BadRequestError(`"${paramName}" Rule #${i + 1}: Age To cannot be negative or invalid`);
+    }
+    if (fromNum > toNum) {
+      throw new BadRequestError(`"${paramName}" Rule #${i + 1}: Age From (${fromNum}) cannot be greater than Age To (${toNum})`);
+    }
+    if (!r.referenceRange || !r.referenceRange.trim()) {
+      throw new BadRequestError(`"${paramName}" Rule #${i + 1}: Reference Range string cannot be empty`);
+    }
+  }
+
+  for (let i = 0; i < rules.length; i++) {
+    for (let j = i + 1; j < rules.length; j++) {
+      const r1 = rules[i];
+      const r2 = rules[j];
+
+      const g1 = (r1.gender || "Any").toLowerCase();
+      const g2 = (r2.gender || "Any").toLowerCase();
+
+      const fromDays1 = convertToDaysHelper(r1.ageFrom, r1.ageUnit);
+      const toDays1 = convertToDaysHelper(r1.ageTo, r1.ageUnit);
+      const fromDays2 = convertToDaysHelper(r2.ageFrom, r2.ageUnit);
+      const toDays2 = convertToDaysHelper(r2.ageTo, r2.ageUnit);
+
+      if (g1 === g2 && fromDays1 === fromDays2 && toDays1 === toDays2) {
+        throw new BadRequestError(`"${paramName}": Duplicate reference range rule detected for Rule #${i + 1} and Rule #${j + 1}`);
+      }
+
+      const genderOverlaps = g1 === g2;
+      if (genderOverlaps) {
+        const ageOverlaps = Math.max(fromDays1, fromDays2) <= Math.min(toDays1, toDays2);
+        if (ageOverlaps) {
+          throw new BadRequestError(
+            `"${paramName}": Overlapping age range detected between Rule #${i + 1} (${r1.ageFrom}-${r1.ageTo} ${r1.ageUnit}, ${r1.gender}) and Rule #${j + 1} (${r2.ageFrom}-${r2.ageTo} ${r2.ageUnit}, ${r2.gender})`
+          );
+        }
+      }
+    }
+  }
+};
+
 const validateSubTests = (subTests) => {
   if (subTests && Array.isArray(subTests)) {
     for (const st of subTests) {
@@ -23,6 +84,10 @@ const validateSubTests = (subTests) => {
         st.allowedValues = uniqueValues;
       } else {
         st.allowedValues = [];
+      }
+
+      if (st.referenceRanges && Array.isArray(st.referenceRanges)) {
+        validateReferenceRangesHelper(st.referenceRanges, st.name || 'Parameter');
       }
     }
   }

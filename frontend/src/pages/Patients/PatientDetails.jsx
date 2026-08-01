@@ -349,6 +349,7 @@ export const PatientDetails = () => {
                               key={testIdStr}
                               reportId={report._id}
                               test={test}
+                              patient={report.patientId || report.patient || patient}
                               isExpanded={expandedTestId === reportTestIdStr}
                               isEditing={editingTestId === reportTestIdStr}
                               onToggleExpand={() => {

@@ -3,10 +3,12 @@ import { reportService } from "../../services/reportService";
 import { Save, ShieldAlert, ChevronDown, ChevronRight, Edit2 } from "lucide-react";
 import { useForm, useFieldArray, useWatch } from "react-hook-form";
 import { checkAbnormalResult } from "../../utils/resultUtils";
+import { resolveReferenceRange } from "../../utils/referenceRangeResolver";
 
 export const InlineTestEditor = ({
   reportId,
   test,
+  patient,
   isExpanded,
   isEditing,
   onToggleExpand,
@@ -16,8 +18,17 @@ export const InlineTestEditor = ({
 }) => {
   const [loadingTemplate, setLoadingTemplate] = useState(false);
   const [testTemplate, setTestTemplate] = useState(null);
+  const [patientInfo, setPatientInfo] = useState(patient || test?.patientId || test?.patient || null);
   const [errorMsg, setErrorMsg] = useState("");
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (patient) {
+      setPatientInfo(patient);
+    } else if (test?.patientId || test?.patient) {
+      setPatientInfo(test.patientId || test.patient);
+    }
+  }, [patient, test]);
 
   const inputRefs = useRef([]);
   const saveButtonRef = useRef(null);
@@ -579,13 +590,29 @@ export const InlineTestEditor = ({
                                 <input type="hidden" {...register(`results.${index}.unit`)} />
                               </td>
                               <td className="py-3 px-3 align-middle">
-                                {item.normalRange ? (
-                                  <span className="text-xs text-stone px-2 py-1 bg-warm-canvas rounded border border-cream-border inline-block">
-                                    {item.normalRange}
-                                  </span>
-                                ) : (
-                                  <span className="text-xs text-stone/50 italic">None</span>
-                                )}
+                                {(() => {
+                                  const resolvedEditRules =
+                                    (Array.isArray(item.referenceRanges) && item.referenceRanges.length > 0)
+                                      ? item.referenceRanges
+                                      : (Array.isArray(testTemplate?.subTests?.[index]?.referenceRanges) && testTemplate.subTests[index].referenceRanges.length > 0
+                                          ? testTemplate.subTests[index].referenceRanges
+                                          : []);
+
+                                  const displayRange = resolveReferenceRange(
+                                    {
+                                      normalRange: item.normalRange,
+                                      referenceRanges: resolvedEditRules
+                                    },
+                                    patientInfo || patient || test?.patientId || test?.patient || {}
+                                  );
+                                  return displayRange ? (
+                                    <span className="text-xs text-stone px-2 py-1 bg-warm-canvas rounded border border-cream-border inline-block font-medium">
+                                      {displayRange}
+                                    </span>
+                                  ) : (
+                                    <span className="text-xs text-stone/50 italic">None</span>
+                                  );
+                                })()}
                                 <input type="hidden" {...register(`results.${index}.normalRange`)} />
                               </td>
                             </tr>
@@ -674,6 +701,21 @@ export const InlineTestEditor = ({
                           );
                         }
 
+                        const resolvedViewRules =
+                          (Array.isArray(item.referenceRanges) && item.referenceRanges.length > 0)
+                            ? item.referenceRanges
+                            : (Array.isArray(testTemplate?.subTests?.[index]?.referenceRanges) && testTemplate.subTests[index].referenceRanges.length > 0
+                                ? testTemplate.subTests[index].referenceRanges
+                                : []);
+
+                        const displayRange = resolveReferenceRange(
+                          {
+                            normalRange: item.normalRange,
+                            referenceRanges: resolvedViewRules
+                          },
+                          patientInfo || patient || {}
+                        );
+
                         return (
                           <React.Fragment key={index}>
                             <tr className="hover:bg-warm-canvas/20">
@@ -681,7 +723,7 @@ export const InlineTestEditor = ({
                               <td className="py-2 px-3 text-sm text-charcoal">
                                 {item.value ? (
                                   (() => {
-                                    const { isAbnormal, status, formattedValue } = checkAbnormalResult(item.value, item.normalRange, item.isListParameter);
+                                    const { isAbnormal, status, formattedValue } = checkAbnormalResult(item.value, displayRange, item.isListParameter);
 
                                     return (
                                       <span className={`font-semibold ${isAbnormal ? 'font-bold text-red-600' : ''}`}>
@@ -696,8 +738,8 @@ export const InlineTestEditor = ({
                               <td className="py-2 px-3 text-xs text-stone text-center">
                                 {item.unit || "-"}
                               </td>
-                              <td className="py-2 px-3 text-xs text-stone">
-                                {item.normalRange || "-"}
+                              <td className="py-2 px-3 text-xs text-stone font-medium">
+                                {displayRange || "-"}
                               </td>
                             </tr>
                             {item.isTextBlock && item.textBlockValue && item.textBlockValue.trim() !== "" && (

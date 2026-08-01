@@ -35,7 +35,7 @@ export const PageRenderer = ({ patient, report, customTemplate, zoom = 1 }) => {
 
   const rows = useMemo(() => {
     if (!report || !patient) return [];
-    return buildRows(report);
+    return buildRows(report, patient);
   }, [report, patient]);
 
   // Derive layout constants from template

@@ -65,7 +65,7 @@ export const PrintOrchestrator = ({
   const ctx      = usePrintTemplate();
   const template = customTemplate || (ctx ? ctx.template : null);
 
-  const rows = useMemo(() => buildRows(report), [report]);
+  const rows = useMemo(() => buildRows(report, patient), [report, patient]);
 
   // Derive content width for the measurement probe
   const page         = template?.page || {};

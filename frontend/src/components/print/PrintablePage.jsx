@@ -131,6 +131,9 @@ export const PrintablePage = ({
   /* ── Row rendering ────────────────────────────────────────────── */
   const renderRow = (row, i) => {
     if (row.type === 'department') {
+      if (deptStyles.enabled === false || deptStyles.show === false) {
+        return null;
+      }
       return (
         <tr key={i}>
           <td

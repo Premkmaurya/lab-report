@@ -3,6 +3,14 @@ const tenantPlugin = require("../plugins/tenantPlugin");
 
 const elementStyleSchema = new mongoose.Schema(
   {
+    enabled: {
+      type: Boolean,
+      default: true,
+    },
+    show: {
+      type: Boolean,
+      default: true,
+    },
     fontSize: {
       type: String,
       default: "",
@@ -140,6 +148,8 @@ const printTemplateSchema = new mongoose.Schema(
       departmentHeading: {
         type: elementStyleSchema,
         default: () => ({
+          enabled: true,
+          show: true,
           fontSize: "25px",
           fontWeight: "700",
           textAlign: "center",

@@ -70,7 +70,10 @@ export const paginateRows = (rows, measurements, template) => {
 
     // Emit continuation labels for whichever context is active.
     // Heights use the row-height map if available, otherwise fall back to estimates.
-    if (currentDepartment) {
+    const deptHeadingStyles = template?.elements?.departmentHeading || {};
+    const showDeptHeading = deptHeadingStyles.enabled !== false && deptHeadingStyles.show !== false;
+
+    if (currentDepartment && showDeptHeading) {
       currentPageRows.push({
         type:           'department',
         content:        `${currentDepartment} (CONT.)`,

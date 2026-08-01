@@ -43,12 +43,15 @@ export const estimateRowHeights = (rows, template) => {
   const baseFontSize  = parseInt(template?.typography?.baseFontSize || 13);
   const rowPaddingPx  = 8; // rowPad (4px top + 4px bottom) from PrintablePage
 
+  const deptHeadingStyles = template?.elements?.departmentHeading || {};
+  const showDeptHeading = deptHeadingStyles.enabled !== false && deptHeadingStyles.show !== false;
+
   rows.forEach((row, i) => {
     let h = 0;
 
     if (row.type === 'department') {
       // paddingTop(20) + text at 18px (~22px) + paddingBottom(6) = 48px
-      h = 48;
+      h = showDeptHeading ? 48 : 0;
     } else if (row.type === 'test') {
       // paddingTop(14) + text at 15px (~19px) + paddingBottom(4) = 37px
       h = 37;
@@ -76,7 +79,11 @@ export const estimateRowHeights = (rows, template) => {
       h = row.height || 16;
     }
 
-    heights.rows[i] = Math.max(h, 20); // minimum 20px per row
+    if (row.type === 'department' && !showDeptHeading) {
+      heights.rows[i] = 0;
+    } else {
+      heights.rows[i] = Math.max(h, 20); // minimum 20px per row
+    }
   });
 
   // Fallback heights for continuation header rows inserted by PaginationPage.

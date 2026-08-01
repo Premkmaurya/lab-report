@@ -50,6 +50,15 @@ const patientTestItemSchema = new mongoose.Schema(
           type: String,
           trim: true,
         },
+        referenceRanges: [
+          {
+            ageFrom: { type: Number, default: 0 },
+            ageTo: { type: Number, default: 120 },
+            ageUnit: { type: String, default: "Years" },
+            gender: { type: String, default: "Any" },
+            referenceRange: { type: String, default: "" },
+          },
+        ],
         textBlockValue: {
           type: String,
           trim: true,

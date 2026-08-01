@@ -1,9 +1,16 @@
-export const buildRows = (report) => {
+import { resolveReferenceRange } from "../../utils/referenceRangeResolver";
+
+export const buildRows = (report, patientOverride = null) => {
   const rows = [];
 
   if (!report || !report.tests || report.tests.length === 0) {
     return rows;
   }
+
+  const patient =
+    (patientOverride && typeof patientOverride === 'object' && (patientOverride.age !== undefined || patientOverride.gender !== undefined))
+      ? patientOverride
+      : (report.patientId && typeof report.patientId === 'object' ? report.patientId : (report.patient || patientOverride || {}));
 
   const isValueValid = (val) => {
     return val !== null && val !== undefined && String(val).trim() !== "";
@@ -79,11 +86,30 @@ export const buildRows = (report) => {
             const hasTb = isTb && isValueValid(tbVal);
 
             if (hasVal || hasTb) {
+               // Prefer rules stored on the result row; fall back to the live
+               // test template sub-test (handles legacy reports saved before
+               // referenceRanges was persisted on result rows).
+               const resolvedRules =
+                  (Array.isArray(res.referenceRanges) && res.referenceRanges.length > 0)
+                     ? res.referenceRanges
+                     : (Array.isArray(subTestTemplate?.referenceRanges) && subTestTemplate.referenceRanges.length > 0
+                           ? subTestTemplate.referenceRanges
+                           : []);
+
+               const effectiveRange = resolveReferenceRange(
+                  {
+                     normalRange: res.normalRange,
+                     referenceRanges: resolvedRules
+                  },
+                  patient
+               );
+
                const resolvedRes = {
                   ...res,
                   value: val,
                   textBlockValue: tbVal,
-                  isTextBlock: isTb
+                  isTextBlock: isTb,
+                  normalRange: effectiveRange,
                };
 
                if (currentSection) {

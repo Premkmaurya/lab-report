@@ -1,7 +1,8 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { checkAbnormalResult } from "../../utils/resultUtils";
+import { resolveReferenceRange } from "../../utils/referenceRangeResolver";
 
-export const TestResultTable = ({ test, rowSpacing = 4, template }) => {
+export const TestResultTable = ({ test, rowSpacing = 4, template, patient }) => {
   const testHeadingStyles = template?.elements?.testHeading || {};
   const sectionHeaderStyles = template?.elements?.sectionHeader || {};
   const profileStyles = template?.elements?.profileName || {};
@@ -10,6 +11,7 @@ export const TestResultTable = ({ test, rowSpacing = 4, template }) => {
   const unitStyles = template?.elements?.unit || {};
   // using parameter styles for normal range if no dedicated one
   const normalRangeStyles = template?.elements?.unit || {}; // Since unit and normal range are similar
+  const patientInfo = patient || test?.patientId || test?.patient || {};
 
   return (
     <>
@@ -48,7 +50,21 @@ export const TestResultTable = ({ test, rowSpacing = 4, template }) => {
             );
           }
 
-          const { isAbnormal, status, formattedValue } = checkAbnormalResult(res.value, res.normalRange, res.isListParameter);
+          const resolvedRules =
+            (Array.isArray(item.referenceRanges) && item.referenceRanges.length > 0)
+              ? item.referenceRanges
+              : [];
+
+          const displayRange = resolveReferenceRange(
+            {
+              normalRange: item.normalRange,
+              referenceRanges: resolvedRules
+            },
+            patient || {}
+          );
+
+
+          const { isAbnormal, status, formattedValue } = checkAbnormalResult(res.value, displayRange, res.isListParameter);
 
           return (
             <tr key={index} className="bg-white">
@@ -57,8 +73,8 @@ export const TestResultTable = ({ test, rowSpacing = 4, template }) => {
                 style={{
                   paddingTop: `${rowSpacing}px`,
                   paddingBottom: `${rowSpacing}px`,
-                  wordBreak: 'break-word', 
-                  overflowWrap: 'anywhere', 
+                  wordBreak: 'break-word',
+                  overflowWrap: 'anywhere',
                   whiteSpace: 'normal',
                   ...parameterStyles,
                 }}
@@ -96,7 +112,7 @@ export const TestResultTable = ({ test, rowSpacing = 4, template }) => {
                   ...normalRangeStyles,
                 }}
               >
-                {res.normalRange}
+                {displayRange}
               </td>
             </tr>
           );

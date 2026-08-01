@@ -11,6 +11,7 @@ import { ArrowLeft, ShieldAlert, Trash2, Globe } from "lucide-react";
 import { toast } from "../../lib/toast";
 import { generateObjectId } from "../../utils/objectId";
 import { useQueryClient } from "@tanstack/react-query";
+import { ReferenceRangesModal } from "../../components/tests/ReferenceRangesModal";
 
 const ParameterSelect = ({ index, field, watch, setValue, register, errors }) => {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -142,6 +143,7 @@ export const CreateTest = () => {
   const [isCreatingDept, setIsCreatingDept] = useState(false);
   const [newDeptName, setNewDeptName] = useState("");
   const [isSavingDept, setIsSavingDept] = useState(false);
+  const [activeRangesModalIndex, setActiveRangesModalIndex] = useState(null);
 
   const {
     register,
@@ -706,6 +708,22 @@ export const CreateTest = () => {
                                 inputRefs.current[index].normalRange = el;
                               }}
                             />
+                            {(!isSection) && (!watch(`subTests.${index}.isListParameter`)) && (
+                              <div className="mt-1.5">
+                                <button
+                                  type="button"
+                                  onClick={() => setActiveRangesModalIndex(index)}
+                                  className="inline-flex items-center space-x-1 text-[11px] font-semibold text-electric-cobalt hover:underline cursor-pointer"
+                                >
+                                  <span>+ Age/Gender Ranges</span>
+                                  {watch(`subTests.${index}.referenceRanges`)?.length > 0 && (
+                                    <span className="ml-1 bg-electric-cobalt text-white rounded-full px-1.5 py-0.2 text-[10px]">
+                                      {watch(`subTests.${index}.referenceRanges`).length}
+                                    </span>
+                                  )}
+                                </button>
+                              </div>
+                            )}
                           </td>
                           <td className="px-4 py-3 align-top text-right">
                             {index !== fields.length - 1 && (
@@ -853,6 +871,18 @@ export const CreateTest = () => {
           </form>
         )}
       </div>
+
+      {activeRangesModalIndex !== null && (
+        <ReferenceRangesModal
+          isOpen={activeRangesModalIndex !== null}
+          onClose={() => setActiveRangesModalIndex(null)}
+          paramName={watch(`subTests.${activeRangesModalIndex}.name`)}
+          initialRules={getValues(`subTests.${activeRangesModalIndex}.referenceRanges`) || []}
+          onSave={(rules) => {
+            setValue(`subTests.${activeRangesModalIndex}.referenceRanges`, rules, { shouldDirty: true });
+          }}
+        />
+      )}
     </div>
   );
 };

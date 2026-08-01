@@ -2,6 +2,17 @@ const mongoose = require("mongoose");
 const mongooseDelete = require("mongoose-delete");
 const tenantPlugin = require("../plugins/tenantPlugin");
 
+const referenceRangeRuleSchema = new mongoose.Schema(
+  {
+    ageFrom: { type: Number, default: 0 },
+    ageTo: { type: Number, default: 120 },
+    ageUnit: { type: String, enum: ['Days', 'Months', 'Years'], default: 'Years' },
+    gender: { type: String, enum: ['Male', 'Female', 'Any', 'Child'], default: 'Any' },
+    referenceRange: { type: String, default: '' },
+  },
+  { _id: true }
+);
+
 const subTestSchema = new mongoose.Schema(
   {
     name: {
@@ -47,6 +58,10 @@ const subTestSchema = new mongoose.Schema(
     normalRange: {
       type: String,
       // optional: normal range may be omitted
+    },
+    referenceRanges: {
+      type: [referenceRangeRuleSchema],
+      default: [],
     },
     unit: {
       type: String,
