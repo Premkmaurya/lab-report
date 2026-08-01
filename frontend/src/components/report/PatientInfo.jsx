@@ -46,7 +46,7 @@ export const PatientInfo = ({ patient, report, template }) => {
   const reportDateStyles = getFieldStyles("reportDate");
 
   return (
-    <div className="border border-slate-300 p-4 mb-6 bg-white" style={{ lineHeight: lineGap }}>
+    <div className="p-4 mb-6 bg-white" style={{ lineHeight: lineGap }}>
       <div className="grid grid-cols-2 gap-2">
         <div className="space-y-1 relative z-20">
           <div className="grid grid-cols-[120px_auto] gap-2 items-baseline">

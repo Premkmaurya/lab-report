@@ -96,7 +96,6 @@ export const PageRenderer = ({ patient, report, customTemplate, zoom = 1 }) => {
     fontWeight:   '600',
     color:        '#0F172A',
     background:   '#F8FAFC',
-    borderBottom: '2px solid #CBD5E1',
     whiteSpace:   'nowrap',
   };
 

@@ -83,9 +83,7 @@ export const PrintablePage = ({
     padding:      '6px 12px',
     fontSize:     '12px',
     fontWeight:   '600',
-    color:        '#0F172A',
     background:   '#F8FAFC',
-    borderBottom: '2px solid #CBD5E1',
     whiteSpace:   'nowrap',
   };
 
@@ -260,13 +258,12 @@ export const PrintablePage = ({
           <td style={{
             padding:   `${rowPad}px 12px`,
             textAlign: 'center',
-            color:     '#475569',
             ...unitStyles,
             textTransform: 'none',
           }}>
             {res.unit}
           </td>
-          <td style={{ padding: `${rowPad}px 12px`, color: '#475569', ...rangeStyles }}>
+          <td style={{ padding: `${rowPad}px 12px`, ...rangeStyles }}>
             {res.normalRange}
           </td>
         </tr>
@@ -307,7 +304,7 @@ export const PrintablePage = ({
       <div style={{ flexShrink: 0, contain: 'layout' }}>
         {renderBarcode()}
         <PatientInfo patient={patient} report={report} template={template} />
-        <div style={{ borderBottom: '2px solid #CBD5E1', marginTop: '4px' }} />
+        <div style={{ marginTop: '4px' }} />
       </div>
 
       {/* ── 2. Table Header ───────────────────────────────────── */}
@@ -351,7 +348,6 @@ export const PrintablePage = ({
 
       {/* ── 4. Footer (always at page bottom via flex) ────────── */}
       <div style={{ flexShrink: 0 }}>
-        <div style={{ borderTop: '2px solid #CBD5E1', marginBottom: '4px' }} />
         <SignatureSection patient={patient} template={template} />
       </div>
     </div>

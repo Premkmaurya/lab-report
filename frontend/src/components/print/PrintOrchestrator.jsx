@@ -197,9 +197,8 @@ export const PrintOrchestrator = ({
             </thead>
           </table>
 
-          {/* Footer probe: includes the separator div and SignatureSection */}
+          {/* Footer probe: includes the SignatureSection */}
           <div ref={footerRef}>
-            <div style={{ borderTop: '2px solid #CBD5E1', marginBottom: '4px' }} />
             <SignatureSection patient={patient} template={template} />
           </div>
         </div>

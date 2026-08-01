@@ -27,8 +27,8 @@ export const estimateRowHeights = (rows, template) => {
     // Column label row (TEST NAME / RESULT / UNIT / REFERENCE RANGE)
     tableHeader: 36, // padding(6+6) + text(~20) + border(2) ≈ 34, rounded up
 
-    // Signature section including its mt-12 (48px) top margin
-    footer: 130,
+    // Signature section — mt-4 (16px) + pt-2 (8px) top spacing + h-16 (64px) signature area
+    footer: 98,
 
     rows:        {},
     pageMargins: { top: 20, bottom: 20 },

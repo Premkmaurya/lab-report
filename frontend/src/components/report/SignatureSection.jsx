@@ -21,7 +21,7 @@ export const SignatureSection = ({ patient, template }) => {
   const footerText = template?.elements?.footer?.text || "";
 
   return (
-    <div className="mt-12 pt-4 px-15 text-[13px] text-slate-900" style={footerStyles}>
+    <div className="mt-4 pt-2 px-15 text-[13px] text-slate-900" style={footerStyles}>
       <div className="flex justify-between">
         {/* Technician Signature Block */}
         <div className={`w-35 text-center ${!tech.show ? 'invisible' : ''}`}>
