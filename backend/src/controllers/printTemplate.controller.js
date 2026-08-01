@@ -1,6 +1,5 @@
 const PrintTemplate = require("../models/printTemplate.model");
 const Laboratory = require("../models/laboratory.model");
-const { invalidateCacheKey } = require("../services/cache.service");
 
 // Helper to determine target lab ID based on user role
 const resolveLabId = (req) => {
@@ -32,7 +31,6 @@ exports.getTemplate = async (req, res, next) => {
     if (!template) {
       try {
         template = await PrintTemplate.create({ laboratoryId: labId, userId: req.user._id });
-        await invalidateCacheKey(`settings:print-template:${labId}`);
       } catch (createErr) {
         if (createErr.code === 11000) {
           template = await PrintTemplate.findOne({ laboratoryId: labId });
@@ -66,9 +64,7 @@ exports.updateTemplate = async (req, res, next) => {
       { page, typography, elements, signatures, laboratoryId: labId, userId: req.user._id },
       { new: true, upsert: true, runValidators: true }
     );
-    
-    await invalidateCacheKey(`settings:print-template:${labId}`);
-    
+
     res.status(200).json({ success: true, data: template });
   } catch (error) {
     next(error);
@@ -85,9 +81,7 @@ exports.resetTemplate = async (req, res, next) => {
 
     await PrintTemplate.findOneAndDelete({ laboratoryId: labId });
     const template = await PrintTemplate.create({ laboratoryId: labId, userId: req.user._id });
-    
-    await invalidateCacheKey(`settings:print-template:${labId}`);
-    
+
     res.status(200).json({ success: true, data: template, message: "Template reset to defaults" });
   } catch (error) {
     next(error);
