@@ -14,7 +14,7 @@ export const printTemplateService = {
     if (laboratoryId) {
       payload.laboratoryId = laboratoryId;
     }
-    const response = await API.put(API_URL, payload);
+    const response = await API.patch(API_URL, payload);
     return response.data;
   },
 

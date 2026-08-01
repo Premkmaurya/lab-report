@@ -65,6 +65,7 @@ const DEFAULT_ELEMENT_STYLES = {
     fontSize: "12px",
     fontWeight: "400",
     color: "",
+    text: "",
   },
   barcode: {
     enabled: true,
@@ -100,6 +101,7 @@ export const PrintTemplateDesigner = () => {
 
   const {
     template: savedTemplate,
+    setTemplate,
     updateTemplate,
     resetTemplate,
     fetchTemplate,
@@ -109,46 +111,28 @@ export const PrintTemplateDesigner = () => {
 
   const [selectedLabId, setSelectedLabId] = useState(globalSelectedLabId || "");
 
-  const [template, setTemplate] = useState(null);
   const [activeTab, setActiveTab] = useState("page"); // page, typography, elements, footer
   const [selectedElement, setSelectedElement] = useState("patientHeader"); // patientHeader, departmentHeading, testHeading, sectionHeader, tableHeader, parameter, result, unit, footer
   const [error, setError] = useState(null);
   const [retrying, setRetrying] = useState(false);
 
-  // Resolve the laboratory ID for this designer session.
-  const resolveLabId = () => {
+  // Resolve the effective laboratory ID for this designer session dynamically.
+  const effectiveLabId = React.useMemo(() => {
     if (isSystemAdmin) {
       return selectedLabId || globalSelectedLabId || (laboratories.length > 0 ? laboratories[0]._id : "");
     }
     return user?.laboratoryId || globalSelectedLabId || "";
-  };
+  }, [isSystemAdmin, selectedLabId, globalSelectedLabId, laboratories, user]);
 
-  // Fetch template on mount and when the selected laboratory changes.
-  const hasFetchedRef = React.useRef(false);
+  // Fetch template on mount and whenever the effective laboratory ID resolves or changes.
   useEffect(() => {
-    const labId = resolveLabId();
-    if (labId) {
-      hasFetchedRef.current = true;
-      fetchTemplate(labId);
+    if (effectiveLabId) {
+      fetchTemplate(effectiveLabId);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedLabId]);
-
-  // On first mount, also trigger a fetch (selectedLabId may already be set via useState initializer).
-  useEffect(() => {
-    if (!hasFetchedRef.current) {
-      const labId = resolveLabId();
-      if (labId) {
-        hasFetchedRef.current = true;
-        fetchTemplate(labId);
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [effectiveLabId, fetchTemplate]);
 
   const handleLabChange = (newLabId) => {
     setSelectedLabId(newLabId);
-    // The useEffect watching selectedLabId will fire fetchTemplate.
   };
 
   // Zoom state
@@ -159,7 +143,7 @@ export const PrintTemplateDesigner = () => {
     setRetrying(true);
     setError(null);
     try {
-      await fetchTemplate(resolveLabId());
+      await fetchTemplate(effectiveLabId);
     } catch (err) {
       console.error("[PrintTemplateDesigner] Retry fetch template failed:", err);
       setError(err.message || "Failed to load template");
@@ -183,9 +167,9 @@ export const PrintTemplateDesigner = () => {
     setTemplate((prev) => ({
       ...prev,
       elements: {
-        ...prev.elements,
+        ...(prev?.elements || {}),
         [elementKey]: {
-          ...prev?.elements?.[elementKey],
+          ...(prev?.elements?.[elementKey] || {}),
           [field]: value,
         },
       },
@@ -196,9 +180,9 @@ export const PrintTemplateDesigner = () => {
     setTemplate((prev) => ({
       ...prev,
       elements: {
-        ...prev.elements,
+        ...(prev?.elements || {}),
         barcode: {
-          ...prev?.elements?.barcode,
+          ...(prev?.elements?.barcode || {}),
           [key]: value,
         },
       },
@@ -277,26 +261,39 @@ export const PrintTemplateDesigner = () => {
     return { ...base, page, typography, elements, signatures };
   };
 
-  // Initialize local form state whenever savedTemplate changes (after fetch completes).
-  useEffect(() => {
-    if (!loading && savedTemplate) {
-      setTemplate(buildTemplateFromSaved(savedTemplate));
-      setError(null);
-    } else if (!loading && !savedTemplate) {
-      // No template in DB yet — use pure defaults (first-time setup).
-      setTemplate({
-        page: { ...DEFAULT_PAGE_SETTINGS },
-        typography: { baseFont: "Times New Roman, serif", lineHeight: "1.5" },
-        elements: JSON.parse(JSON.stringify(DEFAULT_ELEMENT_STYLES)),
-        signatures: {
-          technician: { name: "Lab Technician", designation: "Lab Technician", show: true, signatureImage: "", showSignatureImage: false },
-          pathologist: { name: "", designation: "Pathologist", qualification: "", registrationNumber: "", show: true, signatureImage: "", showSignatureImage: false },
+  const defaultTemplate = React.useMemo(
+    () => ({
+      page: { ...DEFAULT_PAGE_SETTINGS },
+      typography: { baseFont: "Times New Roman, serif", lineHeight: "1.5" },
+      elements: JSON.parse(JSON.stringify(DEFAULT_ELEMENT_STYLES)),
+      signatures: {
+        technician: {
+          name: "Lab Technician",
+          designation: "Lab Technician",
+          show: true,
+          signatureImage: "",
+          showSignatureImage: false,
         },
-      });
-      setError(null);
+        pathologist: {
+          name: "",
+          designation: "Pathologist",
+          qualification: "",
+          registrationNumber: "",
+          show: true,
+          signatureImage: "",
+          showSignatureImage: false,
+        },
+      },
+    }),
+    []
+  );
+
+  const template = React.useMemo(() => {
+    if (!savedTemplate) {
+      return defaultTemplate;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading, savedTemplate]);
+    return buildTemplateFromSaved(savedTemplate);
+  }, [savedTemplate, defaultTemplate]);
 
   const handlePageChange = (field, value) => {
     setTemplate((prev) => ({
@@ -339,7 +336,7 @@ export const PrintTemplateDesigner = () => {
   };
 
   const handleSave = async () => {
-    const targetLabId = isSystemAdmin ? resolveLabId() : undefined;
+    const targetLabId = isSystemAdmin ? effectiveLabId : undefined;
     try {
       await updateTemplate(template, targetLabId);
       // The context's updateTemplate already updates savedTemplate,
@@ -357,7 +354,7 @@ export const PrintTemplateDesigner = () => {
         "Are you sure you want to restore the factory default layout? This cannot be undone.",
       )
     ) {
-      const targetLabId = isSystemAdmin ? resolveLabId() : undefined;
+      const targetLabId = isSystemAdmin ? effectiveLabId : undefined;
       try {
         await resetTemplate(targetLabId);
         // The context's resetTemplate already updates savedTemplate,
@@ -966,6 +963,22 @@ export const PrintTemplateDesigner = () => {
                         </select>
                       </div>
                     </div>
+                    {selectedElement === "footer" && (
+                      <div>
+                        <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
+                          Footer Text
+                        </label>
+                        <input
+                          type="text"
+                          className="w-full text-sm border-slate-300 rounded px-2.5 py-1.5"
+                          value={getElementValue("text", "footer")}
+                          onChange={(e) =>
+                            handleElementChange("text", e.target.value, "footer")
+                          }
+                          placeholder="e.g. Powered by UltraPath"
+                        />
+                      </div>
+                    )}
                   </>
                 )}
               </div>
@@ -1284,6 +1297,27 @@ export const PrintTemplateDesigner = () => {
                     )}
                   </div>
                 )}
+              </div>
+
+              {/* Footer Custom Text / Note */}
+              <div className="space-y-4 pt-4 border-t border-cream-border">
+                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                  Footer Custom Text / Note
+                </h3>
+                <div>
+                  <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
+                    Footer Text
+                  </label>
+                  <input
+                    type="text"
+                    className="w-full text-sm border-slate-300 rounded px-3 py-2"
+                    value={getElementValue("text", "footer")}
+                    onChange={(e) =>
+                      handleElementChange("text", e.target.value, "footer")
+                    }
+                    placeholder="e.g. Powered by UltraPath / Digitally Signed Report"
+                  />
+                </div>
               </div>
             </div>
           )}

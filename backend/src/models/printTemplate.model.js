@@ -55,6 +55,10 @@ const elementStyleSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    text: {
+      type: String,
+      default: "",
+    },
   },
   { _id: false, strict: false },
 );

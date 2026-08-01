@@ -22,6 +22,7 @@ router.get(
 );
 
 // Users can manage their lab's template
+router.patch("/", updateTemplate);
 router.put("/", updateTemplate);
 router.post("/reset", resetTemplate);
 
