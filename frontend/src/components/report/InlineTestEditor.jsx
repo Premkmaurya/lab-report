@@ -4,6 +4,7 @@ import { Save, ShieldAlert, ChevronDown, ChevronRight, Edit2 } from "lucide-reac
 import { useForm, useFieldArray, useWatch } from "react-hook-form";
 import { checkAbnormalResult } from "../../utils/resultUtils";
 import { resolveReferenceRange } from "../../utils/referenceRangeResolver";
+import { evaluateTokens, migrateFormula } from "../../utils/formulaUtils";
 
 export const InlineTestEditor = ({
   reportId,
@@ -94,6 +95,14 @@ export const InlineTestEditor = ({
     const calculatedParamsCount = currentResults.filter(r => r.isCalculated && r.formula).length;
     if (calculatedParamsCount === 0) return;
 
+    // Build a resolver: parameterId → numeric value from current results
+    const buildResolver = (results) => (parameterId) => {
+      const found = findParamResult(results, parameterId, testTemplate);
+      if (!found) return null;
+      const v = parseFloat(found.value);
+      return isNaN(v) ? null : v;
+    };
+
     let changed = true;
     let pass = 0;
     const maxPasses = calculatedParamsCount || 1;
@@ -104,53 +113,14 @@ export const InlineTestEditor = ({
 
       currentResults.forEach((res, index) => {
         if (res.isCalculated && res.formula) {
-          const formula = res.formula;
+          // Migrate old formula format to tokens if needed
+          const tokens = migrateFormula(res.formula);
+          if (tokens.length === 0) return;
 
-          // Resolve left operand
-          let leftNum = null;
-          if (formula.leftType === "constant") {
-            if (formula.leftConstant !== undefined && formula.leftConstant !== null && formula.leftConstant !== "" && !isNaN(parseFloat(formula.leftConstant))) {
-              leftNum = parseFloat(formula.leftConstant);
-            }
-          } else {
-            const targetId = formula.leftParameterId;
-            if (targetId) {
-              const leftParam = findParamResult(currentResults, targetId, testTemplate);
-              if (leftParam && leftParam.value !== undefined && leftParam.value !== null && String(leftParam.value).trim() !== "" && !isNaN(parseFloat(leftParam.value))) {
-                leftNum = parseFloat(leftParam.value);
-              }
-            }
-          }
+          const resolver = buildResolver(currentResults);
+          const resultNum = evaluateTokens(tokens, resolver);
 
-          // Resolve right operand
-          let rightNum = null;
-          if (formula.rightType === "constant") {
-            if (formula.rightConstant !== undefined && formula.rightConstant !== null && formula.rightConstant !== "" && !isNaN(parseFloat(formula.rightConstant))) {
-              rightNum = parseFloat(formula.rightConstant);
-            }
-          } else {
-            const targetId = formula.rightParameterId;
-            if (targetId) {
-              const rightParam = findParamResult(currentResults, targetId, testTemplate);
-              if (rightParam && rightParam.value !== undefined && rightParam.value !== null && String(rightParam.value).trim() !== "" && !isNaN(parseFloat(rightParam.value))) {
-                rightNum = parseFloat(rightParam.value);
-              }
-            }
-          }
-
-          let calculatedValue = "";
-
-          if (leftNum !== null && rightNum !== null) {
-            let resultNum;
-            switch (formula.operator) {
-              case '+': resultNum = leftNum + rightNum; break;
-              case '-': resultNum = leftNum - rightNum; break;
-              case '*': resultNum = leftNum * rightNum; break;
-              case '/': resultNum = rightNum !== 0 ? leftNum / rightNum : 0; break;
-              default: resultNum = 0; break;
-            }
-            calculatedValue = String(Math.round(resultNum * 1000) / 1000);
-          }
+          const calculatedValue = resultNum !== null ? String(resultNum) : "";
 
           if (res.value !== calculatedValue) {
             setValue(`results.${index}.value`, calculatedValue, { shouldDirty: true });

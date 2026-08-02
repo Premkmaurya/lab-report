@@ -38,6 +38,14 @@ const subTestSchema = new mongoose.Schema(
       default: false,
     },
     formula: {
+      // ── New: unlimited token-based formula ────────────────────────────
+      // Each token is one of:
+      //   { type: "constant",  value: <number> }
+      //   { type: "parameter", parameterId: <string>, parameterName: <string> }
+      //   { type: "operator",  value: "+" | "-" | "*" | "/" }
+      tokens: { type: mongoose.Schema.Types.Mixed, default: [] },
+
+      // ── Legacy: kept for backward compatibility with existing formulas ─
       leftParameterId: { type: String },
       leftConstant: { type: Number },
       leftType: { type: String, enum: ['parameter', 'constant'], default: 'parameter' },

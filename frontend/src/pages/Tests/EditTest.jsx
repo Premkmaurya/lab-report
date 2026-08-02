@@ -9,127 +9,11 @@ import { generateObjectId } from "../../utils/objectId";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "../../hooks/useAuth";
 import { ReferenceRangesModal } from "../../components/tests/ReferenceRangesModal";
+import { FormulaBuilder } from "../../components/tests/FormulaBuilder";
+import { validateTokens, migrateFormula } from "../../utils/formulaUtils";
 
-const ParameterSelect = ({ index, field, watch, setValue, register, errors, disabled }) => {
-  const [isOpen, setIsOpen] = React.useState(false);
-  const [search, setSearch] = React.useState("");
-  const currentId = watch(`subTests.${index}.formula.${field}`);
-  
-  const options = watch("subTests").filter((f, i) => i !== index && f.name && f.type !== "section");
-  
-  React.useEffect(() => {
-    const matched = options.find(o => o._id === currentId);
-    if (matched && !isOpen) {
-      setSearch(matched.name);
-    }
-  }, [currentId, options, isOpen]);
+// ParameterSelect and FormulaOperand removed — replaced by FormulaBuilder component
 
-  return (
-    <div className="relative flex-1">
-      <input 
-        type="text" 
-        value={search}
-        disabled={disabled}
-        onChange={(e) => {
-           setSearch(e.target.value);
-           setIsOpen(true);
-           if (e.target.value === "") {
-             setValue(`subTests.${index}.formula.${field}`, "");
-           }
-        }}
-        onFocus={() => !disabled && setIsOpen(true)}
-        onBlur={() => setTimeout(() => setIsOpen(false), 200)}
-        placeholder={`-- ${field === 'leftParameterId' ? 'Left' : 'Right'} Parameter --`}
-        className={`w-full text-sm border border-cream-border rounded-inputs px-2 py-2 focus:outline-none focus:border-electric-cobalt ${errors?.subTests?.[index]?.formula?.[field] ? "border-red-500" : ""} ${disabled ? "bg-transparent text-stone border-transparent" : ""}`}
-      />
-      <input type="hidden" {...register(`subTests.${index}.formula.${field}`, { required: "Required" })} />
-      {isOpen && !disabled && (
-        <div className="absolute z-10 w-full mt-1 bg-white border border-cream-border rounded shadow-lg max-h-40 overflow-y-auto">
-          {options.filter(o => o.name.toLowerCase().includes(search.toLowerCase())).map(o => (
-            <div 
-              key={o._id} 
-              className="px-2 py-1.5 text-sm hover:bg-warm-canvas cursor-pointer"
-              onClick={() => {
-                setValue(`subTests.${index}.formula.${field}`, o._id, { shouldValidate: true });
-                setSearch(o.name);
-                setIsOpen(false);
-              }}
-            >
-              {o.name}
-            </div>
-          ))}
-          {options.filter(o => o.name.toLowerCase().includes(search.toLowerCase())).length === 0 && (
-             <div className="px-2 py-1.5 text-sm text-stone italic">No parameters found</div>
-          )}
-        </div>
-      )}
-    </div>
-  );
-};
-
-const FormulaOperand = ({ index, side, watch, setValue, register, errors, disabled }) => {
-  const typeField = `subTests.${index}.formula.${side}Type`;
-  const constantField = `subTests.${index}.formula.${side}Constant`;
-  const paramField = `subTests.${index}.formula.${side}ParameterId`;
-  const operandType = watch(typeField) || "parameter";
-
-  return (
-    <div className="flex-1 flex flex-col space-y-1">
-      <div className="flex rounded-inputs overflow-hidden border border-cream-border">
-        <button
-          type="button"
-          disabled={disabled}
-          className={`px-2 py-1 text-[11px] font-semibold transition-colors ${operandType === "parameter" ? "bg-electric-cobalt text-white" : "bg-white text-stone hover:bg-warm-canvas"} ${disabled ? "opacity-60 cursor-not-allowed" : ""}`}
-          onClick={() => {
-            setValue(typeField, "parameter", { shouldValidate: true });
-            setValue(constantField, "", { shouldValidate: true });
-          }}
-        >
-          Param
-        </button>
-        <button
-          type="button"
-          disabled={disabled}
-          className={`px-2 py-1 text-[11px] font-semibold border-l border-cream-border transition-colors ${operandType === "constant" ? "bg-electric-cobalt text-white" : "bg-white text-stone hover:bg-warm-canvas"} ${disabled ? "opacity-60 cursor-not-allowed" : ""}`}
-          onClick={() => {
-            setValue(typeField, "constant", { shouldValidate: true });
-            setValue(paramField, "", { shouldValidate: true });
-          }}
-        >
-          Number
-        </button>
-      </div>
-      <input type="hidden" {...register(typeField)} />
-      {operandType === "constant" ? (
-        <input
-          type="number"
-          step="any"
-          disabled={disabled}
-          placeholder="Enter number"
-          className={`w-full text-sm border border-cream-border rounded-inputs px-2 py-2 focus:outline-none focus:border-electric-cobalt ${errors?.subTests?.[index]?.formula?.[`${side}Constant`] ? "border-red-500" : ""} ${disabled ? "bg-transparent text-stone border-transparent" : ""}`}
-          {...register(constantField, {
-            validate: (val) => {
-              if (operandType !== "constant") return true;
-              if (val === "" || val === undefined || val === null) return "Required";
-              if (isNaN(Number(val))) return "Must be a valid number";
-              return true;
-            },
-          })}
-        />
-      ) : (
-        <ParameterSelect
-          index={index}
-          field={`${side}ParameterId`}
-          watch={watch}
-          setValue={setValue}
-          register={register}
-          errors={errors}
-          disabled={disabled}
-        />
-      )}
-    </div>
-  );
-};
 
 export const EditTest = () => {
   const { id } = useParams();
@@ -369,7 +253,7 @@ export const EditTest = () => {
             };
           });
           if (!isReadOnly && (tests.length === 0 || !isEmptyRow(tests[tests.length - 1]))) {
-             tests = [...tests, { _id: generateObjectId(), name: "", type: "parameter", price: "", unit: "", normalRange: "", isListParameter: false, allowedValues: [], isCalculated: false, isTextBlock: false, formula: { leftParameterId: "", leftType: "parameter", leftConstant: "", operator: "+", rightParameterId: "", rightType: "parameter", rightConstant: "" }, textBlockSettings: { defaultText: "" } }];
+             tests = [...tests, { _id: generateObjectId(), name: "", type: "parameter", price: "", unit: "", normalRange: "", isListParameter: false, allowedValues: [], isCalculated: false, isTextBlock: false, formula: { tokens: [] }, textBlockSettings: { defaultText: "" } }];
           }
 
           const targetDeptId = t.departmentId?._id || t.departmentId || "";
@@ -924,41 +808,13 @@ export const EditTest = () => {
                             <td colSpan={isReadOnly ? "4" : "5"} className="px-4 py-4">
                               <div className="flex flex-col max-w-2xl pl-4 border-l-2 border-electric-cobalt">
                                 <span className="text-xs font-bold text-charcoal uppercase mb-2">Formula Builder</span>
-                                <div className="flex items-end space-x-4 mb-2">
-                                  <FormulaOperand
-                                    index={index}
-                                    side="left"
-                                    watch={watch}
-                                    setValue={setValue}
-                                    register={register}
-                                    errors={errors}
-                                    disabled={isReadOnly}
-                                  />
-
-                                  <select 
-                                    className={`w-20 text-sm border border-cream-border rounded-inputs px-2 py-2 text-center focus:outline-none font-bold ${isReadOnly ? "bg-transparent text-stone border-transparent" : ""}`}
-                                    disabled={isReadOnly}
-                                    {...register(`subTests.${index}.formula.operator`, { required: "Required" })}
-                                  >
-                                    <option value="+">+</option>
-                                    <option value="-">-</option>
-                                    <option value="*">*</option>
-                                    <option value="/">/</option>
-                                  </select>
-
-                                  <FormulaOperand
-                                    index={index}
-                                    side="right"
-                                    watch={watch}
-                                    setValue={setValue}
-                                    register={register}
-                                    errors={errors}
-                                    disabled={isReadOnly}
-                                  />
-                                </div>
-                                {!isReadOnly && (errors?.subTests?.[index]?.formula?.leftParameterId || errors?.subTests?.[index]?.formula?.rightParameterId || errors?.subTests?.[index]?.formula?.leftConstant || errors?.subTests?.[index]?.formula?.rightConstant) && (
-                                  <p className="text-xs text-red-500 mt-1">Please provide valid operands for the formula.</p>
-                                )}
+                                <FormulaBuilder
+                                  subTestIndex={index}
+                                  allSubTests={watch("subTests")}
+                                  value={watch(`subTests.${index}.formula`)}
+                                  onChange={(newFormula) => setValue(`subTests.${index}.formula`, newFormula, { shouldDirty: true })}
+                                  disabled={isReadOnly}
+                                />
                               </div>
                             </td>
                           </tr>
