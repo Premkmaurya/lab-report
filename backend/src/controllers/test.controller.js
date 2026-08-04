@@ -94,7 +94,19 @@ const validateSubTests = (subTests) => {
 };
 
 const getTests = asyncHandler(async (req, res) => {
-  const filter = { isGlobal: false, ...(req.tenantFilter || {}) };
+  const isSystemAdmin = req.user.role === 'system_admin';
+  const hasLabContext = !!(req.laboratoryId || req.tenantFilter?.laboratoryId);
+
+  let filter;
+
+  if (isSystemAdmin && !hasLabContext) {
+    // System admin with no specific laboratory context → show only global test library
+    filter = { isGlobal: true };
+  } else {
+    // Lab users or system_admin scoped to a specific lab → show only that lab's tests
+    filter = { isGlobal: false, ...(req.tenantFilter || {}) };
+  }
+
   const tests = await Test.find(filter)
     .populate('departmentId')
     .populate('createdBy', 'username _id')
@@ -108,7 +120,17 @@ const getTests = asyncHandler(async (req, res) => {
 });
 
 const getTestById = asyncHandler(async (req, res) => {
-  const query = { _id: req.params.id, isGlobal: false, ...req.tenantFilter };
+  const isSystemAdmin = req.user.role === 'system_admin';
+  const hasLabContext = !!(req.laboratoryId || req.tenantFilter?.laboratoryId);
+
+  let query;
+  if (isSystemAdmin && !hasLabContext) {
+    // System admin with no specific lab: can fetch any test by ID (global or local)
+    query = { _id: req.params.id };
+  } else {
+    query = { _id: req.params.id, isGlobal: false, ...req.tenantFilter };
+  }
+
   const test = await Test.findOne(query)
     .populate('departmentId')
     .populate('createdBy', 'username _id')

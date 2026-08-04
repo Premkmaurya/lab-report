@@ -33,7 +33,11 @@ export const TestList = () => {
   const { data, isLoading: loading, error: fetchError, refetch } = useGetTestsQuery();
   const { data: globalData } = useGetGlobalTestsQuery({});
 
-  const tests = data?.tests || [];
+  const allTests = data?.tests || [];
+  // Safeguard: system_admin should only ever see global tests in this tab
+  const tests = isSystemAdmin
+    ? allTests.filter((t) => t.isGlobal === true)
+    : allTests.filter((t) => t.isGlobal === false);
   const updatesCount = globalData?.updatesAvailableCount || 0;
   const error = fetchError ? "Failed to load test catalog." : "";
 
@@ -134,10 +138,16 @@ export const TestList = () => {
           TEST MANAGEMENT
         </span>
         <h1 className="font-martinaplantijn text-5xl text-ink-navy">
-          Laboratory <span className="italic font-light">Tests</span>
+          {isSystemAdmin ? (
+            <>Global <span className="italic font-light">Test Library</span></>
+          ) : (
+            <>Laboratory <span className="italic font-light">Tests</span></>
+          )}
         </h1>
         <p className="font-inter text-stone text-base max-w-xl mx-auto">
-          Manage your laboratory test catalog, configure custom parameters, or import standardized global test templates.
+          {isSystemAdmin
+            ? "Manage the global test library. Create, edit, and version master test templates used by all laboratories."
+            : "Manage your laboratory test catalog, configure custom parameters, or import standardized global test templates."}
         </p>
 
         {/* Tab Switcher */}
@@ -151,7 +161,7 @@ export const TestList = () => {
             }`}
           >
             <FlaskConical className="w-3.5 h-3.5" />
-            <span>Laboratory Tests ({tests.length})</span>
+            <span>{isSystemAdmin ? "Global Tests" : "Laboratory Tests"} ({tests.length})</span>
           </button>
           <button
             onClick={() => handleTabChange("global")}
@@ -212,16 +222,15 @@ export const TestList = () => {
             <div className="flex flex-col md:flex-row justify-between items-end gap-4">
               <div className="flex-1">
                 <h2 className="font-martinaplantijn text-3xl text-ink-navy">
-                  Test <span className="italic font-light">Catalog</span>
-                  {!isSystemAdmin && (
-                    <span className="text-base text-stone font-sans ml-3 px-3 py-1 bg-warm-canvas rounded-full border border-cream-border">
-                      Laboratory Pricing Catalog
-                    </span>
+                  {isSystemAdmin ? (
+                    <>Global Test <span className="italic font-light">Catalog</span></>
+                  ) : (
+                    <>Test <span className="italic font-light">Catalog</span></>
                   )}
                 </h2>
                 <p className="text-sm text-stone mt-2">
                   {isSystemAdmin
-                    ? "View and manage all configured laboratory tests."
+                    ? "View and manage all global test templates. These serve as master definitions for all laboratories."
                     : "Browse laboratory tests and click price to edit inline."}
                 </p>
               </div>
