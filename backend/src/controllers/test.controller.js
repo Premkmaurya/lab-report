@@ -522,10 +522,16 @@ const deleteGlobalTest = asyncHandler(async (req, res) => {
 });
 
 /**
- * Helper to remap formula leftParameterId / rightParameterId from global test sub-test IDs to new local sub-test IDs.
- * Also validates that formula parameter references exist in the test definition.
+ * Helper to remap all formula parameter ID references from global sub-test IDs
+ * to the newly-assigned local sub-test IDs.
+ *
+ * Remaps ALL of:
+ *   - formula.leftParameterId  (legacy two-operand format)
+ *   - formula.rightParameterId (legacy two-operand format)
+ *   - formula.tokens[].parameterId  (new unlimited token format)
  */
 const remapSubTestFormulas = (globalSubTests, newSubTests) => {
+  // ── Step 1: Build id / name → new id lookup maps ──────────────────────────
   const oldIdToNewIdMap = {};
   const nameToNewIdMap = {};
   const validNewIdsSet = new Set();
@@ -549,65 +555,89 @@ const remapSubTestFormulas = (globalSubTests, newSubTests) => {
     }
   });
 
+  // ── Step 2: Remap all formula parameter references ─────────────────────────
   newSubTests.forEach((st) => {
-    if (st.isCalculated && st.formula) {
-      const formula = typeof st.formula.toObject === 'function' ? st.formula.toObject() : { ...st.formula };
+    if (!st.isCalculated || !st.formula) return;
 
-      const resolveAndValidateParamId = (paramId, operandSide) => {
-        if (!paramId) return paramId;
-        const idStr = String(paramId).trim();
+    const formula = typeof st.formula.toObject === 'function' ? st.formula.toObject() : { ...st.formula };
 
-        // 1. Check if already a valid new ID in the new sub-tests
-        if (validNewIdsSet.has(idStr)) {
-          return idStr;
-        }
+    /**
+     * Resolves a single parameterId to its new local ID.
+     * Priority: already-valid new ID → old→new map → name map → null (warn).
+     */
+    const resolveAndValidateParamId = (paramId, label) => {
+      if (!paramId) return paramId;
+      const idStr = String(paramId).trim();
 
-        // 2. Check if in oldId -> newId map
-        if (oldIdToNewIdMap[idStr]) {
-          return oldIdToNewIdMap[idStr];
-        }
+      // 1. Already a valid imported ID — no remapping needed
+      if (validNewIdsSet.has(idStr)) return idStr;
 
-        // 3. Check if matches parameter name
-        const lowerName = idStr.toLowerCase();
-        if (nameToNewIdMap[lowerName]) {
-          return nameToNewIdMap[lowerName];
-        }
+      // 2. Direct old → new ID mapping (most common case)
+      if (oldIdToNewIdMap[idStr]) return oldIdToNewIdMap[idStr];
 
-        // 4. Validation failed: parameter ID does not exist in imported test
-        console.warn(
-          `[Formula Remap Warning] Calculated parameter "${st.name}" formula references non-existent parameter ID "${paramId}" (${operandSide} operand).`
-        );
-        return null;
-      };
+      // 3. Fall back to parameter name match
+      const lowerName = idStr.toLowerCase();
+      if (nameToNewIdMap[lowerName]) return nameToNewIdMap[lowerName];
 
-      // Remap left operand
-      if (formula.leftType !== "constant" && formula.leftParameterId) {
-        const remappedLeft = resolveAndValidateParamId(formula.leftParameterId, "left");
-        if (remappedLeft) {
-          formula.leftParameterId = remappedLeft;
-        } else {
-          console.warn(`[Formula Remap Warning] Clearing invalid leftParameterId for "${st.name}".`);
-          formula.leftParameterId = "";
-        }
+      // 4. Nothing matched — warn and clear
+      console.warn(
+        `[Formula Remap Warning] "${st.name}" formula references non-existent parameter ID "${paramId}" (${label}).`
+      );
+      return null;
+    };
+
+    // ── Remap legacy left operand ──────────────────────────────────────────
+    if (formula.leftType !== 'constant' && formula.leftParameterId) {
+      const remapped = resolveAndValidateParamId(formula.leftParameterId, 'leftParameterId');
+      formula.leftParameterId = remapped || '';
+      if (!remapped) {
+        console.warn(`[Formula Remap Warning] Clearing invalid leftParameterId for "${st.name}".`);
       }
-
-      // Remap right operand
-      if (formula.rightType !== "constant" && formula.rightParameterId) {
-        const remappedRight = resolveAndValidateParamId(formula.rightParameterId, "right");
-        if (remappedRight) {
-          formula.rightParameterId = remappedRight;
-        } else {
-          console.warn(`[Formula Remap Warning] Clearing invalid rightParameterId for "${st.name}".`);
-          formula.rightParameterId = "";
-        }
-      }
-
-      st.formula = formula;
     }
+
+    // ── Remap legacy right operand ─────────────────────────────────────────
+    if (formula.rightType !== 'constant' && formula.rightParameterId) {
+      const remapped = resolveAndValidateParamId(formula.rightParameterId, 'rightParameterId');
+      formula.rightParameterId = remapped || '';
+      if (!remapped) {
+        console.warn(`[Formula Remap Warning] Clearing invalid rightParameterId for "${st.name}".`);
+      }
+    }
+
+    // ── Remap token array (new unlimited formula format) ───────────────────
+    if (Array.isArray(formula.tokens) && formula.tokens.length > 0) {
+      formula.tokens = formula.tokens.map((token, tokenIdx) => {
+        // Only parameter tokens carry a parameterId reference
+        if (token.type !== 'parameter') return token;
+
+        const remapped = resolveAndValidateParamId(
+          token.parameterId,
+          `tokens[${tokenIdx}].parameterId`
+        );
+
+        if (!remapped) {
+          console.warn(
+            `[Formula Remap Warning] Clearing invalid token parameterId at index ${tokenIdx} for "${st.name}".`
+          );
+        }
+
+        return {
+          ...token,
+          parameterId: remapped || '',
+          // Update the display name to match the newly-imported parameter
+          parameterName: remapped
+            ? (newSubTests.find(s => s._id && s._id.toString() === remapped)?.name || token.parameterName)
+            : token.parameterName,
+        };
+      });
+    }
+
+    st.formula = formula;
   });
 
   return newSubTests;
 };
+
 
 const importGlobalTest = asyncHandler(async (req, res) => {
   const globalTest = await Test.findOne({ _id: req.params.id, isGlobal: true }).populate('departmentId');
