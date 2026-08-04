@@ -296,7 +296,7 @@ export const TestList = () => {
                                   className="hover:bg-warm-canvas/50 transition-colors group bg-paper-white/50 cursor-pointer"
                                   onClick={() => {
                                     if (!isEditingThis) {
-                                      navigate(isSystemAdmin ? `/tests/edit/${test._id}` : `/tests/view/${test._id}`);
+                                      navigate(test.isGlobal ? `/tests/view/${test._id}` : (isSystemAdmin ? `/tests/edit/${test._id}` : `/tests/view/${test._id}`));
                                     }
                                   }}
                                 >
@@ -308,10 +308,6 @@ export const TestList = () => {
                                           Global v{test.importedVersion || 1}
                                         </span>
                                       )}
-                                    </div>
-                                    <div className="text-[10px] text-stone mt-0.5 font-normal">
-                                      {test.createdBy && <span>Owner: {test.createdBy.username}</span>}
-                                      {test.updatedBy && test.updatedBy._id !== test.createdBy?._id && <span className="ml-2">• Last Updated by: {test.updatedBy.username}</span>}
                                     </div>
                                   </td>
                                   <td className="px-6 py-3 text-sm text-stone text-center">

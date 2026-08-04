@@ -95,23 +95,32 @@ const validateSubTests = (subTests) => {
 
 const getTests = asyncHandler(async (req, res) => {
   const isSystemAdmin = req.user.role === 'system_admin';
-  const hasLabContext = !!(req.laboratoryId || req.tenantFilter?.laboratoryId);
+  const targetLabId = req.query.laboratoryId || req.headers['x-laboratory-id'] || req.laboratoryId || req.tenantFilter?.laboratoryId;
 
   let filter;
 
-  if (isSystemAdmin && !hasLabContext) {
+  if (isSystemAdmin && !targetLabId) {
     // System admin with no specific laboratory context → show only global test library
-    filter = { isGlobal: true };
+    filter = { isGlobal: true, deleted: { $ne: true } };
   } else {
-    // Lab users or system_admin scoped to a specific lab → show only that lab's tests
-    filter = { isGlobal: false, ...(req.tenantFilter || {}) };
+    // Lab users or system_admin scoped to a specific lab → show all lab tests for that laboratory (local + imported)
+    const effectiveLabId = targetLabId || req.user?.laboratoryId;
+    filter = { laboratoryId: effectiveLabId, isGlobal: false, deleted: { $ne: true } };
   }
+
+  console.log("=== GET TESTS BACKEND DEBUG LOG ===");
+  console.log("Current user role:", req.user?.role);
+  console.log("Current user laboratoryId:", req.user?.laboratoryId?.toString() ?? null);
+  console.log("Target laboratoryId:", targetLabId?.toString() ?? null);
+  console.log("Mongo query filter:", JSON.stringify(filter));
 
   const tests = await Test.find(filter)
     .populate('departmentId')
     .populate('createdBy', 'username _id')
     .populate('updatedBy', 'username _id')
     .sort({ createdAt: -1 });
+
+  console.log("Number of tests returned from Mongo:", tests.length);
 
   res.status(200).json({
     success: true,
@@ -225,9 +234,13 @@ const updateTest = asyncHandler(async (req, res) => {
     }
   }
 
-  const existingTest = await Test.findOne({ _id: req.params.id, isGlobal: false, ...req.tenantFilter });
+  const existingTest = await Test.findOne({ _id: req.params.id, ...req.tenantFilter });
   if (!existingTest) {
     throw new NotFoundError("Test not found");
+  }
+
+  if (existingTest.isGlobal) {
+    throw new ForbiddenError("Global Tests are read-only. Import this test into a laboratory to customize pricing or use the update workflow.");
   }
 
   const allowedFields = ["name", "price", "subTests", "departmentId"];
@@ -275,7 +288,6 @@ const updateTest = asyncHandler(async (req, res) => {
   updates.updatedBy = req.user._id;
 
   const test = await Test.findOneAndUpdate({ _id: req.params.id, isGlobal: false, ...req.tenantFilter }, updates, {
-    new: true,
     returnDocument: "after",
     runValidators: true,
   })
@@ -455,6 +467,10 @@ const updateGlobalTest = asyncHandler(async (req, res) => {
     throw new NotFoundError("Global test template not found");
   }
 
+  if (existingTest.isGlobal) {
+    throw new ForbiddenError("Global Tests are read-only. Import this test into a laboratory to customize pricing or use the update workflow.");
+  }
+
   const allowedFields = ["name", "price", "subTests", "departmentId"];
   const updates = {};
 
@@ -487,7 +503,7 @@ const updateGlobalTest = asyncHandler(async (req, res) => {
   const test = await Test.findOneAndUpdate(
     { _id: req.params.id, isGlobal: true },
     updates,
-    { new: true, returnDocument: "after", runValidators: true }
+    { returnDocument: "after", runValidators: true }
   )
     .populate('departmentId')
     .populate('createdBy', 'username _id');

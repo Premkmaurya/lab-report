@@ -52,7 +52,7 @@ const createOrUpdateLabDetails = asyncHandler(async (req, res) => {
   const lab = await Laboratory.findByIdAndUpdate(
     labId,
     { $set: updates },
-    { new: true, runValidators: true },
+    { returnDocument: "after", runValidators: true },
   );
 
   if (!lab) {

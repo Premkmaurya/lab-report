@@ -60,7 +60,8 @@ export const CreatePatient = () => {
 
   useEffect(() => {
     const fetchInitialData = async () => {
-      const params = watchedLabId ? { laboratoryId: watchedLabId } : {};
+      const activeLabId = watchedLabId || user?.laboratoryId;
+      const params = activeLabId ? { laboratoryId: activeLabId } : {};
       try {
         const docData = await doctorService.getAllDoctors(params);
         setDoctors((docData.doctors || []).filter((d) => d.isActive !== false));
@@ -76,7 +77,7 @@ export const CreatePatient = () => {
       }
     };
     fetchInitialData();
-  }, [watchedLabId]);
+  }, [watchedLabId, user?.laboratoryId]);
 
   const handleNext = async () => {
     const isValid = await trigger();

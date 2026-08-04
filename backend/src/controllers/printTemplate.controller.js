@@ -62,7 +62,7 @@ exports.updateTemplate = async (req, res, next) => {
     const template = await PrintTemplate.findOneAndUpdate(
       { laboratoryId: labId },
       { page, typography, elements, signatures, laboratoryId: labId, userId: req.user._id },
-      { new: true, upsert: true, runValidators: true }
+      { returnDocument: "after", upsert: true, runValidators: true }
     );
 
     res.status(200).json({ success: true, data: template });

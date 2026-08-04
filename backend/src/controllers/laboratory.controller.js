@@ -303,7 +303,7 @@ const updateLaboratoryStatus = async (req, res, next) => {
     const laboratory = await Laboratory.findByIdAndUpdate(
       req.params.id,
       { status },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
 
     if (!laboratory) {
@@ -328,7 +328,7 @@ const deleteLaboratory = async (req, res, next) => {
     const laboratory = await Laboratory.findByIdAndUpdate(
       req.params.id,
       { status: 'inactive' },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     if (!laboratory) {

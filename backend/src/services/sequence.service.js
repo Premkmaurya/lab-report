@@ -42,7 +42,7 @@ const getNextVisitNumber = async (laboratoryId) => {
   const updatedCounter = await Counter.findOneAndUpdate(
     { laboratoryId, name: "visitNumber" },
     { $inc: { seq: 1 } },
-    { new: true, upsert: true, returnDocument: "after" }
+    { upsert: true, returnDocument: "after" }
   );
 
   return updatedCounter.seq;

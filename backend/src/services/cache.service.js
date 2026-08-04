@@ -23,17 +23,19 @@ const invalidateCacheKey = async (key) => {
 const invalidateCachePattern = async (pattern) => {
   if (!redisClient.isReady) return;
   try {
-    let cursor = 0;
+    let cursor = '0';
     const keysToDelete = [];
 
     do {
-      const reply = await redisClient.scan(cursor, {
+      const reply = await redisClient.scan(String(cursor), {
         MATCH: pattern,
         COUNT: 100
       });
       cursor = reply.cursor;
-      keysToDelete.push(...reply.keys);
-    } while (cursor !== 0);
+      if (reply.keys && reply.keys.length > 0) {
+        keysToDelete.push(...reply.keys);
+      }
+    } while (String(cursor) !== '0');
 
     if (keysToDelete.length > 0) {
       await redisClient.del(keysToDelete);

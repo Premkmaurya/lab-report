@@ -3,7 +3,7 @@ import { useForm, useFieldArray } from "react-hook-form";
 import { useNavigate, useParams, Link, useLocation } from "react-router-dom";
 import { testService } from "../../services/testService";
 import { departmentService } from "../../services/departmentService";
-import { ArrowLeft, Trash2, Search, ChevronDown } from "lucide-react";
+import { ArrowLeft, Trash2, Search, ChevronDown, ShieldAlert } from "lucide-react";
 import { toast } from "../../lib/toast";
 import { generateObjectId } from "../../utils/objectId";
 import { useQueryClient } from "@tanstack/react-query";
@@ -22,7 +22,9 @@ export const EditTest = () => {
   const isSystemAdmin = user?.role === "system_admin";
   const queryClient = useQueryClient();
   const { pathname } = useLocation();
-  const isReadOnly = pathname.includes('/view') || !isSystemAdmin;
+  const [isGlobalTest, setIsGlobalTest] = useState(false);
+  const isGlobalMode = new URLSearchParams(useLocation().search).get("global") === "true";
+  const isReadOnly = pathname.includes('/view') || !isSystemAdmin || isGlobalTest || isGlobalMode;
   const [loading, setLoading] = useState(true);
   const [step, setStep] = useState(id ? 2 : 1);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -223,9 +225,6 @@ export const EditTest = () => {
   }, []);
 
   // Fetch specific test details for Step 2
-  const location = useLocation();
-  const isGlobalMode = new URLSearchParams(location.search).get("global") === "true";
-
   useEffect(() => {
     if (step === 2) {
       const testIdToFetch = id || selectedTestId;
@@ -238,6 +237,9 @@ export const EditTest = () => {
             ? await testService.getGlobalTestById(testIdToFetch)
             : await testService.getTestById(testIdToFetch);
           const t = data.test;
+          if (t?.isGlobal) {
+            setIsGlobalTest(true);
+          }
           
            let tests = (t.subTests || []).map(st => {
             if (st.type === 'text_block') {
@@ -252,7 +254,7 @@ export const EditTest = () => {
               isTextBlock: st.isTextBlock || false
             };
           });
-          if (!isReadOnly && (tests.length === 0 || !isEmptyRow(tests[tests.length - 1]))) {
+          if (!isReadOnly && !t?.isGlobal && (tests.length === 0 || !isEmptyRow(tests[tests.length - 1]))) {
              tests = [...tests, { _id: generateObjectId(), name: "", type: "parameter", price: "", unit: "", normalRange: "", isListParameter: false, allowedValues: [], isCalculated: false, isTextBlock: false, formula: { tokens: [] }, textBlockSettings: { defaultText: "" } }];
           }
 
@@ -293,6 +295,11 @@ export const EditTest = () => {
   };
 
   const onSubmit = async (data) => {
+    if (isGlobalTest || isGlobalMode) {
+      toast.error("Global Tests are read-only. Import this test into a laboratory to customize pricing or use the update workflow.");
+      return;
+    }
+
     setIsSubmitting(true);
     
     const targetId = id || selectedTestId;
@@ -475,6 +482,17 @@ export const EditTest = () => {
 
         {step === 2 && (
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            {(isGlobalTest || isGlobalMode) && (
+              <div className="bg-amber-50 border border-amber-200 rounded-cards p-4 mb-6 flex items-start space-x-3 text-amber-800">
+                <ShieldAlert className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-semibold">Global Test (Read-Only)</p>
+                  <p className="text-xs text-amber-700 mt-0.5">
+                    Global Tests are read-only. Import this test into a laboratory to customize pricing or use the update workflow.
+                  </p>
+                </div>
+              </div>
+            )}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-xs font-bold text-charcoal uppercase tracking-wider mb-2">

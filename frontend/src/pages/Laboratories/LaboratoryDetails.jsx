@@ -432,7 +432,6 @@ export const LaboratoryDetails = () => {
                         <th className="py-3 px-4">Patient ID</th>
                         <th className="py-3 px-4">Name</th>
                         <th className="py-3 px-4">Age / Gender</th>
-                        <th className="py-3 px-4">Phone</th>
                         <th className="py-3 px-4">Registered</th>
                       </tr>
                     </thead>
@@ -442,7 +441,6 @@ export const LaboratoryDetails = () => {
                           <td className="py-3 px-4 font-mono text-xs font-bold text-indigo-600">{p.patientId || p._id.slice(-6)}</td>
                           <td className="py-3 px-4 font-semibold text-slate-800">{p.name}</td>
                           <td className="py-3 px-4 text-slate-600">{p.age ? `${p.age} Yrs` : ''} {p.gender ? `/ ${p.gender}` : ''}</td>
-                          <td className="py-3 px-4 text-slate-600">{p.phone || 'N/A'}</td>
                           <td className="py-3 px-4 text-xs text-slate-500 font-mono">
                             {new Date(p.createdAt).toLocaleDateString()}
                           </td>
@@ -469,21 +467,13 @@ export const LaboratoryDetails = () => {
                       <tr>
                         <th className="py-3 px-4">Doctor Name</th>
                         <th className="py-3 px-4">Specialization</th>
-                        <th className="py-3 px-4">Phone</th>
-                        <th className="py-3 px-4">Email</th>
-                        <th className="py-3 px-4 text-right">Commission (%)</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                       {doctors.map((d) => (
                         <tr key={d._id} className="hover:bg-slate-50/50">
                           <td className="py-3 px-4 font-semibold text-slate-800">{d.name}</td>
-                          <td className="py-3 px-4 text-slate-600">{d.specialization || d.degree || 'General'}</td>
-                          <td className="py-3 px-4 text-slate-600">{d.phone || 'N/A'}</td>
-                          <td className="py-3 px-4 text-slate-600">{d.email || 'N/A'}</td>
-                          <td className="py-3 px-4 text-right font-mono font-bold text-indigo-600">
-                            {d.commissionPercentage !== undefined ? `${d.commissionPercentage}%` : '0%'}
-                          </td>
+                          <td className="py-3 px-4 text-slate-600">{d.qualification || d.degree || 'General'}</td>
                         </tr>
                       ))}
                     </tbody>

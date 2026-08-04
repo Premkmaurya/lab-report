@@ -89,7 +89,7 @@ router.post(
 // ==========================================
 
 // Get all tests for laboratory
-router.get("/", cacheMiddleware(86400, (req) => `tests:${req.laboratoryId || req.tenantFilter?.laboratoryId || 'all'}`), getTests);
+router.get("/", getTests);
 
 // Get test by ID
 router.get(

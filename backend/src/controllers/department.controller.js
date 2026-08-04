@@ -93,7 +93,7 @@ const updateDepartment = asyncHandler(async (req, res) => {
 
   const query = { _id: req.params.id, ...req.tenantFilter };
   const department = await Department.findOneAndUpdate(query, updates, {
-    new: true,
+    returnDocument: "after",
     runValidators: true,
   });
 

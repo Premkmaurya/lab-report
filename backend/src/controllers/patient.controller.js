@@ -138,7 +138,6 @@ const updatePatient = asyncHandler(async (req, res) => {
 
   const query = { _id: req.params.id, ...req.tenantFilter };
   const patient = await Patient.findOneAndUpdate(query, updates, {
-    new: true,
     returnDocument: "after",
     runValidators: true,
   })

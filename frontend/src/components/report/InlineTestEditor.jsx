@@ -293,7 +293,8 @@ export const InlineTestEditor = ({
 
       let hasAnyValue = false;
       const updatedTests = fullReport.tests.map((t) => {
-        if ((t.testId?._id || t.testId).toString() === testIdStr.toString()) {
+        const currentTestId = (t.testId?._id || t.testId || t._id)?.toString();
+        if (currentTestId && currentTestId === testIdStr.toString()) {
           const updatedResult = data.results.map(r => {
             if (r.type === "section") {
               return { parameter: r.parameter, type: "section" };
