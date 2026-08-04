@@ -83,8 +83,10 @@ export const PrintablePage = ({
     padding:      '6px 12px',
     fontSize:     '12px',
     fontWeight:   '600',
-    background:   '#F8FAFC',
+    color:        '#161618',
+    background:   '#BDBEB8',
     whiteSpace:   'nowrap',
+    borderBottom: '1px solid #BFD1EB',
   };
 
   /* ── Barcode ──────────────────────────────────────────────────── */

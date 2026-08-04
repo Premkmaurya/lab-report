@@ -4,7 +4,7 @@ import { formatDate, formatDateTime } from "../../utils/dateFormatter";
 export const PatientInfo = ({ patient, report, template }) => {
   // Report Date is the exact print timestamp
   const reportDate = formatDateTime(new Date());
-    
+
   // Reg Date prioritizes the exact registration timestamp
   const regDate = formatDateTime(patient.registeredAt || patient.createdAt || patient.date);
 
@@ -47,7 +47,7 @@ export const PatientInfo = ({ patient, report, template }) => {
 
   return (
     <div className="p-4 mb-6 bg-white" style={{ lineHeight: lineGap }}>
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-2 border border-[#19191979] p-2 gap-2">
         <div className="space-y-1 relative z-20">
           <div className="grid grid-cols-[120px_auto] gap-2 items-baseline">
             <span className="whitespace-nowrap" style={nameStyles.labelStyle}>

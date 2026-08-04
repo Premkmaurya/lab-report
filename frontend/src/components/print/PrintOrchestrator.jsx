@@ -150,9 +150,9 @@ export const PrintOrchestrator = ({
     padding:      '6px 12px',
     fontSize:     '12px',
     fontWeight:   '600',
-    color:        '#0F172A',
-    background:   '#F8FAFC',
-    borderBottom: '2px solid #CBD5E1',
+    color:        '#161618',
+    background:   '#BDBEB8',
+    borderBottom: '1px solid #BFD1EB',
     whiteSpace:   'nowrap',
   };
 

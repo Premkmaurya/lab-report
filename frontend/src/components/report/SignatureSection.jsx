@@ -30,7 +30,7 @@ export const SignatureSection = ({ patient, template }) => {
               <img src={tech.signatureImage} alt="Technician Signature" className="max-h-14 max-w-full object-contain" />
             ) : null}
           </div>
-          <div className="border-t border-slate-900 pt-1">
+          <div className="pt-1">
             <p className="font-semibold text-lg whitespace-nowrap">{tech.name || "System Admin"}</p>
             <p className="text-[#475569] text-base">{tech.designation || "Lab Technician"}</p>
           </div>
@@ -43,7 +43,7 @@ export const SignatureSection = ({ patient, template }) => {
               <img src={path.signatureImage} alt="Pathologist Signature" className="max-h-14 max-w-full object-contain" />
             ) : null}
           </div>
-          <div className="border-t border-slate-900 pt-1">
+          <div className="pt-1">
             <p className="font-semibold text-lg text-center whitespace-wrap">
               {path.name || `Dr. Smith`}
             </p>
