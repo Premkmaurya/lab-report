@@ -3,6 +3,7 @@ const Test = require("../models/test.model");
 const Patient = require("../models/patient.model");
 const asyncHandler = require("../utils/asyncHandler");
 const { BadRequestError, NotFoundError } = require("../utils/errors");
+const { autoImportGlobalTestIfNeeded } = require("./test.controller");
 
 const computeTotalPrice = (report) => {
   let total = 0;
@@ -220,7 +221,8 @@ const createPatientTest = asyncHandler(async (req, res) => {
         if (!rawTest.isGlobal) {
           template = await Test.findOne({ _id: rawTest._id, laboratoryId: targetLabId, isGlobal: false, deleted: { $ne: true } });
         } else {
-          template = await Test.findOne({ sourceTestId: rawTest._id, laboratoryId: targetLabId, isGlobal: false, deleted: { $ne: true } });
+          // Auto-import Global Test if not imported yet for targetLabId
+          template = await autoImportGlobalTestIfNeeded(rawTest, targetLabId, req.user._id);
         }
       } else {
         template = await Test.findOne({ _id: t.testId, laboratoryId: targetLabId, isGlobal: false, deleted: { $ne: true } });
@@ -383,10 +385,9 @@ const addTestToReport = asyncHandler(async (req, res) => {
         throw new BadRequestError(`Test '${rawTest.name}' belongs to another laboratory and cannot be added to this report`);
       }
     } else {
-      // Test is a Global Test -> automatically resolve to imported laboratory copy
-      findQuery = { sourceTestId: rawTest._id, laboratoryId: targetLabId, isGlobal: false, deleted: { $ne: true } };
-      console.log("Database query used to resolve global test to laboratory test:", JSON.stringify(findQuery));
-      template = await Test.findOne(findQuery);
+      // Test is a Global Test -> auto-import if not imported yet or return existing lab copy
+      console.log("Selected test is a Global Test. Auto-importing if needed for lab:", targetLabId);
+      template = await autoImportGlobalTestIfNeeded(rawTest, targetLabId, req.user._id);
     }
   } else {
     // Fallback search by ID and targetLabId

@@ -88,12 +88,8 @@ export const PatientDetails = () => {
     
     try {
       const labId = report.laboratoryId?._id || report.laboratoryId || report.patientId?.laboratoryId?._id || report.patientId?.laboratoryId || user?.laboratoryId;
-      console.log("=== ADD TEST MODAL FETCH DEBUG ===");
-      console.log("Report ID:", report._id);
-      console.log("Report laboratoryId:", labId);
 
       const testsData = await testService.getAllTests(labId ? { laboratoryId: labId } : {});
-      console.log("Total tests returned for laboratory:", testsData.tests?.length || 0);
 
       const existingTestIds = (report.tests || []).map(t => {
         const id = t.testId?._id || t.testId;
@@ -104,21 +100,9 @@ export const PatientDetails = () => {
       const filtered = allLabTests.filter(t => {
         const testIdStr = t._id?.toString();
         const isAlreadyAdded = existingTestIds.includes(testIdStr);
-        if (isAlreadyAdded) {
-          console.log(`[Add Test Filter] Test excluded (already added to report):`, {
-            name: t.name,
-            _id: t._id,
-            laboratoryId: t.laboratoryId,
-            isGlobal: t.isGlobal,
-            sourceTestId: t.sourceTestId,
-            deleted: t.deleted,
-            reason: "Already assigned to report"
-          });
-        }
         return !isAlreadyAdded;
       });
 
-      console.log("Available tests after filtering assigned tests:", filtered.length);
       setAvailableTests(filtered);
     } catch (err) {
       console.error("Failed to fetch available tests", err);
@@ -135,7 +119,6 @@ export const PatientDetails = () => {
   const handleAddTest = async () => {
     if (!selectedTestIdToAdd) return;
     setIsAddingTest(true);
-    console.log(availableTests)
     
     const selectedTest = availableTests.find(t => t._id === selectedTestIdToAdd);
     if (!selectedTest) {

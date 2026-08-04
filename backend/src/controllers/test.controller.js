@@ -97,35 +97,85 @@ const getTests = asyncHandler(async (req, res) => {
   const isSystemAdmin = req.user.role === 'system_admin';
   const targetLabId = req.query.laboratoryId || req.headers['x-laboratory-id'] || req.laboratoryId || req.tenantFilter?.laboratoryId;
 
-  let filter;
-
-  if (isSystemAdmin && !targetLabId) {
-    // System admin with no specific laboratory context → show only global test library
-    filter = { isGlobal: true, deleted: { $ne: true } };
-  } else {
-    // Lab users or system_admin scoped to a specific lab → show all lab tests for that laboratory (local + imported)
-    const effectiveLabId = targetLabId || req.user?.laboratoryId;
-    filter = { laboratoryId: effectiveLabId, isGlobal: false, deleted: { $ne: true } };
-  }
-
   console.log("=== GET TESTS BACKEND DEBUG LOG ===");
   console.log("Current user role:", req.user?.role);
   console.log("Current user laboratoryId:", req.user?.laboratoryId?.toString() ?? null);
   console.log("Target laboratoryId:", targetLabId?.toString() ?? null);
-  console.log("Mongo query filter:", JSON.stringify(filter));
 
-  const tests = await Test.find(filter)
-    .populate('departmentId')
-    .populate('createdBy', 'username _id')
-    .populate('updatedBy', 'username _id')
-    .sort({ createdAt: -1 });
+  if (isSystemAdmin && targetLabId) {
+    // System Admin scoped to a target lab:
+    // 1. Fetch all existing lab tests for targetLabId
+    const labTests = await Test.find({
+      laboratoryId: targetLabId,
+      isGlobal: false,
+      deleted: { $ne: true },
+    })
+      .populate('departmentId')
+      .populate('createdBy', 'username _id')
+      .populate('updatedBy', 'username _id')
+      .sort({ createdAt: -1 });
 
-  console.log("Number of tests returned from Mongo:", tests.length);
+    const importedSourceIdsSet = new Set(
+      labTests.filter(t => t.sourceTestId).map(t => t.sourceTestId.toString())
+    );
 
-  res.status(200).json({
-    success: true,
-    tests,
-  });
+    // 2. Fetch all Global Tests that have NOT been imported by targetLabId yet
+    const globalTests = await Test.find({
+      isGlobal: true,
+      deleted: { $ne: true },
+    })
+      .populate('departmentId')
+      .populate('createdBy', 'username _id')
+      .sort({ name: 1 });
+
+    const unimportedGlobalTests = globalTests.filter(
+      gt => !importedSourceIdsSet.has(gt._id.toString())
+    );
+
+    const mergedTests = [...labTests, ...unimportedGlobalTests];
+
+    console.log(`System Admin merged test list count: ${mergedTests.length} (Lab tests: ${labTests.length}, Unimported Global tests: ${unimportedGlobalTests.length})`);
+
+    return res.status(200).json({
+      success: true,
+      tests: mergedTests,
+    });
+  } else if (isSystemAdmin && !targetLabId) {
+    // System admin with no specific laboratory context → show global test library
+    const filter = { isGlobal: true, deleted: { $ne: true } };
+    console.log("Mongo query filter:", JSON.stringify(filter));
+
+    const tests = await Test.find(filter)
+      .populate('departmentId')
+      .populate('createdBy', 'username _id')
+      .populate('updatedBy', 'username _id')
+      .sort({ createdAt: -1 });
+
+    console.log("Number of global tests returned:", tests.length);
+
+    return res.status(200).json({
+      success: true,
+      tests,
+    });
+  } else {
+    // Lab users → show only tests belonging to their laboratory
+    const effectiveLabId = targetLabId || req.user?.laboratoryId;
+    const filter = { laboratoryId: effectiveLabId, isGlobal: false, deleted: { $ne: true } };
+    console.log("Mongo query filter:", JSON.stringify(filter));
+
+    const tests = await Test.find(filter)
+      .populate('departmentId')
+      .populate('createdBy', 'username _id')
+      .populate('updatedBy', 'username _id')
+      .sort({ createdAt: -1 });
+
+    console.log("Number of tests returned for lab user:", tests.length);
+
+    return res.status(200).json({
+      success: true,
+      tests,
+    });
+  }
 });
 
 const getTestById = asyncHandler(async (req, res) => {
@@ -806,6 +856,71 @@ const updateImportedGlobalTest = asyncHandler(async (req, res) => {
   });
 });
 
+/**
+ * Helper to auto-import a Global Test into a laboratory if it hasn't been imported yet.
+ * If an imported copy already exists for targetLabId, returns that existing copy.
+ */
+const autoImportGlobalTestIfNeeded = async (globalTestOrId, targetLabId, userId) => {
+  if (!globalTestOrId || !targetLabId) return null;
+  const globalTestId = globalTestOrId._id ? globalTestOrId._id.toString() : globalTestOrId.toString();
+
+  const globalTest = await Test.findOne({ _id: globalTestId, isGlobal: true }).populate('departmentId');
+  if (!globalTest) {
+    return null;
+  }
+
+  // Check if an imported copy already exists for targetLabId
+  const existingImport = await Test.findOne({
+    laboratoryId: targetLabId,
+    sourceTestId: globalTest._id,
+    isGlobal: false,
+    deleted: { $ne: true },
+  });
+
+  if (existingImport) {
+    console.log(`[Auto-Import] Found existing imported test "${existingImport.name}" (${existingImport._id}) for lab ${targetLabId}`);
+    return existingImport;
+  }
+
+  console.log(`[Auto-Import] Auto-importing Global Test "${globalTest.name}" (${globalTest._id}) for lab ${targetLabId}...`);
+
+  // Step 1: Clone sub-tests with new explicit ObjectIds first
+  const clonedSubTests = globalTest.subTests.map((st) => {
+    const stObj = typeof st.toObject === 'function' ? st.toObject() : { ...st };
+    stObj._id = new mongoose.Types.ObjectId();
+    return stObj;
+  });
+
+  // Step 2: Remap formula references using oldId -> newId mapping & validate
+  remapSubTestFormulas(globalTest.subTests, clonedSubTests);
+
+  // Step 3: Create imported laboratory test document
+  const importedLocalTest = await Test.create({
+    name: globalTest.name,
+    departmentId: globalTest.departmentId?._id || globalTest.departmentId,
+    price: globalTest.price,
+    subTests: clonedSubTests,
+    isGlobal: false,
+    createdBySystem: false,
+    sourceTestId: globalTest._id,
+    importedVersion: globalTest.version || 1,
+    importedAt: new Date(),
+    lastUpdatedFromGlobalAt: new Date(),
+    laboratoryId: targetLabId,
+    createdBy: userId,
+    updatedBy: userId,
+  });
+
+  const populatedTest = await Test.findById(importedLocalTest._id)
+    .populate('departmentId')
+    .populate('createdBy', 'username _id');
+
+  await invalidateCachePattern("*test*");
+
+  console.log(`[Auto-Import] Successfully imported "${populatedTest.name}" with new lab test ID (${populatedTest._id})`);
+  return populatedTest;
+};
+
 module.exports = {
   getTests,
   getTestById,
@@ -819,4 +934,6 @@ module.exports = {
   deleteGlobalTest,
   importGlobalTest,
   updateImportedGlobalTest,
+  remapSubTestFormulas,
+  autoImportGlobalTestIfNeeded,
 };
