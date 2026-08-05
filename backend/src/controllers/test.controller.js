@@ -3,6 +3,7 @@ const Test = require("../models/test.model");
 const asyncHandler = require("../utils/asyncHandler");
 const { BadRequestError, NotFoundError, ConflictError, ForbiddenError } = require("../utils/errors");
 const { invalidateCacheKey, invalidateCachePattern } = require("../services/cache.service");
+const logger = require("../utils/logger");
 
 const convertToDaysHelper = (age, unit = "Years") => {
   const numericAge = parseFloat(age);
@@ -284,13 +285,18 @@ const updateTest = asyncHandler(async (req, res) => {
     }
   }
 
-  const existingTest = await Test.findOne({ _id: req.params.id, ...req.tenantFilter });
+  const query = isSystemAdmin ? { _id: req.params.id } : { _id: req.params.id, ...req.tenantFilter };
+  const existingTest = await Test.findOne(query);
   if (!existingTest) {
     throw new NotFoundError("Test not found");
   }
 
-  if (existingTest.isGlobal) {
-    throw new ForbiddenError("Global Tests are read-only. Import this test into a laboratory to customize pricing or use the update workflow.");
+  logger.info(
+    `Checking test update permission | user._id: ${req.user._id}, user.role: ${req.user.role}, test._id: ${existingTest._id}, test.isGlobal: ${existingTest.isGlobal}`
+  );
+
+  if (existingTest.isGlobal && req.user.role !== "system_admin") {
+    throw new ForbiddenError("Only System Admin can edit Global Tests.");
   }
 
   const allowedFields = ["name", "price", "subTests", "departmentId"];
@@ -335,9 +341,24 @@ const updateTest = asyncHandler(async (req, res) => {
     validateSubTests(updates.subTests);
   }
 
+  if (existingTest.isGlobal) {
+    const isStructuralChange =
+      (updates.name !== undefined && updates.name !== existingTest.name) ||
+      (updates.departmentId !== undefined && updates.departmentId.toString() !== existingTest.departmentId?.toString()) ||
+      updates.subTests !== undefined;
+
+    if (isStructuralChange) {
+      updates.version = (existingTest.version || 1) + 1;
+    }
+  }
+
   updates.updatedBy = req.user._id;
 
-  const test = await Test.findOneAndUpdate({ _id: req.params.id, isGlobal: false, ...req.tenantFilter }, updates, {
+  const updateFilter = existingTest.isGlobal
+    ? { _id: req.params.id, isGlobal: true }
+    : { _id: req.params.id, isGlobal: false, ...req.tenantFilter };
+
+  const test = await Test.findOneAndUpdate(updateFilter, updates, {
     returnDocument: "after",
     runValidators: true,
   })
@@ -517,8 +538,12 @@ const updateGlobalTest = asyncHandler(async (req, res) => {
     throw new NotFoundError("Global test template not found");
   }
 
-  if (existingTest.isGlobal) {
-    throw new ForbiddenError("Global Tests are read-only. Import this test into a laboratory to customize pricing or use the update workflow.");
+  logger.info(
+    `Checking global test update permission | user._id: ${req.user._id}, user.role: ${req.user.role}, test._id: ${existingTest._id}, test.isGlobal: ${existingTest.isGlobal}`
+  );
+
+  if (existingTest.isGlobal && req.user.role !== "system_admin") {
+    throw new ForbiddenError("Only System Admin can edit Global Tests.");
   }
 
   const allowedFields = ["name", "price", "subTests", "departmentId"];
