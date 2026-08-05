@@ -354,23 +354,6 @@ const addTestToReport = asyncHandler(async (req, res) => {
 
   const rawTest = await Test.findById(testId);
 
-  // Debug logging
-  console.log("=== ADD TEST TO REPORT DEBUG LOG ===");
-  console.log("Report:", {
-    reportId: patientTest._id?.toString(),
-    laboratoryId: targetLabId,
-  });
-  console.log("Selected Test:", {
-    testIdReceived: testId,
-    isGlobal: rawTest?.isGlobal ?? null,
-    laboratoryId: rawTest?.laboratoryId?.toString() ?? null,
-    sourceTestId: rawTest?.sourceTestId?.toString() ?? null,
-  });
-  console.log("Current User:", {
-    role: req.user?.role,
-    laboratoryId: req.user?.laboratoryId?.toString() ?? null,
-  });
-
   let template = null;
   let findQuery = {};
 
@@ -378,21 +361,17 @@ const addTestToReport = asyncHandler(async (req, res) => {
     if (!rawTest.isGlobal) {
       // Test is a laboratory test
       findQuery = { _id: rawTest._id, laboratoryId: targetLabId, isGlobal: false, deleted: { $ne: true } };
-      console.log("Database query used to find test:", JSON.stringify(findQuery));
       template = await Test.findOne(findQuery);
 
       if (!template && rawTest.laboratoryId?.toString() !== targetLabId) {
         throw new BadRequestError(`Test '${rawTest.name}' belongs to another laboratory and cannot be added to this report`);
       }
     } else {
-      // Test is a Global Test -> auto-import if not imported yet or return existing lab copy
-      console.log("Selected test is a Global Test. Auto-importing if needed for lab:", targetLabId);
       template = await autoImportGlobalTestIfNeeded(rawTest, targetLabId, req.user._id);
     }
   } else {
     // Fallback search by ID and targetLabId
     findQuery = { _id: testId, laboratoryId: targetLabId, isGlobal: false, deleted: { $ne: true } };
-    console.log("Database query used to find test (fallback):", JSON.stringify(findQuery));
     template = await Test.findOne(findQuery);
   }
 

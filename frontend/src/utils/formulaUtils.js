@@ -16,55 +16,68 @@
 // ─── Migration ────────────────────────────────────────────────────────────────
 
 /**
- * Converts the old 3-field formula structure into a token array.
- * If `formula.tokens` already exists and has entries, it is returned as-is.
+ * Converts old or serialized formula structure into a valid token array.
+ * If `formula.tokens` exists and has entries, it is returned as-is.
  * If the formula is null/undefined an empty token array is returned.
  *
- * @param {Object|null} formula
+ * @param {Object|string|null} formula
  * @returns {Array} token array
  */
 export function migrateFormula(formula) {
   if (!formula) return [];
 
-  // Already migrated
-  if (Array.isArray(formula.tokens) && formula.tokens.length > 0) {
-    return formula.tokens;
+  let tokens = formula.tokens !== undefined ? formula.tokens : (Array.isArray(formula) ? formula : null);
+
+  if (typeof tokens === 'string') {
+    try {
+      tokens = JSON.parse(tokens);
+    } catch (e) {
+      tokens = null;
+    }
+  }
+
+  if (tokens && typeof tokens === 'object' && !Array.isArray(tokens)) {
+    tokens = Object.values(tokens);
+  }
+
+  if (Array.isArray(tokens) && tokens.length > 0) {
+    return tokens;
   }
 
   // Old format: leftType / operator / rightType
-  const tokens = [];
+  const legacyTokens = [];
 
   // Left operand
   if (formula.leftType === 'constant') {
     const v = parseFloat(formula.leftConstant);
-    if (!isNaN(v)) tokens.push({ type: 'constant', value: v });
-  } else if (formula.leftParameterId) {
-    tokens.push({
+    if (!isNaN(v)) legacyTokens.push({ type: 'constant', value: v });
+  } else if (formula.leftParameterId || formula.leftParameterName) {
+    legacyTokens.push({
       type: 'parameter',
-      parameterId: formula.leftParameterId,
-      parameterName: formula.leftParameterName || '',
+      parameterId: formula.leftParameterId || formula.leftParameterName,
+      parameterName: formula.leftParameterName || formula.leftParameterId || '',
     });
   }
 
   // Operator
-  if (formula.operator && tokens.length === 1) {
-    tokens.push({ type: 'operator', value: formula.operator });
+  if (formula.operator && legacyTokens.length === 1) {
+    legacyTokens.push({ type: 'operator', value: formula.operator });
   }
 
   // Right operand
   if (formula.rightType === 'constant') {
     const v = parseFloat(formula.rightConstant);
-    if (!isNaN(v)) tokens.push({ type: 'constant', value: v });
-  } else if (formula.rightParameterId) {
-    tokens.push({
+    if (!isNaN(v)) legacyTokens.push({ type: 'constant', value: v });
+  } else if (formula.rightParameterId || formula.rightParameterName) {
+    legacyTokens.push({
       type: 'parameter',
-      parameterId: formula.rightParameterId,
-      parameterName: formula.rightParameterName || '',
+      parameterId: formula.rightParameterId || formula.rightParameterName,
+      parameterName: formula.rightParameterName || formula.rightParameterId || '',
     });
   }
 
   // Require at least operand + operator + operand
-  return tokens.length >= 3 ? tokens : [];
+  return legacyTokens.length >= 3 ? legacyTokens : [];
 }
 
 // ─── Validation ───────────────────────────────────────────────────────────────
@@ -113,7 +126,7 @@ export function validateTokens(tokens) {
       if (i + 1 < tokens.length && tokens[i + 1].type !== 'operator') {
         errors.push(`Missing operator between operands at position ${i + 1}.`);
       }
-      if (!token.parameterId) {
+      if (!token.parameterId && !token.parameterName) {
         errors.push(`Parameter at position ${i + 1} has no parameter selected.`);
       }
     } else {
@@ -160,36 +173,53 @@ const PRECEDENCE = { '+': 1, '-': 1, '*': 2, '/': 2 };
 /**
  * Safely evaluates a token array to a numeric result.
  *
- * @param {Array} tokens – the token list
- * @param {Function} resolveParam – (parameterId) => number | null
+ * @param {Array} rawTokens – the token list or formula object
+ * @param {Function} resolveParam – (parameterId, parameterName) => number | null
  *   Return null if the parameter value is unavailable or non-numeric.
  * @returns {number|null} the result, or null on any error
  */
-export function evaluateTokens(tokens, resolveParam) {
+export function evaluateTokens(rawTokens, resolveParam) {
+  const tokens = migrateFormula(rawTokens);
   if (!Array.isArray(tokens) || tokens.length === 0) return null;
 
-  // Step 1: resolve each token to a number or operator
   const resolved = [];
+  const resolvedLog = [];
+  const expressionParts = [];
+
+  // Step 1: Resolve ALL tokens in the expression
   for (const token of tokens) {
     if (token.type === 'operator') {
       resolved.push({ kind: 'op', value: token.value });
+      resolvedLog.push({ operator: token.value });
+      expressionParts.push(token.value);
     } else if (token.type === 'constant') {
       const n = parseFloat(token.value);
       if (isNaN(n)) return null;
       resolved.push({ kind: 'num', value: n });
+      resolvedLog.push({ constant: token.value, value: n });
+      expressionParts.push(String(n));
     } else if (token.type === 'parameter') {
-      if (!token.parameterId) return null;
-      const n = resolveParam ? resolveParam(token.parameterId) : null;
-      if (n === null || n === undefined || isNaN(Number(n))) return null;
-      resolved.push({ kind: 'num', value: Number(n) });
+      const paramId = token.parameterId || token.parameterName;
+      const paramName = token.parameterName || token.parameterId;
+      if (!paramId && !paramName) return null;
+
+      let n = resolveParam ? resolveParam(paramId, paramName) : null;
+
+      if (n === null || n === undefined || isNaN(Number(n))) {
+        return null;
+      }
+      n = Number(n);
+      resolved.push({ kind: 'num', value: n });
+      resolvedLog.push({ parameter: paramName || paramId, value: n });
+      expressionParts.push(String(n));
     } else {
       return null;
     }
   }
 
-  // Step 2: shunting-yard → postfix (RPN)
-  const output = []; // number values
-  const opStack = []; // operator strings
+  // Step 2: Evaluate complete token array via Shunting-Yard (RPN)
+  const output = []; // numeric stack
+  const opStack = []; // operator stack
 
   const applyOp = () => {
     const op = opStack.pop();
@@ -231,5 +261,18 @@ export function evaluateTokens(tokens, resolveParam) {
     return null;
   }
 
-  return Math.round(output[0] * 1000) / 1000;
+  const finalResult = Math.round(output[0] * 1000) / 1000;
+  const finalExpression = expressionParts.join(' ');
+
+
+  return finalResult;
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    migrateFormula,
+    validateTokens,
+    buildFormulaPreview,
+    evaluateTokens,
+  };
 }

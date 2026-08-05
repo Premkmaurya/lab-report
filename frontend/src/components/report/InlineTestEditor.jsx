@@ -95,9 +95,12 @@ export const InlineTestEditor = ({
     const calculatedParamsCount = currentResults.filter(r => r.isCalculated && r.formula).length;
     if (calculatedParamsCount === 0) return;
 
-    // Build a resolver: parameterId → numeric value from current results
-    const buildResolver = (results) => (parameterId) => {
-      const found = findParamResult(results, parameterId, testTemplate);
+    // Build a resolver: (parameterId, parameterName) → numeric value from current results
+    const buildResolver = (results) => (parameterId, parameterName) => {
+      let found = findParamResult(results, parameterId, testTemplate);
+      if (!found && parameterName) {
+        found = findParamResult(results, parameterName, testTemplate);
+      }
       if (!found) return null;
       const v = parseFloat(found.value);
       return isNaN(v) ? null : v;
