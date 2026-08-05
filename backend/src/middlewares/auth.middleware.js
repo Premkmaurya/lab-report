@@ -1,6 +1,8 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/user.model");
 const config = require("../config/config");
+const { isTokenBlacklisted, isUserRevoked } = require("../services/tokenBlacklist.service");
+const logger = require("../utils/logger");
 
 const userAuth = async (req, res, next) => {
   try {
@@ -14,7 +16,23 @@ const userAuth = async (req, res, next) => {
       return res.status(401).json({ message: "Not authorized, no token" });
     }
 
-    const decoded = jwt.verify(token, config.JWT_SECRET || "report-secret-key");
+    const secretKey = process.env.JWT_SECRET || config.JWT_SECRET || "report-secret-key";
+    const decoded = jwt.verify(token, secretKey);
+
+    // Check Redis Blacklist
+    const blacklisted = await isTokenBlacklisted(token);
+    if (blacklisted) {
+      logger.warn(`Token Rejected | Blacklisted token attempted for user: ${decoded.id}`);
+      return res.status(401).json({ message: "Token has been revoked." });
+    }
+
+    // Check User-wide session revocation
+    const userRevoked = await isUserRevoked(decoded.id, decoded.iat);
+    if (userRevoked) {
+      logger.warn(`Token Rejected | Revoked session token attempted for user: ${decoded.id}`);
+      return res.status(401).json({ message: "Token has been revoked." });
+    }
+
     const user = await User.findById(decoded.id).select("-password");
 
     if (!user) {
@@ -22,15 +40,20 @@ const userAuth = async (req, res, next) => {
     }
 
     if (!user.isAuthorized) {
+      logger.warn(`Token Rejected | Disabled user attempted access: ${user._id}`);
       return res.status(403).json({ 
         message: "Your account is not authorized yet. Please contact the administrator." 
       });
     }
 
+    req.token = token;
     req.user = user;
     req.laboratoryId = user.laboratoryId || null;
     next();
   } catch (error) {
+    if (error.name === "TokenExpiredError") {
+      return res.status(401).json({ message: "Not authorized, token expired" });
+    }
     return res.status(401).json({ message: "Not authorized, invalid token" });
   }
 };

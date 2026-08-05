@@ -4,6 +4,12 @@ const User = require("../models/user.model");
 const config = require("../config/config");
 const asyncHandler = require("../utils/asyncHandler");
 const { BadRequestError, NotFoundError, UnauthorizedError, ForbiddenError } = require("../utils/errors");
+const logger = require("../utils/logger");
+const {
+  blacklistToken,
+  trackUserToken,
+  revokeAllUserTokens,
+} = require("../services/tokenBlacklist.service");
 
 const generateToken = (user) => {
   return jwt.sign(
@@ -21,8 +27,14 @@ const generateToken = (user) => {
   );
 };
 
-const sendTokenResponse = (user, statusCode, res) => {
+const sendTokenResponse = async (user, statusCode, res) => {
   const token = generateToken(user);
+
+  // Track session token for user
+  await trackUserToken(user._id.toString(), token);
+
+  // Log User Login (Requirement 11)
+  logger.info(`User Login | User: ${user.username} (${user._id})`);
 
   res.cookie("token", token, {
     httpOnly: true,
@@ -33,6 +45,7 @@ const sendTokenResponse = (user, statusCode, res) => {
 
   res.status(statusCode).json({
     success: true,
+    token,
     user: {
       id: user._id,
       username: user.username,
@@ -81,17 +94,70 @@ const login = asyncHandler(async (req, res) => {
     throw new UnauthorizedError("Invalid username/email or password.");
   }
 
-  sendTokenResponse(user, 200, res);
+  await sendTokenResponse(user, 200, res);
 });
 
-const logout = (req, res) => {
+const logout = asyncHandler(async (req, res) => {
+  let token = req.cookies?.token;
+  if (!token && req.headers.authorization?.startsWith("Bearer ")) {
+    token = req.headers.authorization.split(" ")[1];
+  }
+
+  const userId = req.user?.id || req.user?._id;
+
+  if (token) {
+    await blacklistToken(token, userId);
+  }
+
+  // Log User Logout (Requirement 11)
+  logger.info(`User Logout | User: ${userId || "unknown"}`);
+
   res.cookie("token", "", {
     httpOnly: true,
     expires: new Date(0),
   });
 
   res.status(200).json({ success: true, message: "Logged out successfully" });
-};
+});
+
+const changePassword = asyncHandler(async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+
+  if (!currentPassword || !newPassword) {
+    throw new BadRequestError("Please provide current and new password");
+  }
+
+  if (newPassword.length < 6) {
+    throw new BadRequestError("New password must be at least 6 characters long");
+  }
+
+  const user = await User.findById(req.user._id);
+  if (!user) {
+    throw new NotFoundError("User not found");
+  }
+
+  const isMatch = await bcrypt.compare(currentPassword, user.password);
+  if (!isMatch) {
+    throw new UnauthorizedError("Current password is incorrect");
+  }
+
+  user.password = await bcrypt.hash(newPassword, 10);
+  await user.save();
+
+  // Requirement 5: Invalidate all previous tokens on password change
+  await revokeAllUserTokens(user._id.toString());
+  logger.info(`Password Change | All previous tokens invalidated for user: ${user._id}`);
+
+  res.cookie("token", "", {
+    httpOnly: true,
+    expires: new Date(0),
+  });
+
+  res.status(200).json({
+    success: true,
+    message: "Password updated successfully. Please log in again.",
+  });
+});
 
 const getMe = asyncHandler(async (req, res) => {
   const user = req.user;
@@ -216,7 +282,7 @@ const updateUserStatus = asyncHandler(async (req, res) => {
     throw new ForbiddenError("You cannot update your own account status");
   }
 
-    const { status, permissions, role, isAuthorized } = req.body;
+  const { status, permissions, role, isAuthorized } = req.body;
 
   const query = { _id: req.params.id, ...req.tenantFilter };
   const user = await User.findOne(query);
@@ -232,6 +298,11 @@ const updateUserStatus = asyncHandler(async (req, res) => {
 
   if (normalizedStatus !== undefined) {
     user.isAuthorized = normalizedStatus;
+    // Requirement 4: Force Logout - if user disabled, blacklist all active tokens
+    if (normalizedStatus === false) {
+      await revokeAllUserTokens(user._id.toString());
+      logger.info(`Force Logout | Disabled user active tokens revoked: ${user._id}`);
+    }
   }
 
   if (permissions !== undefined) {
@@ -263,6 +334,7 @@ module.exports = {
   login,
   signup,
   logout,
+  changePassword,
   getMe,
   createUser,
   getAllUsers,

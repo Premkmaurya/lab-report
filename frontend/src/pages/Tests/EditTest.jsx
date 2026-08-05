@@ -24,7 +24,7 @@ export const EditTest = () => {
   const { pathname } = useLocation();
   const [isGlobalTest, setIsGlobalTest] = useState(false);
   const isGlobalMode = new URLSearchParams(useLocation().search).get("global") === "true";
-  const isReadOnly = pathname.includes('/view') || !isSystemAdmin || isGlobalTest || isGlobalMode;
+  const isReadOnly = pathname.includes('/view') || (!isSystemAdmin && (isGlobalTest || isGlobalMode));
   const [loading, setLoading] = useState(true);
   const [step, setStep] = useState(id ? 2 : 1);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -295,7 +295,7 @@ export const EditTest = () => {
   };
 
   const onSubmit = async (data) => {
-    if (isGlobalTest || isGlobalMode) {
+    if ((isGlobalTest || isGlobalMode) && !isSystemAdmin) {
       toast.error("Global Tests are read-only. Import this test into a laboratory to customize pricing or use the update workflow.");
       return;
     }
@@ -482,17 +482,6 @@ export const EditTest = () => {
 
         {step === 2 && (
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            {(isGlobalTest || isGlobalMode) && (
-              <div className="bg-amber-50 border border-amber-200 rounded-cards p-4 mb-6 flex items-start space-x-3 text-amber-800">
-                <ShieldAlert className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-sm font-semibold">Global Test (Read-Only)</p>
-                  <p className="text-xs text-amber-700 mt-0.5">
-                    Global Tests are read-only. Import this test into a laboratory to customize pricing or use the update workflow.
-                  </p>
-                </div>
-              </div>
-            )}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-xs font-bold text-charcoal uppercase tracking-wider mb-2">

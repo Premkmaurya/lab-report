@@ -5,6 +5,7 @@ const {
   signup,
   login,
   logout,
+  changePassword,
   getMe,
   createUser,
   getAllUsers,
@@ -39,6 +40,12 @@ router.post(
   login,
 );
 router.post("/logout", auditMiddleware("LOGOUT", "Auth"), logout);
+router.post(
+  "/change-password",
+  authMiddleware.userAuth,
+  auditMiddleware("UPDATED", "Password"),
+  changePassword,
+);
 router.get("/me", authMiddleware.userAuth, getMe);
 
 // Admin / System Admin user management routes

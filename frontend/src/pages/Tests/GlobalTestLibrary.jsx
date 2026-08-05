@@ -276,11 +276,11 @@ export const GlobalTestLibrary = ({ onImportSuccess }) => {
                     {isSystemAdmin ? (
                       <div className="flex items-center space-x-1">
                         <Link
-                          to={`/tests/view/${gt._id}`}
+                          to={`/tests/edit/${gt._id}?global=true`}
                           className="p-2 border border-cream-border text-stone hover:text-charcoal hover:bg-warm-canvas rounded-buttons transition"
-                          title="View Global Template (Read-Only)"
+                          title="Edit Global Template"
                         >
-                          <Eye className="w-4 h-4 text-stone" />
+                          <Edit2 className="w-4 h-4 text-stone" />
                         </Link>
                         <button
                           onClick={() => handleDeleteGlobal(gt._id, gt.name)}
