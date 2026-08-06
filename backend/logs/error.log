@@ -35,3 +35,11 @@
 {"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-08-06 23:14:12"}
 {"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-08-06 23:14:12"}
 {"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-08-06 23:14:13"}
+{"level":"error","message":"Redis Client Error: read ECONNRESET","service":"laboratory-management-system","timestamp":"2026-08-07 00:23:19"}
+{"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-08-07 00:23:21"}
+{"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-08-07 00:23:22"}
+{"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-08-07 00:23:23"}
+{"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-08-07 00:23:23"}
+{"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-08-07 00:23:24"}
+{"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-08-07 00:23:25"}
+{"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-08-07 00:23:26"}

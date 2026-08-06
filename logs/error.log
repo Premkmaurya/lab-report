@@ -1,0 +1,2 @@
+{"level":"error","message":"Redis Error during blacklist check: The client is closed","service":"laboratory-management-system","timestamp":"2026-08-07 00:20:29"}
+{"level":"error","message":"Redis Error during blacklist check: The client is closed","service":"laboratory-management-system","timestamp":"2026-08-07 00:42:57"}
