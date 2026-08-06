@@ -42,9 +42,11 @@ app.use("/status", userAuth, authorizeRoles("admin"));
 app.use(statusMonitor());
 
 const laboratoryRoutes = require("./routes/laboratory.routes");
+const reportVerificationRoutes = require("./routes/reportVerification.routes");
 
 app.use("/api/health", healthRoutes);
 app.use("/api/auth", authRoutes); // Auth routes have their own limiters
+app.use("/api/report/verify", reportVerificationRoutes); // Public report verification routes
 app.use("/api/laboratories", laboratoryRoutes);
 app.use("/api/doctors", doctorRoutes);
 app.use("/api/patients", patientRoutes);

@@ -24,6 +24,7 @@
 import { PatientInfo }     from '../report/PatientInfo';
 import { SignatureSection } from '../report/SignatureSection';
 import { BarcodeElement }  from './BarcodeElement';
+import { QrCodeElement }   from './QrCodeElement';
 import { checkAbnormalResult } from '../../utils/resultUtils';
 import './styles/print.css';
 
@@ -37,6 +38,7 @@ export const PrintablePage = ({
   rows         = [],
   pageNumber   = 1,
   barcodeSvgString = null,
+  qrCodeSvgString = null,
   zoom         = 1,
 }) => {
   /* ── Template values ──────────────────────────────────────────── */
@@ -49,6 +51,7 @@ export const PrintablePage = ({
   const marginLeft   = parseInt(page.marginLeft   || 15);
 
   const barcodeSettings = template?.elements?.barcode || { enabled: true };
+  const qrCodeSettings  = template?.elements?.qrCode  || { enabled: true };
 
   // Element-level style overrides from the print template designer
   const deptStyles   = template?.elements?.departmentHeading || {};
@@ -303,6 +306,7 @@ export const PrintablePage = ({
     <div
       className="print-page"
       style={{
+        position:       'relative',
         width:          `${A4_WIDTH_PX}px`,
         height:         `${A4_HEIGHT_PX}px`,
         boxSizing:      'border-box',
@@ -365,7 +369,12 @@ export const PrintablePage = ({
 
       {/* ── 4. Footer (always at page bottom via flex) ────────── */}
       <div style={{ flexShrink: 0 }}>
-        <SignatureSection patient={patient} template={template} />
+        <SignatureSection
+          patient={patient}
+          report={report}
+          template={template}
+          qrCodeSvgString={qrCodeSvgString}
+        />
       </div>
     </div>
   );

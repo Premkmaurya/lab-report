@@ -23,6 +23,10 @@ const labDetailsSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    requirePatientVerification: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true },
 );

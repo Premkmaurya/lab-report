@@ -15,6 +15,7 @@ export const Settings = () => {
     labAddress: "Plot 12, Medical Square, Sector 4, Nagpur - 440012",
     labPhone: "+91 712 255 1200",
     labEmail: "support@balajidiagnostics.com",
+    requirePatientVerification: false,
   });
 
   useEffect(() => {
@@ -26,6 +27,7 @@ export const Settings = () => {
           labAddress: res.labDetails.letterheadAddressLine || "",
           labPhone: res.labDetails.contactPhone || "",
           labEmail: res.labDetails.contactEmail || "",
+          requirePatientVerification: !!res.labDetails.requirePatientVerification,
         });
       }
     }
@@ -40,6 +42,7 @@ export const Settings = () => {
       letterheadAddressLine: labSettings.labAddress,
       contactPhone: labSettings.labPhone,
       contactEmail: labSettings.labEmail,
+      requirePatientVerification: labSettings.requirePatientVerification,
     };
 
     toast.promise(labDetailsService.upsert(payload), {
@@ -202,6 +205,27 @@ export const Settings = () => {
                   required
                 />
               </div>
+            </div>
+
+            <div className="p-4 bg-lavender-mist/30 border border-cream-border rounded-cards space-y-2">
+              <div className="flex items-center space-x-3">
+                <input
+                  type="checkbox"
+                  id="requirePatientVerification"
+                  checked={labSettings.requirePatientVerification}
+                  onChange={(e) => handleFieldChange("requirePatientVerification", e.target.checked)}
+                  className="h-4 w-4 rounded border-cream-border text-electric-cobalt focus:ring-electric-cobalt cursor-pointer"
+                />
+                <label
+                  htmlFor="requirePatientVerification"
+                  className="text-sm font-semibold text-charcoal cursor-pointer"
+                >
+                  Require Patient Verification for Online Reports
+                </label>
+              </div>
+              <p className="text-xs text-stone pl-7">
+                If enabled, users scanning the report QR code must enter Patient Mobile Number, Date of Birth, or Visit ID before viewing report details online.
+              </p>
             </div>
 
             <div className="flex justify-end pt-4 border-t border-cream-border">

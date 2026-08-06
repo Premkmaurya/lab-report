@@ -148,6 +148,12 @@ const getPatientTestById = asyncHandler(async (req, res) => {
     throw new NotFoundError("Patient test not found");
   }
 
+  if (!patientTest.verificationToken) {
+    const crypto = require("crypto");
+    patientTest.verificationToken = crypto.randomBytes(32).toString("hex");
+    await patientTest.save();
+  }
+
   const reportObj = patientTest.toObject();
   reportObj.totalPrice = computeTotalPrice(reportObj);
 

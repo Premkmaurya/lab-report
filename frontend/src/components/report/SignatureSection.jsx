@@ -1,8 +1,10 @@
 import React from 'react';
+import { QrCodeElement } from '../print/QrCodeElement';
 
-export const SignatureSection = ({ patient, template }) => {
+export const SignatureSection = ({ patient, report, template, qrCodeSvgString }) => {
   const footerStyles = template?.elements?.footer || {};
   const signatures = template?.signatures || {};
+  const qrSettings = template?.elements?.qrCode || { enabled: true };
 
   const tech = signatures.technician || {
     name: "System Admin",
@@ -22,7 +24,7 @@ export const SignatureSection = ({ patient, template }) => {
 
   return (
     <div className="mt-4 pt-2 px-15 text-[13px] text-slate-900" style={footerStyles}>
-      <div className="flex justify-between">
+      <div className="flex justify-between items-end">
         {/* Technician Signature Block */}
         <div className={`w-35 text-center ${!tech.show ? 'invisible' : ''}`}>
           <div className="h-16 w-full flex items-center justify-center">
@@ -36,6 +38,15 @@ export const SignatureSection = ({ patient, template }) => {
           </div>
         </div>
         
+        {/* Centered QR Code Block */}
+        <div className="flex-1 flex justify-center items-center">
+          <QrCodeElement
+            token={report?.verificationToken}
+            settings={qrSettings}
+            qrSvgString={qrCodeSvgString}
+          />
+        </div>
+
         {/* Pathologist Signature Block */}
         <div className={`w-35 text-center ${!path.show ? 'invisible' : ''}`}>
           <div className="h-16 w-full flex items-center justify-center">

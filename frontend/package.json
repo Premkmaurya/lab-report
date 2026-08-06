@@ -16,6 +16,7 @@
     "jsbarcode": "^3.12.3",
     "lucide-react": "^1.21.0",
     "pagedjs": "^0.4.3",
+    "qrcode": "^1.5.4",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "react-helmet-async": "^3.0.0",

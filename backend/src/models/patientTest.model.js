@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const mongooseDelete = require("mongoose-delete");
 const tenantPlugin = require("../plugins/tenantPlugin");
+const crypto = require("crypto");
 
 const patientTestItemSchema = new mongoose.Schema(
   {
@@ -101,11 +102,36 @@ const patientTestSchema = new mongoose.Schema(
       ref: "User",
       default: null,
     },
+    verificationToken: {
+      type: String,
+      unique: true,
+      sparse: true,
+      index: true,
+    },
+    verifiedAt: {
+      type: Date,
+      default: null,
+    },
+    verificationEnabled: {
+      type: Boolean,
+      default: true,
+    },
+    status: {
+      type: String,
+      enum: ['Verified', 'Cancelled', 'Superseded', 'Deleted', 'Draft'],
+      default: 'Verified',
+    },
   },
   {
     timestamps: true,
   },
 );
+
+patientTestSchema.pre("save", function () {
+  if (!this.verificationToken) {
+    this.verificationToken = crypto.randomBytes(32).toString("hex");
+  }
+});
 
 patientTestSchema.plugin(tenantPlugin);
 patientTestSchema.plugin(mongooseDelete, { overrideMethods: "all", deletedAt: true });

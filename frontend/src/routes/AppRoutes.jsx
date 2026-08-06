@@ -108,14 +108,21 @@ const PrintTemplateDesigner = lazy(() =>
   })),
 );
 
+const VerifyReport = lazy(() =>
+  import("../pages/Reports/VerifyReport").then((m) => ({
+    default: m.VerifyReport,
+  })),
+);
+
 export const AppRoutes = () => {
   return (
     <Suspense fallback={<LoadingScreen />}>
       <Routes>
-        {/* Public Auth Routes */}
+        {/* Public Auth & Report Verification Routes */}
         <Route element={<AuthLayout />}>
           <Route path="/login" element={<Login />} />
         </Route>
+        <Route path="/report/verify/:token" element={<VerifyReport />} />
 
         {/* Pending Authorization Route */}
         <Route path="/pending" element={<Pending />} />

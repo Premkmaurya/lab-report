@@ -119,7 +119,7 @@ export const CreatePatient = () => {
           navigate("/");
           return "Patient created successfully";
         },
-        error: (err) => err.data?.message || err.response?.data?.message || "Failed to create patient",
+        error: (err) => err?.data?.message || err?.message || err?.response?.data?.message || "Failed to create patient",
       }
     );
   };

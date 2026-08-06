@@ -144,7 +144,7 @@ export const PageRenderer = ({ patient, report, customTemplate, zoom = 1 }) => {
 
           <div ref={footerRef}>
             <div style={{ borderTop: '2px solid #CBD5E1', marginBottom: '4px' }} />
-            <SignatureSection patient={patient} template={template} />
+            <SignatureSection patient={patient} report={report} template={template} />
           </div>
         </div>
       )}

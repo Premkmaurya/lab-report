@@ -53,6 +53,7 @@ import { buildRows }          from './RowBuilder';
 import { estimateRowHeights } from './HeightCalculator';
 import { paginateRows }       from './PaginationPage';
 import { generateBarcodeSvgString } from '../../utils/barcodeUtils';
+import { generateQrSvgString, getVerificationUrl } from '../../utils/qrCodeUtils';
 import { injectAndPrint }     from '../../utils/printWindow';
 
 export const PrintOrchestrator = ({
@@ -76,6 +77,7 @@ export const PrintOrchestrator = ({
   const contentWidth = A4_WIDTH_PX - marginLeft - marginRight;
 
   const barcodeSettings = template?.elements?.barcode || { enabled: true };
+  const qrCodeSettings  = template?.elements?.qrCode  || { enabled: true };
 
   const headerRef      = useRef(null);
   const tableHeaderRef = useRef(null);
@@ -84,6 +86,7 @@ export const PrintOrchestrator = ({
 
   const [measurements, setMeasurements] = useState(null);
   const [pages, setPages]               = useState(null);
+  const [qrCodeSvgString, setQrCodeSvgString] = useState(null);
 
   // Pre-generate the barcode SVG string synchronously so there is no
   // useEffect timing dependency during the serialization step.
@@ -91,6 +94,17 @@ export const PrintOrchestrator = ({
     if (!barcodeSettings.enabled || !patient?.visitId) return null;
     return generateBarcodeSvgString(patient.visitId, barcodeSettings);
   }, [patient?.visitId, JSON.stringify(barcodeSettings)]);
+
+  useEffect(() => {
+    if (!qrCodeSettings.enabled) return;
+    const url = getVerificationUrl(report?.verificationToken);
+    let isMounted = true;
+    generateQrSvgString(url, { size: qrCodeSettings.size || 80, margin: qrCodeSettings.margin || 2 })
+      .then((svg) => {
+        if (isMounted && svg) setQrCodeSvgString(svg);
+      });
+    return () => { isMounted = false; };
+  }, [report?.verificationToken, JSON.stringify(qrCodeSettings)]);
 
   /* ── Phase 1: Measure DOM heights after mount ────────────────── */
   useEffect(() => {
@@ -199,7 +213,7 @@ export const PrintOrchestrator = ({
 
           {/* Footer probe: includes the SignatureSection */}
           <div ref={footerRef}>
-            <SignatureSection patient={patient} template={template} />
+            <SignatureSection patient={patient} report={report} template={template} qrCodeSvgString={qrCodeSvgString} />
           </div>
         </div>
       )}
@@ -216,6 +230,7 @@ export const PrintOrchestrator = ({
               rows={pageData.rows}
               pageNumber={i + 1}
               barcodeSvgString={barcodeSvgString}
+              qrCodeSvgString={qrCodeSvgString}
               zoom={1} // always 1x for the print window
             />
           ))}

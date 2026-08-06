@@ -254,3 +254,327 @@
 {"level":"info","message":"\u001b[0mPATCH /api/doctors/6a6c8e9b0516d4c78755c710 \u001b[32m200\u001b[0m 1574.563 ms - 596\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 10:51:24"}
 {"level":"debug","message":"Cache miss for key: tenant:global:doctors:all","service":"laboratory-management-system","timestamp":"2026-08-06 10:51:26"}
 {"level":"info","message":"\u001b[0mGET /api/doctors \u001b[32m200\u001b[0m 1480.893 ms - 599\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 10:51:26"}
+{"level":"info","message":"Token Blacklisted | User: user123 | Hash: bc8f64226a45... | TTL: 600s","service":"laboratory-management-system","timestamp":"2026-08-06 22:31:29"}
+{"level":"info","message":"Token Blacklisted | User: user123 | Hash: bc8f64226a45... | TTL: 600s","service":"laboratory-management-system","timestamp":"2026-08-06 22:31:29"}
+{"level":"warn","message":"Token Rejected | Blacklisted token attempted for user: user123","service":"laboratory-management-system","timestamp":"2026-08-06 22:31:29"}
+{"level":"info","message":"Token Blacklisted | All active tokens revoked for user: user123","service":"laboratory-management-system","timestamp":"2026-08-06 22:31:29"}
+{"level":"error","message":"Redis Error during blacklist check: The client is closed","service":"laboratory-management-system","timestamp":"2026-08-06 22:31:29"}
+{"level":"info","message":"Server is running on port 3000 in development mode","service":"laboratory-management-system","timestamp":"2026-08-06 22:37:51"}
+{"level":"info","message":"Redis client connected","service":"laboratory-management-system","timestamp":"2026-08-06 22:37:51"}
+{"level":"info","message":"Redis client ready","service":"laboratory-management-system","timestamp":"2026-08-06 22:37:51"}
+{"level":"info","message":"Database connected successfully","service":"laboratory-management-system","timestamp":"2026-08-06 22:37:51"}
+{"level":"info","message":"\u001b[0mGET /api/auth/me \u001b[32m200\u001b[0m 1096.659 ms - 181\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 22:40:05"}
+{"level":"info","message":"\u001b[0mGET /api/auth/me \u001b[36m304\u001b[0m 616.679 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 22:40:05"}
+{"level":"info","message":"\u001b[0mGET /api/settings/print-template \u001b[32m200\u001b[0m 811.325 ms - 3588\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 22:40:07"}
+{"level":"info","message":"\u001b[0mGET /api/laboratories?limit=100 \u001b[32m200\u001b[0m 850.778 ms - 1872\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 22:40:08"}
+{"level":"debug","message":"Cache miss for key: tenant:global:doctors:all","service":"laboratory-management-system","timestamp":"2026-08-06 22:40:09"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests?date=today&timezoneOffset=-330 \u001b[32m200\u001b[0m 1152.351 ms - 64147\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 22:40:09"}
+{"level":"info","message":"\u001b[0mGET /api/doctors \u001b[32m200\u001b[0m 1314.887 ms - 599\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 22:40:09"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests \u001b[32m200\u001b[0m 1378.014 ms - 322388\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 22:40:09"}
+{"level":"info","message":"\u001b[0mGET /api/patients \u001b[32m200\u001b[0m 1679.701 ms - 26089\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 22:40:09"}
+{"level":"info","message":"\u001b[0mGET /api/tests \u001b[32m200\u001b[0m 1728.859 ms - 66139\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 22:40:09"}
+{"level":"info","message":"\u001b[0mGET /api/patients/6a74abaa2f9ecdd15882fe5e \u001b[32m200\u001b[0m 760.114 ms - 610\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 22:40:44"}
+{"level":"info","message":"\u001b[0mGET /api/patients/6a74abaa2f9ecdd15882fe5e \u001b[36m304\u001b[0m 761.720 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 22:40:45"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/patient/6a74abaa2f9ecdd15882fe5e \u001b[32m200\u001b[0m 887.108 ms - 28089\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 22:40:45"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/patient/6a74abaa2f9ecdd15882fe5e \u001b[36m304\u001b[0m 949.960 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 22:40:46"}
+{"level":"info","message":"\u001b[0mPOST /api/patient-tests/6a74abad2f9ecdd15882fea9/print \u001b[32m200\u001b[0m 1149.533 ms - 29426\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 22:40:49"}
+{"level":"info","message":"\u001b[0mGET /api/auth/me \u001b[36m304\u001b[0m 684.697 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 22:44:20"}
+{"level":"info","message":"\u001b[0mGET /api/auth/me \u001b[36m304\u001b[0m 640.940 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 22:44:22"}
+{"level":"info","message":"\u001b[0mGET /api/report/verify/sample-token-12345 \u001b[33m404\u001b[0m 78.476 ms - 91\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 22:44:24"}
+{"level":"info","message":"\u001b[0mGET /api/laboratories?limit=100 \u001b[36m304\u001b[0m 911.562 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 22:44:24"}
+{"level":"info","message":"\u001b[0mGET /api/settings/print-template \u001b[36m304\u001b[0m 1005.791 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 22:44:24"}
+{"level":"info","message":"\u001b[0mGET /api/report/verify/sample-token-12345 \u001b[33m404\u001b[0m 79.007 ms - 91\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 22:44:24"}
+{"level":"info","message":"\u001b[0mGET /api/settings/print-template \u001b[36m304\u001b[0m 772.175 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 22:44:25"}
+{"level":"info","message":"\u001b[0mGET /api/auth/me \u001b[36m304\u001b[0m 663.049 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 22:44:37"}
+{"level":"info","message":"\u001b[0mGET /api/report/verify/sample-token-12345 \u001b[33m404\u001b[0m 75.785 ms - 91\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 22:44:37"}
+{"level":"info","message":"\u001b[0mGET /api/report/verify/sample-token-12345 \u001b[33m404\u001b[0m 75.561 ms - 91\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 22:44:37"}
+{"level":"info","message":"\u001b[0mGET /api/auth/me \u001b[36m304\u001b[0m 620.166 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 22:44:38"}
+{"level":"info","message":"\u001b[0mGET /api/settings/print-template \u001b[36m304\u001b[0m 749.444 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 22:44:39"}
+{"level":"info","message":"\u001b[0mGET /api/laboratories?limit=100 \u001b[36m304\u001b[0m 752.790 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 22:44:39"}
+{"level":"info","message":"\u001b[0mGET /api/settings/print-template \u001b[36m304\u001b[0m 797.437 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 22:44:40"}
+{"level":"error","message":"Redis Client Error: read ECONNRESET","service":"laboratory-management-system","timestamp":"2026-08-06 22:44:50"}
+{"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-08-06 22:44:50"}
+{"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-08-06 22:44:50"}
+{"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-08-06 22:44:50"}
+{"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-08-06 22:44:51"}
+{"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-08-06 22:44:51"}
+{"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-08-06 22:44:52"}
+{"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-08-06 22:44:52"}
+{"level":"info","message":"Server is running on port 3000 in development mode","service":"laboratory-management-system","timestamp":"2026-08-06 22:47:25"}
+{"level":"info","message":"Redis client connected","service":"laboratory-management-system","timestamp":"2026-08-06 22:47:25"}
+{"level":"info","message":"Redis client ready","service":"laboratory-management-system","timestamp":"2026-08-06 22:47:26"}
+{"level":"info","message":"Database connected successfully","service":"laboratory-management-system","timestamp":"2026-08-06 22:47:26"}
+{"level":"info","message":"\u001b[0mGET /api/auth/me \u001b[36m304\u001b[0m 744.835 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 22:47:49"}
+{"level":"info","message":"\u001b[0mGET /api/auth/me \u001b[36m304\u001b[0m 610.446 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 22:47:49"}
+{"level":"info","message":"\u001b[0mGET /api/settings/print-template \u001b[32m200\u001b[0m 872.039 ms - 3663\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 22:47:50"}
+{"level":"info","message":"\u001b[0mGET /api/laboratories?limit=100 \u001b[36m304\u001b[0m 862.822 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 22:47:50"}
+{"level":"info","message":"\u001b[0mGET /api/settings/print-template \u001b[36m304\u001b[0m 769.702 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 22:47:53"}
+{"level":"info","message":"\u001b[0mGET /api/patients/6a74abaa2f9ecdd15882fe5e \u001b[36m304\u001b[0m 917.083 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 22:47:57"}
+{"level":"info","message":"\u001b[0mGET /api/patients/6a74abaa2f9ecdd15882fe5e \u001b[36m304\u001b[0m 915.436 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 22:47:58"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/patient/6a74abaa2f9ecdd15882fe5e \u001b[36m304\u001b[0m 922.787 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 22:48:00"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/patient/6a74abaa2f9ecdd15882fe5e \u001b[36m304\u001b[0m 919.665 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 22:48:01"}
+{"level":"info","message":"Server is running on port 3000 in development mode","service":"laboratory-management-system","timestamp":"2026-08-06 22:48:27"}
+{"level":"info","message":"Redis client connected","service":"laboratory-management-system","timestamp":"2026-08-06 22:48:28"}
+{"level":"info","message":"Redis client ready","service":"laboratory-management-system","timestamp":"2026-08-06 22:48:28"}
+{"level":"info","message":"Database connected successfully","service":"laboratory-management-system","timestamp":"2026-08-06 22:48:28"}
+{"level":"info","message":"Token Blacklisted | User: user123 | Hash: 82c10e3dfdd0... | TTL: 600s","service":"laboratory-management-system","timestamp":"2026-08-06 22:49:01"}
+{"level":"info","message":"Token Blacklisted | User: user123 | Hash: 82c10e3dfdd0... | TTL: 600s","service":"laboratory-management-system","timestamp":"2026-08-06 22:49:01"}
+{"level":"warn","message":"Token Rejected | Blacklisted token attempted for user: user123","service":"laboratory-management-system","timestamp":"2026-08-06 22:49:01"}
+{"level":"info","message":"Token Blacklisted | All active tokens revoked for user: user123","service":"laboratory-management-system","timestamp":"2026-08-06 22:49:01"}
+{"level":"error","message":"Redis Error during blacklist check: The client is closed","service":"laboratory-management-system","timestamp":"2026-08-06 22:49:01"}
+{"level":"error","message":"Redis Client Error: read ECONNRESET","service":"laboratory-management-system","timestamp":"2026-08-06 22:50:33"}
+{"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-08-06 22:50:33"}
+{"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-08-06 22:50:33"}
+{"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-08-06 22:50:34"}
+{"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-08-06 22:50:34"}
+{"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-08-06 22:50:34"}
+{"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-08-06 22:50:35"}
+{"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-08-06 22:50:35"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 22:55:07"}
+{"level":"info","message":"\u001b[0mPOST /api/patient-tests/6a74abad2f9ecdd15882fea9/print \u001b[32m200\u001b[0m 1682.205 ms - 29426\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 22:55:08"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 22:55:29"}
+{"level":"info","message":"\u001b[0mPOST /api/patient-tests/6a74abad2f9ecdd15882fea9/print \u001b[32m200\u001b[0m 1241.476 ms - 29426\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 22:55:30"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 22:55:48"}
+{"level":"info","message":"\u001b[0mPOST /api/patient-tests/6a74abad2f9ecdd15882fea9/print \u001b[32m200\u001b[0m 704.562 ms - 29426\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 22:55:49"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 22:59:45"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests?date=today&timezoneOffset=-330 \u001b[36m304\u001b[0m 1172.761 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 22:59:46"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 22:59:49"}
+{"level":"info","message":"\u001b[0mGET /api/doctors \u001b[36m304\u001b[0m 228.071 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 22:59:49"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 22:59:49"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 22:59:49"}
+{"level":"info","message":"\u001b[0mGET /api/tests \u001b[36m304\u001b[0m 419.971 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 22:59:50"}
+{"level":"info","message":"\u001b[0mGET /api/doctors \u001b[36m304\u001b[0m 698.185 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 22:59:50"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 22:59:50"}
+{"level":"info","message":"\u001b[0mGET /api/tests \u001b[36m304\u001b[0m 419.961 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 22:59:50"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 22:59:52"}
+{"level":"info","message":"\u001b[0mGET /api/doctors \u001b[36m304\u001b[0m 237.090 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 22:59:52"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 22:59:52"}
+{"level":"info","message":"\u001b[0mGET /api/tests?laboratoryId=6a6b71a48205f8a6bca38669 \u001b[32m200\u001b[0m 778.112 ms - 68578\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 22:59:53"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 23:00:14"}
+{"level":"info","message":"\u001b[0mPOST /api/patients \u001b[32m201\u001b[0m 690.687 ms - 484\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:00:14"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 23:00:14"}
+{"error":"next is not a function","level":"error","message":"Unhandled Exception:","route":"/api/patient-tests","service":"laboratory-management-system","stack":"TypeError: next is not a function\n    at model.<anonymous> (C:\\Users\\prem\\Desktop\\report-genrator\\backend\\src\\models\\patientTest.model.js:134:3)\n    at Kareem.execPre (C:\\Users\\prem\\Desktop\\report-genrator\\backend\\node_modules\\kareem\\index.js:59:39)\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at async model.$__save (C:\\Users\\prem\\Desktop\\report-genrator\\backend\\node_modules\\mongoose\\lib\\model.js:403:5)\n    at async maybeTracedSave (C:\\Users\\prem\\Desktop\\report-genrator\\backend\\node_modules\\mongoose\\lib\\model.js:675:7)\n    at async model.create (C:\\Users\\prem\\Desktop\\report-genrator\\backend\\node_modules\\mongoose\\lib\\model.js:2763:5)\n    at async C:\\Users\\prem\\Desktop\\report-genrator\\backend\\src\\controllers\\patientTest.controller.js:267:23","timestamp":"2026-08-06 23:00:15"}
+{"level":"info","message":"\u001b[0mPOST /api/patient-tests \u001b[31m500\u001b[0m 423.562 ms - 911\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:00:15"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 23:00:28"}
+{"level":"info","message":"\u001b[0mPOST /api/patients \u001b[32m201\u001b[0m 654.840 ms - 484\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:00:29"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 23:00:29"}
+{"error":"next is not a function","level":"error","message":"Unhandled Exception:","route":"/api/patient-tests","service":"laboratory-management-system","stack":"TypeError: next is not a function\n    at model.<anonymous> (C:\\Users\\prem\\Desktop\\report-genrator\\backend\\src\\models\\patientTest.model.js:134:3)\n    at Kareem.execPre (C:\\Users\\prem\\Desktop\\report-genrator\\backend\\node_modules\\kareem\\index.js:59:39)\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at async model.$__save (C:\\Users\\prem\\Desktop\\report-genrator\\backend\\node_modules\\mongoose\\lib\\model.js:403:5)\n    at async maybeTracedSave (C:\\Users\\prem\\Desktop\\report-genrator\\backend\\node_modules\\mongoose\\lib\\model.js:675:7)\n    at async model.create (C:\\Users\\prem\\Desktop\\report-genrator\\backend\\node_modules\\mongoose\\lib\\model.js:2763:5)\n    at async C:\\Users\\prem\\Desktop\\report-genrator\\backend\\src\\controllers\\patientTest.controller.js:267:23","timestamp":"2026-08-06 23:00:29"}
+{"level":"info","message":"\u001b[0mPOST /api/patient-tests \u001b[31m500\u001b[0m 399.836 ms - 911\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:00:29"}
+{"level":"info","message":"Server is running on port 3000 in development mode","service":"laboratory-management-system","timestamp":"2026-08-06 23:03:21"}
+{"level":"info","message":"Redis client connected","service":"laboratory-management-system","timestamp":"2026-08-06 23:03:21"}
+{"level":"info","message":"Redis client ready","service":"laboratory-management-system","timestamp":"2026-08-06 23:03:22"}
+{"level":"info","message":"Database connected successfully","service":"laboratory-management-system","timestamp":"2026-08-06 23:03:23"}
+{"level":"info","message":"Server is running on port 3000 in development mode","service":"laboratory-management-system","timestamp":"2026-08-06 23:05:11"}
+{"level":"error","message":"Redis Client Error: Connection timeout","service":"laboratory-management-system","timestamp":"2026-08-06 23:05:17"}
+{"level":"info","message":"Redis client connected","service":"laboratory-management-system","timestamp":"2026-08-06 23:05:18"}
+{"level":"info","message":"Redis client ready","service":"laboratory-management-system","timestamp":"2026-08-06 23:05:19"}
+{"level":"info","message":"Database connected successfully","service":"laboratory-management-system","timestamp":"2026-08-06 23:05:20"}
+{"level":"info","message":"Server is running on port 3000 in development mode","service":"laboratory-management-system","timestamp":"2026-08-06 23:07:36"}
+{"level":"info","message":"Redis client connected","service":"laboratory-management-system","timestamp":"2026-08-06 23:07:37"}
+{"level":"info","message":"Redis client ready","service":"laboratory-management-system","timestamp":"2026-08-06 23:07:37"}
+{"level":"info","message":"Database connected successfully","service":"laboratory-management-system","timestamp":"2026-08-06 23:07:37"}
+{"level":"info","message":"\u001b[0mPOST /api/patients \u001b[32m201\u001b[0m 1630.926 ms - 484\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:08:31"}
+{"level":"info","message":"\u001b[0mPOST /api/patient-tests \u001b[32m201\u001b[0m 1304.827 ms - 7193\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:08:32"}
+{"level":"info","message":"\u001b[0mGET /api/patients \u001b[32m200\u001b[0m 859.321 ms - 27769\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:08:34"}
+{"level":"debug","message":"Cache miss for key: tenant:global:doctors:all","service":"laboratory-management-system","timestamp":"2026-08-06 23:08:35"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests?date=today&timezoneOffset=-330 \u001b[32m200\u001b[0m 1274.131 ms - 71541\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:08:35"}
+{"level":"info","message":"\u001b[0mGET /api/doctors \u001b[36m304\u001b[0m 1468.644 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:08:35"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests \u001b[32m200\u001b[0m 1814.822 ms - 329782\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:08:35"}
+{"level":"info","message":"\u001b[0mGET /api/tests \u001b[36m304\u001b[0m 1838.255 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:08:36"}
+{"level":"info","message":"\u001b[0mGET /api/patients/6a74c69683690db0f1797518 \u001b[32m200\u001b[0m 758.499 ms - 586\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:08:39"}
+{"level":"info","message":"\u001b[0mGET /api/patients/6a74c69683690db0f1797518 \u001b[36m304\u001b[0m 754.098 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:08:40"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/patient/6a74c69683690db0f1797518 \u001b[32m200\u001b[0m 858.255 ms - 7427\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:08:40"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/patient/6a74c69683690db0f1797518 \u001b[36m304\u001b[0m 816.658 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:08:41"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/6a74c69883690db0f179752b/test/6a72441387fa4290371b9f26 \u001b[32m200\u001b[0m 840.787 ms - 5766\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:08:49"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/6a74c69883690db0f179752b/test/6a72441387fa4290371b9f26 \u001b[36m304\u001b[0m 844.763 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:09:03"}
+{"level":"info","message":"\u001b[0mPATCH /api/patient-tests/6a74c69883690db0f179752b \u001b[32m200\u001b[0m 948.599 ms - 7206\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:09:04"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/6a74c69883690db0f179752b/test/6a6c8ccd0516d4c78755c290 \u001b[32m200\u001b[0m 833.666 ms - 3890\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:09:09"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/6a74c69883690db0f179752b/test/6a6c8ccd0516d4c78755c290 \u001b[36m304\u001b[0m 849.203 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:09:18"}
+{"level":"info","message":"\u001b[0mPATCH /api/patient-tests/6a74c69883690db0f179752b \u001b[32m200\u001b[0m 940.585 ms - 6945\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:09:19"}
+{"level":"info","message":"\u001b[0mPOST /api/patient-tests/6a74c69883690db0f179752b/print \u001b[32m200\u001b[0m 1282.829 ms - 7326\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:09:23"}
+{"level":"info","message":"\u001b[0mPOST /api/patient-tests/6a74c69883690db0f179752b/print \u001b[32m200\u001b[0m 975.565 ms - 7326\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:09:39"}
+{"level":"info","message":"\u001b[0mGET /api/auth/me \u001b[36m304\u001b[0m 612.157 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:11:52"}
+{"level":"info","message":"\u001b[0mGET /api/auth/me \u001b[36m304\u001b[0m 625.207 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:11:52"}
+{"level":"info","message":"\u001b[0mGET /api/settings/print-template \u001b[36m304\u001b[0m 815.983 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:11:53"}
+{"level":"info","message":"\u001b[0mGET /api/laboratories?limit=100 \u001b[36m304\u001b[0m 1076.996 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:11:53"}
+{"level":"info","message":"\u001b[0mGET /api/report/verify/40734db9d0bc6df96cfff1ef0f524b3885811eaee07a8d01d106224688c1b4b2 \u001b[32m200\u001b[0m 482.188 ms - 1765\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:11:55"}
+{"level":"info","message":"\u001b[0mGET /api/settings/print-template \u001b[36m304\u001b[0m 759.630 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:11:55"}
+{"level":"info","message":"\u001b[0mGET /api/report/verify/40734db9d0bc6df96cfff1ef0f524b3885811eaee07a8d01d106224688c1b4b2 \u001b[36m304\u001b[0m 453.325 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:11:55"}
+{"level":"info","message":"\u001b[0mPOST /api/report/verify/40734db9d0bc6df96cfff1ef0f524b3885811eaee07a8d01d106224688c1b4b2/audit \u001b[32m200\u001b[0m 92.883 ms - 62\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:12:01"}
+{"level":"info","message":"\u001b[0mGET /api/report/verify/40734db9d0bc6df96cfff1ef0f524b3885811eaee07a8d01d106224688c1b4b2/pdf \u001b[33m404\u001b[0m 897.673 ms - 70\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:12:02"}
+{"level":"info","message":"\u001b[0mPOST /api/report/verify/40734db9d0bc6df96cfff1ef0f524b3885811eaee07a8d01d106224688c1b4b2/audit \u001b[32m200\u001b[0m 72.824 ms - 62\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:12:11"}
+{"level":"info","message":"\u001b[0mPOST /api/report/verify/40734db9d0bc6df96cfff1ef0f524b3885811eaee07a8d01d106224688c1b4b2/audit \u001b[32m200\u001b[0m 74.589 ms - 62\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:12:18"}
+{"level":"info","message":"\u001b[0mGET /api/report/verify/40734db9d0bc6df96cfff1ef0f524b3885811eaee07a8d01d106224688c1b4b2/pdf \u001b[33m404\u001b[0m 698.680 ms - 70\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:12:18"}
+{"level":"error","message":"Redis Client Error: read ECONNRESET","service":"laboratory-management-system","timestamp":"2026-08-06 23:14:06"}
+{"level":"error","message":"Redis Client Error: Connection timeout","service":"laboratory-management-system","timestamp":"2026-08-06 23:14:11"}
+{"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-08-06 23:14:11"}
+{"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-08-06 23:14:11"}
+{"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-08-06 23:14:12"}
+{"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-08-06 23:14:12"}
+{"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-08-06 23:14:12"}
+{"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-08-06 23:14:13"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 23:18:30"}
+{"level":"info","message":"\u001b[0mPOST /api/patient-tests/6a74c69883690db0f179752b/print \u001b[32m200\u001b[0m 1341.239 ms - 7326\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:18:31"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 23:18:45"}
+{"level":"info","message":"\u001b[0mPOST /api/patient-tests/6a74c69883690db0f179752b/print \u001b[32m200\u001b[0m 951.882 ms - 7326\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:18:46"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 23:28:08"}
+{"level":"info","message":"\u001b[0mPOST /api/patient-tests/6a74c69883690db0f179752b/print \u001b[32m200\u001b[0m 1031.694 ms - 7326\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:28:09"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 23:28:23"}
+{"level":"info","message":"\u001b[0mPOST /api/patient-tests/6a74c69883690db0f179752b/print \u001b[32m200\u001b[0m 758.985 ms - 7326\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:28:24"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 23:30:33"}
+{"level":"info","message":"\u001b[0mGET /api/auth/me \u001b[36m304\u001b[0m 372.233 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:30:34"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 23:30:34"}
+{"level":"info","message":"\u001b[0mGET /api/auth/me \u001b[36m304\u001b[0m 256.703 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:30:35"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 23:30:36"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 23:30:36"}
+{"level":"info","message":"\u001b[0mGET /api/settings/print-template \u001b[36m304\u001b[0m 495.334 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:30:37"}
+{"level":"info","message":"\u001b[0mGET /api/laboratories?limit=100 \u001b[36m304\u001b[0m 371.732 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:30:37"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 23:30:37"}
+{"level":"info","message":"\u001b[0mGET /api/settings/print-template \u001b[36m304\u001b[0m 270.705 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:30:37"}
+{"level":"info","message":"\u001b[0mGET /api/report/verify/40734db9d0bc6df96cfff1ef0f524b3885811eaee07a8d01d106224688c1b4b2 \u001b[36m304\u001b[0m 1855.852 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:30:40"}
+{"level":"info","message":"\u001b[0mGET /api/report/verify/40734db9d0bc6df96cfff1ef0f524b3885811eaee07a8d01d106224688c1b4b2 \u001b[36m304\u001b[0m 445.865 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:30:40"}
+{"level":"info","message":"\u001b[0mPOST /api/report/verify/40734db9d0bc6df96cfff1ef0f524b3885811eaee07a8d01d106224688c1b4b2/audit \u001b[32m200\u001b[0m 71.847 ms - 62\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:31:05"}
+{"level":"info","message":"\u001b[0mGET /api/report/verify/40734db9d0bc6df96cfff1ef0f524b3885811eaee07a8d01d106224688c1b4b2/pdf \u001b[33m404\u001b[0m 769.112 ms - 70\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:31:06"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 23:39:20"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 23:39:20"}
+{"level":"info","message":"\u001b[0mGET /api/settings/print-template \u001b[36m304\u001b[0m 387.463 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:39:20"}
+{"level":"info","message":"\u001b[0mGET /api/laboratories?limit=100 \u001b[36m304\u001b[0m 322.145 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:39:20"}
+{"level":"info","message":"\u001b[0mGET /api/report/verify/40734db9d0bc6df96cfff1ef0f524b3885811eaee07a8d01d106224688c1b4b2 \u001b[36m304\u001b[0m 479.410 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:39:24"}
+{"level":"info","message":"\u001b[0mGET /api/report/verify/40734db9d0bc6df96cfff1ef0f524b3885811eaee07a8d01d106224688c1b4b2 \u001b[36m304\u001b[0m 531.742 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:39:24"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 23:40:23"}
+{"level":"info","message":"\u001b[0mGET /api/auth/me \u001b[36m304\u001b[0m 501.290 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:40:23"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 23:40:23"}
+{"level":"info","message":"\u001b[0mGET /api/auth/me \u001b[36m304\u001b[0m 177.830 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:40:23"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 23:40:25"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 23:40:25"}
+{"level":"info","message":"\u001b[0mGET /api/settings/print-template \u001b[36m304\u001b[0m 365.062 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:40:25"}
+{"level":"info","message":"\u001b[0mGET /api/laboratories?limit=100 \u001b[36m304\u001b[0m 281.805 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:40:25"}
+{"level":"info","message":"\u001b[0mGET /api/report/verify/40734db9d0bc6df96cfff1ef0f524b3885811eaee07a8d01d106224688c1b4b2 \u001b[36m304\u001b[0m 1326.958 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:40:26"}
+{"level":"info","message":"\u001b[0mGET /api/report/verify/40734db9d0bc6df96cfff1ef0f524b3885811eaee07a8d01d106224688c1b4b2 \u001b[36m304\u001b[0m 442.513 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:40:27"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 23:40:48"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 23:40:49"}
+{"level":"info","message":"\u001b[0mGET /api/settings/print-template \u001b[36m304\u001b[0m 1012.142 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:40:49"}
+{"level":"info","message":"\u001b[0mGET /api/laboratories?limit=100 \u001b[36m304\u001b[0m 431.850 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:40:49"}
+{"level":"info","message":"\u001b[0mGET /api/report/verify/40734db9d0bc6df96cfff1ef0f524b3885811eaee07a8d01d106224688c1b4b2 \u001b[36m304\u001b[0m 440.798 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:41:02"}
+{"level":"info","message":"\u001b[0mGET /api/report/verify/40734db9d0bc6df96cfff1ef0f524b3885811eaee07a8d01d106224688c1b4b2 \u001b[36m304\u001b[0m 834.419 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:41:04"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 23:41:52"}
+{"level":"info","message":"\u001b[0mGET /api/auth/me \u001b[36m304\u001b[0m 179.712 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:41:52"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 23:41:53"}
+{"level":"info","message":"\u001b[0mGET /api/auth/me \u001b[36m304\u001b[0m 91.134 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:41:53"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 23:41:53"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 23:41:53"}
+{"level":"info","message":"\u001b[0mGET /api/settings/print-template \u001b[36m304\u001b[0m 707.827 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:41:54"}
+{"level":"info","message":"\u001b[0mGET /api/laboratories?limit=100 \u001b[36m304\u001b[0m 775.742 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:41:54"}
+{"level":"info","message":"\u001b[0mGET /api/report/verify/40734db9d0bc6df96cfff1ef0f524b3885811eaee07a8d01d106224688c1b4b2 \u001b[36m304\u001b[0m 460.011 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:41:55"}
+{"level":"info","message":"\u001b[0mGET /api/report/verify/40734db9d0bc6df96cfff1ef0f524b3885811eaee07a8d01d106224688c1b4b2 \u001b[36m304\u001b[0m 574.045 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:41:56"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 23:43:33"}
+{"level":"info","message":"\u001b[0mGET /api/patients/6a74c69683690db0f1797518 \u001b[36m304\u001b[0m 344.521 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:43:33"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 23:43:33"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 23:43:33"}
+{"level":"info","message":"\u001b[0mGET /api/patients/6a74c69683690db0f1797518 \u001b[36m304\u001b[0m 259.907 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:43:33"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/patient/6a74c69683690db0f1797518 \u001b[32m200\u001b[0m 962.090 ms - 7275\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:43:34"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 23:43:34"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/patient/6a74c69683690db0f1797518 \u001b[36m304\u001b[0m 315.975 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:43:34"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 23:43:36"}
+{"level":"info","message":"\u001b[0mPOST /api/patient-tests/6a74c69883690db0f179752b/print \u001b[32m200\u001b[0m 456.438 ms - 7326\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:43:37"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 23:44:24"}
+{"level":"info","message":"\u001b[0mPOST /api/patient-tests/6a74c69883690db0f179752b/print \u001b[32m200\u001b[0m 400.545 ms - 7326\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:44:24"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 23:44:50"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests?date=today&timezoneOffset=-330 \u001b[32m200\u001b[0m 453.239 ms - 71389\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:44:51"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 23:44:55"}
+{"level":"info","message":"\u001b[0mGET /api/settings/lab-details \u001b[32m200\u001b[0m 86.944 ms - 34\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:44:56"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 23:44:56"}
+{"level":"info","message":"\u001b[0mGET /api/settings/lab-details \u001b[36m304\u001b[0m 87.185 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:44:56"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 23:44:58"}
+{"level":"info","message":"\u001b[0mGET /api/settings/print-template?laboratoryId=6a6b71a48205f8a6bca38669 \u001b[32m200\u001b[0m 208.756 ms - 25883\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:44:58"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 23:44:58"}
+{"level":"info","message":"\u001b[0mGET /api/settings/print-template?laboratoryId=6a6b71a48205f8a6bca38669 \u001b[36m304\u001b[0m 152.091 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:44:58"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 23:45:09"}
+{"level":"info","message":"\u001b[0mGET /api/settings/lab-details \u001b[36m304\u001b[0m 71.020 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:45:09"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 23:45:09"}
+{"level":"info","message":"\u001b[0mGET /api/settings/lab-details \u001b[36m304\u001b[0m 67.936 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:45:09"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 23:45:12"}
+{"level":"info","message":"\u001b[0mGET /api/patients/6a74c69683690db0f1797518 \u001b[36m304\u001b[0m 223.419 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:45:12"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 23:45:12"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 23:45:12"}
+{"level":"info","message":"\u001b[0mGET /api/patients/6a74c69683690db0f1797518 \u001b[36m304\u001b[0m 223.549 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:45:12"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/patient/6a74c69683690db0f1797518 \u001b[36m304\u001b[0m 331.578 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:45:12"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 23:45:12"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/patient/6a74c69683690db0f1797518 \u001b[36m304\u001b[0m 331.975 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:45:13"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 23:45:14"}
+{"level":"info","message":"\u001b[0mPOST /api/patient-tests/6a74c69883690db0f179752b/print \u001b[32m200\u001b[0m 435.469 ms - 7326\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:45:15"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 23:46:25"}
+{"level":"info","message":"\u001b[0mGET /api/patients/6a74c69683690db0f1797518 \u001b[36m304\u001b[0m 229.846 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:46:26"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 23:46:26"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 23:46:26"}
+{"level":"info","message":"\u001b[0mGET /api/patients/6a74c69683690db0f1797518 \u001b[36m304\u001b[0m 227.780 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:46:26"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/patient/6a74c69683690db0f1797518 \u001b[36m304\u001b[0m 305.811 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:46:26"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 23:46:26"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/patient/6a74c69683690db0f1797518 \u001b[36m304\u001b[0m 345.370 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:46:26"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 23:46:28"}
+{"level":"info","message":"\u001b[0mPOST /api/patient-tests/6a74c69883690db0f179752b/print \u001b[32m200\u001b[0m 396.987 ms - 7326\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:46:28"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 23:46:37"}
+{"level":"info","message":"\u001b[0mGET /api/patients/6a74abaa2f9ecdd15882fe5e \u001b[36m304\u001b[0m 221.505 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:46:37"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 23:46:37"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 23:46:37"}
+{"level":"info","message":"\u001b[0mGET /api/patients/6a74abaa2f9ecdd15882fe5e \u001b[36m304\u001b[0m 227.324 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:46:37"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/patient/6a74abaa2f9ecdd15882fe5e \u001b[36m304\u001b[0m 358.094 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:46:38"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 23:46:38"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/patient/6a74abaa2f9ecdd15882fe5e \u001b[36m304\u001b[0m 311.741 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:46:38"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 23:46:41"}
+{"level":"info","message":"\u001b[0mPOST /api/patient-tests/6a74abad2f9ecdd15882fea9/print \u001b[32m200\u001b[0m 559.055 ms - 29426\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:46:41"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 23:46:55"}
+{"level":"info","message":"\u001b[0mGET /api/patients/6a74c69683690db0f1797518 \u001b[36m304\u001b[0m 239.002 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:46:55"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 23:46:55"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 23:46:55"}
+{"level":"info","message":"\u001b[0mGET /api/patients/6a74c69683690db0f1797518 \u001b[36m304\u001b[0m 219.465 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:46:56"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/patient/6a74c69683690db0f1797518 \u001b[36m304\u001b[0m 299.775 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:46:56"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 23:46:56"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/patient/6a74c69683690db0f1797518 \u001b[36m304\u001b[0m 312.640 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:46:56"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 23:50:06"}
+{"level":"info","message":"\u001b[0mGET /api/auth/me \u001b[36m304\u001b[0m 95.306 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:50:06"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 23:50:06"}
+{"level":"info","message":"\u001b[0mGET /api/auth/me \u001b[36m304\u001b[0m 119.057 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:50:06"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 23:50:07"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 23:50:07"}
+{"level":"info","message":"\u001b[0mGET /api/settings/print-template \u001b[36m304\u001b[0m 342.824 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:50:07"}
+{"level":"info","message":"\u001b[0mGET /api/laboratories?limit=100 \u001b[36m304\u001b[0m 247.888 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:50:07"}
+{"level":"info","message":"\u001b[0mGET /api/report/verify/40734db9d0bc6df96cfff1ef0f524b3885811eaee07a8d01d106224688c1b4b2 \u001b[36m304\u001b[0m 486.183 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:50:09"}
+{"level":"info","message":"\u001b[0mGET /api/report/verify/40734db9d0bc6df96cfff1ef0f524b3885811eaee07a8d01d106224688c1b4b2 \u001b[36m304\u001b[0m 538.060 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:50:10"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 23:53:40"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 23:53:41"}
+{"level":"info","message":"\u001b[0mGET /api/laboratories?limit=100 \u001b[36m304\u001b[0m 1254.959 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:53:42"}
+{"level":"info","message":"\u001b[0mGET /api/settings/print-template \u001b[36m304\u001b[0m 2214.502 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:53:42"}
+{"level":"info","message":"\u001b[0mGET /api/report/verify/40734db9d0bc6df96cfff1ef0f524b3885811eaee07a8d01d106224688c1b4b2 \u001b[36m304\u001b[0m 580.122 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:53:43"}
+{"level":"info","message":"\u001b[0mGET /api/report/verify/40734db9d0bc6df96cfff1ef0f524b3885811eaee07a8d01d106224688c1b4b2 \u001b[36m304\u001b[0m 483.730 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:53:43"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 23:53:54"}
+{"level":"info","message":"\u001b[0mGET /api/auth/me \u001b[36m304\u001b[0m 92.679 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:53:54"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 23:53:55"}
+{"level":"info","message":"\u001b[0mGET /api/auth/me \u001b[36m304\u001b[0m 149.209 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:53:55"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 23:53:55"}
+{"level":"warn","message":"Redis unavailable during blacklist check. Falling through.","service":"laboratory-management-system","timestamp":"2026-08-06 23:53:55"}
+{"level":"info","message":"\u001b[0mGET /api/laboratories?limit=100 \u001b[36m304\u001b[0m 1574.754 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:53:57"}
+{"level":"info","message":"\u001b[0mGET /api/settings/print-template \u001b[36m304\u001b[0m 1801.298 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:53:57"}
+{"level":"info","message":"\u001b[0mGET /api/report/verify/40734db9d0bc6df96cfff1ef0f524b3885811eaee07a8d01d106224688c1b4b2 \u001b[36m304\u001b[0m 493.312 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:53:58"}
+{"level":"info","message":"\u001b[0mGET /api/report/verify/40734db9d0bc6df96cfff1ef0f524b3885811eaee07a8d01d106224688c1b4b2 \u001b[36m304\u001b[0m 581.065 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:53:59"}
+{"level":"info","message":"\u001b[0mPOST /api/report/verify/40734db9d0bc6df96cfff1ef0f524b3885811eaee07a8d01d106224688c1b4b2/audit \u001b[32m200\u001b[0m 127.481 ms - 62\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:54:06"}
+{"level":"info","message":"\u001b[0mGET /api/report/verify/40734db9d0bc6df96cfff1ef0f524b3885811eaee07a8d01d106224688c1b4b2/pdf \u001b[33m404\u001b[0m 713.027 ms - 70\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:54:07"}
+{"level":"info","message":"\u001b[0mPOST /api/report/verify/40734db9d0bc6df96cfff1ef0f524b3885811eaee07a8d01d106224688c1b4b2/audit \u001b[32m200\u001b[0m 76.194 ms - 62\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:54:11"}
+{"level":"info","message":"\u001b[0mPOST /api/report/verify/40734db9d0bc6df96cfff1ef0f524b3885811eaee07a8d01d106224688c1b4b2/audit \u001b[32m200\u001b[0m 68.444 ms - 62\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:54:20"}
+{"level":"info","message":"\u001b[0mPOST /api/report/verify/40734db9d0bc6df96cfff1ef0f524b3885811eaee07a8d01d106224688c1b4b2/audit \u001b[32m200\u001b[0m 136.195 ms - 62\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:54:59"}
+{"level":"info","message":"\u001b[0mGET /api/report/verify/40734db9d0bc6df96cfff1ef0f524b3885811eaee07a8d01d106224688c1b4b2/pdf \u001b[33m404\u001b[0m 628.668 ms - 70\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:55:00"}
+{"level":"info","message":"Server is running on port 3000 in development mode","service":"laboratory-management-system","timestamp":"2026-08-06 23:57:27"}
+{"level":"info","message":"Redis client connected","service":"laboratory-management-system","timestamp":"2026-08-06 23:57:28"}
+{"level":"info","message":"Redis client ready","service":"laboratory-management-system","timestamp":"2026-08-06 23:57:28"}
+{"level":"info","message":"Database connected successfully","service":"laboratory-management-system","timestamp":"2026-08-06 23:57:28"}
+{"level":"info","message":"\u001b[0mPOST /api/report/verify/40734db9d0bc6df96cfff1ef0f524b3885811eaee07a8d01d106224688c1b4b2/audit \u001b[32m200\u001b[0m 386.276 ms - 62\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:57:30"}
+{"level":"info","message":"\u001b[0mGET /api/report/verify/40734db9d0bc6df96cfff1ef0f524b3885811eaee07a8d01d106224688c1b4b2/pdf \u001b[32m200\u001b[0m 1054.619 ms - 4244\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:57:31"}
+{"level":"info","message":"\u001b[0mGET /api/laboratories?limit=100 \u001b[36m304\u001b[0m 775.065 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:58:32"}
+{"level":"info","message":"\u001b[0mGET /api/settings/print-template \u001b[36m304\u001b[0m 830.031 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:58:32"}
+{"level":"info","message":"\u001b[0mGET /api/settings/print-template \u001b[36m304\u001b[0m 786.366 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:58:33"}
+{"level":"info","message":"\u001b[0mGET /api/report/verify/40734db9d0bc6df96cfff1ef0f524b3885811eaee07a8d01d106224688c1b4b2 \u001b[36m304\u001b[0m 466.861 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:58:34"}
+{"level":"info","message":"\u001b[0mGET /api/report/verify/40734db9d0bc6df96cfff1ef0f524b3885811eaee07a8d01d106224688c1b4b2 \u001b[36m304\u001b[0m 471.425 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-06 23:58:34"}
+{"level":"info","message":"Server is running on port 3000 in development mode","service":"laboratory-management-system","timestamp":"2026-08-07 00:03:48"}
+{"level":"info","message":"Redis client connected","service":"laboratory-management-system","timestamp":"2026-08-07 00:03:49"}
+{"level":"info","message":"Redis client ready","service":"laboratory-management-system","timestamp":"2026-08-07 00:03:49"}
+{"level":"info","message":"Database connected successfully","service":"laboratory-management-system","timestamp":"2026-08-07 00:03:49"}
