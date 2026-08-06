@@ -4,7 +4,7 @@ import { resolveReferenceRange } from "../../utils/referenceRangeResolver";
 
 export const TestResultTable = ({ test, rowSpacing = 4, template, patient }) => {
   const testHeadingStyles = template?.elements?.testHeading || {};
-  const sectionHeaderStyles = template?.elements?.sectionHeader || {};
+  const sectionHeaderStyles = template?.elements?.sectionHeading || template?.elements?.sectionHeader || {};
   const profileStyles = template?.elements?.profileName || {};
   const parameterStyles = template?.elements?.parameter || {};
   const resultStyles = template?.elements?.result || {};
@@ -28,12 +28,23 @@ export const TestResultTable = ({ test, rowSpacing = 4, template, patient }) => 
       {test.result && test.result.length > 0 ? (
         test.result.map((res, index) => {
           if (res.type === 'section') {
+            const align = sectionHeaderStyles.textAlign || 'left';
+            const underline = (sectionHeaderStyles.textDecoration === 'underline' || sectionHeaderStyles.underline) ? 'underline' : (sectionHeaderStyles.textDecoration || 'none');
+            const fontStyle = sectionHeaderStyles.fontStyle || 'normal';
+
             return (
               <tr key={index} className="bg-white">
-                <td colSpan="1" className="pt-6 pb-2 px-3 text-left">
+                <td colSpan="4" className="pt-4 pb-2 px-3" style={{ textAlign: align }}>
                   <span
                     className="section-header text-wrap text-lg font-extrabold text-[#0F172A] uppercase tracking-wider block"
                     style={{
+                      fontSize: sectionHeaderStyles.fontSize,
+                      fontWeight: sectionHeaderStyles.fontWeight,
+                      fontStyle: fontStyle,
+                      color: sectionHeaderStyles.color,
+                      textAlign: align,
+                      textTransform: sectionHeaderStyles.textTransform || 'uppercase',
+                      textDecoration: underline,
                       whiteSpace: 'normal',
                       overflowWrap: 'anywhere',
                       wordBreak: 'break-word',
@@ -45,7 +56,6 @@ export const TestResultTable = ({ test, rowSpacing = 4, template, patient }) => 
                     {res.parameter}
                   </span>
                 </td>
-                <td colSpan="3"></td>
               </tr>
             );
           }

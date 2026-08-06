@@ -12,3 +12,8 @@
 {"level":"warn","message":"Token Rejected | Blacklisted token attempted for user: user123","service":"laboratory-management-system","timestamp":"2026-08-05 20:23:21"}
 {"level":"info","message":"Token Blacklisted | All active tokens revoked for user: user123","service":"laboratory-management-system","timestamp":"2026-08-05 20:23:21"}
 {"level":"error","message":"Redis Error during blacklist check: The client is closed","service":"laboratory-management-system","timestamp":"2026-08-05 20:23:21"}
+{"level":"info","message":"Token Blacklisted | User: user123 | Hash: 66212fd793b5... | TTL: 600s","service":"laboratory-management-system","timestamp":"2026-08-05 21:32:26"}
+{"level":"info","message":"Token Blacklisted | User: user123 | Hash: 66212fd793b5... | TTL: 600s","service":"laboratory-management-system","timestamp":"2026-08-05 21:32:26"}
+{"level":"warn","message":"Token Rejected | Blacklisted token attempted for user: user123","service":"laboratory-management-system","timestamp":"2026-08-05 21:32:26"}
+{"level":"info","message":"Token Blacklisted | All active tokens revoked for user: user123","service":"laboratory-management-system","timestamp":"2026-08-05 21:32:26"}
+{"level":"error","message":"Redis Error during blacklist check: The client is closed","service":"laboratory-management-system","timestamp":"2026-08-05 21:32:26"}

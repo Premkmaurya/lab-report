@@ -264,8 +264,7 @@ export function evaluateTokens(rawTokens, resolveParam) {
   const finalResult = Math.round(output[0] * 1000) / 1000;
   const finalExpression = expressionParts.join(' ');
 
-
-  return finalResult;
+  return Math.abs(finalResult);
 }
 
 if (typeof module !== 'undefined' && module.exports) {

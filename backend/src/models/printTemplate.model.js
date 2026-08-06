@@ -157,6 +157,20 @@ const printTemplateSchema = new mongoose.Schema(
           textDecoration: "underline",
         }),
       },
+      sectionHeading: {
+        type: elementStyleSchema,
+        default: () => ({
+          enabled: true,
+          show: true,
+          fontSize: "16px",
+          fontWeight: "700",
+          fontStyle: "normal",
+          color: "#0F172A",
+          textAlign: "left",
+          textTransform: "uppercase",
+          textDecoration: "none",
+        }),
+      },
       barcode: {
         enabled: { type: Boolean, default: true },
         format: { type: String, default: "CODE128" },

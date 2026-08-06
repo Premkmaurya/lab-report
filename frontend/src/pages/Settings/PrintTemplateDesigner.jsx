@@ -39,6 +39,17 @@ const DEFAULT_ELEMENT_STYLES = {
     textDecoration: "underline",
     color: "",
   },
+  sectionHeading: {
+    enabled: true,
+    show: true,
+    fontSize: "16px",
+    fontWeight: "700",
+    fontStyle: "normal",
+    color: "#0F172A",
+    textAlign: "left",
+    textTransform: "uppercase",
+    textDecoration: "none",
+  },
   parameter: {
     fontSize: "20px",
     fontWeight: "500",
@@ -455,6 +466,10 @@ export const PrintTemplateDesigner = () => {
             unit: "g/dL",
           },
           {
+            parameter: "DIFFERENTIAL LEUKOCYTE COUNT",
+            type: "section",
+          },
+          {
             parameter: "WBC Count",
             value: "8500",
             normalRange: "4000 - 11000",
@@ -487,6 +502,7 @@ export const PrintTemplateDesigner = () => {
     { value: "patientHeader", label: "Patient Information Header" },
     { value: "departmentHeading", label: "Department Heading" },
     { value: "testHeading", label: "Test Heading" },
+    { value: "sectionHeading", label: "Section Heading" },
     { value: "parameter", label: "Parameter" },
     { value: "result", label: "Result" },
     { value: "unit", label: "Normal Range & Unit" },
@@ -955,6 +971,21 @@ export const PrintTemplateDesigner = () => {
                         <option value="right">Right</option>
                       </select>
                     </div>
+                    <div>
+                      <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
+                        Font Style
+                      </label>
+                      <select
+                        className="w-full text-sm border-slate-300 rounded"
+                        value={getElementValue("fontStyle") || "normal"}
+                        onChange={(e) =>
+                          handleElementChange("fontStyle", e.target.value)
+                        }
+                      >
+                        <option value="normal">Normal</option>
+                        <option value="italic">Italic</option>
+                      </select>
+                    </div>
                     <div className="grid grid-cols-2 gap-2">
                       <div>
                         <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
@@ -967,8 +998,9 @@ export const PrintTemplateDesigner = () => {
                             handleElementChange("textTransform", e.target.value)
                           }
                         >
-                          <option value="">None</option>
+                          <option value="none">None</option>
                           <option value="uppercase">Uppercase</option>
+                          <option value="lowercase">Lowercase</option>
                           <option value="capitalize">Capitalize</option>
                         </select>
                       </div>

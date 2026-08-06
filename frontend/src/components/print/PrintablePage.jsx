@@ -53,7 +53,7 @@ export const PrintablePage = ({
   // Element-level style overrides from the print template designer
   const deptStyles   = template?.elements?.departmentHeading || {};
   const testStyles   = template?.elements?.testHeading       || {};
-  const secStyles    = template?.elements?.sectionHeader     || {};
+  const secStyles    = template?.elements?.sectionHeading    || template?.elements?.sectionHeader || {};
   const paramStyles  = template?.elements?.parameter         || {};
   const resultStyles = template?.elements?.result            || {};
   const unitStyles   = template?.elements?.unit              || {};
@@ -179,15 +179,31 @@ export const PrintablePage = ({
     }
 
     if (row.type === 'section') {
+      const align = secStyles.textAlign || 'left';
+      const underline = (secStyles.textDecoration === 'underline' || secStyles.underline) ? 'underline' : (secStyles.textDecoration || 'none');
+      const fontStyle = secStyles.fontStyle || 'normal';
+
       return (
         <tr key={i}>
           <td
-            style={{ paddingTop: 14, paddingBottom: 0, paddingLeft: 12, paddingRight: 12, background: 'white' }}
+            colSpan={4}
+            style={{
+              paddingTop: 14,
+              paddingBottom: 4,
+              paddingLeft: 12,
+              paddingRight: 12,
+              background: 'white',
+              textAlign: align,
+            }}
           >
             <span style={{
-              fontSize:      '14px',
-              fontWeight:    '800',
-              textTransform: 'uppercase',
+              fontSize:      secStyles.fontSize || '14px',
+              fontWeight:    secStyles.fontWeight || '700',
+              fontStyle:     fontStyle,
+              color:         secStyles.color || '#0F172A',
+              textTransform: secStyles.textTransform || 'uppercase',
+              textDecoration: underline,
+              textAlign:     align,
               letterSpacing: '0.04em',
               display:       'block',
               whiteSpace:    'normal',
@@ -199,7 +215,6 @@ export const PrintablePage = ({
               {row.content}
             </span>
           </td>
-          <td colSpan={3} />
         </tr>
       );
     }

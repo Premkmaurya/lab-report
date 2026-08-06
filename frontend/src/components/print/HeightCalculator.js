@@ -56,11 +56,11 @@ export const estimateRowHeights = (rows, template) => {
       // paddingTop(14) + text at 15px (~19px) + paddingBottom(4) = 37px
       h = 37;
     } else if (row.type === 'section') {
-      // paddingTop(14) + text can wrap; col width is 45% of ~764px content ≈ 344px
-      // At ~7px/char (14px font) ≈ 49 chars/line
+      const secStyles = template?.elements?.sectionHeading || template?.elements?.sectionHeader || {};
+      const fontSizePx = parseInt(secStyles.fontSize || baseFontSize);
       const len   = row.content ? row.content.length : 0;
       const lines = Math.max(1, Math.ceil(len / 49));
-      h = 14 + (lines * baseFontSize * 1.2) + 4;
+      h = 14 + (lines * fontSizePx * 1.2) + 4;
     } else if (row.type === 'parameter') {
       // Parameter col (45% of content width ≈ 344px) — ~46 chars/line at 13px font
       const paramLen  = row.content?.parameter ? row.content.parameter.length : 0;
