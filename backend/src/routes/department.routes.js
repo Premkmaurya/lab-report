@@ -1,5 +1,4 @@
 const express = require("express");
-const auditMiddleware = require("../middlewares/audit.middleware");
 const {
   getDepartments,
   createDepartment,
@@ -16,8 +15,8 @@ const router = express.Router();
 router.use(authMiddleware.userAuth, injectTenantFilter);
 
 router.get("/", cacheMiddleware(300), getDepartments);
-router.post("/", injectTenantOnCreate, authMiddleware.authorizePermissions("manage_tests"), auditMiddleware("CREATED", "Department"), createDepartment);
-router.patch("/:id", authMiddleware.authorizePermissions("manage_tests"), auditMiddleware("UPDATED", "Department"), updateDepartment);
-router.delete("/:id", authMiddleware.authorizeRoles("admin"), auditMiddleware("DELETED", "Department"), deleteDepartment);
+router.post("/", injectTenantOnCreate, authMiddleware.authorizePermissions("manage_tests"), createDepartment);
+router.patch("/:id", authMiddleware.authorizePermissions("manage_tests"), updateDepartment);
+router.delete("/:id", authMiddleware.authorizeRoles("admin"), deleteDepartment);
 
 module.exports = router;

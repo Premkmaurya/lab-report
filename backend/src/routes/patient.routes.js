@@ -1,7 +1,5 @@
 const express = require("express");
 
-const auditMiddleware = require("../middlewares/audit.middleware");
-
 const {
   getPatients,
   getPatientById,
@@ -60,7 +58,6 @@ router.post(
   injectTenantOnCreate,
   validateCreatePatient,
   validateRequest,
-  auditMiddleware("CREATED", "Patient"),
   createPatient
 );
 
@@ -69,7 +66,6 @@ router.patch(
   "/:id",
   validateUpdatePatient,
   validateRequest,
-  auditMiddleware("UPDATED", "Patient"),
   updatePatient
 );
 

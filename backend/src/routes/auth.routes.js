@@ -1,6 +1,5 @@
 const express = require("express");
 
-const auditMiddleware = require("../middlewares/audit.middleware");
 const {
   signup,
   login,
@@ -29,21 +28,18 @@ router.post(
   "/signup",
   validateSignup,
   validateRequest,
-  auditMiddleware("CREATED", "Auth"),
   signup,
 );
 router.post(
   "/login",
   validateLogin,
   validateRequest,
-  auditMiddleware("LOGIN", "Auth"),
   login,
 );
-router.post("/logout", auditMiddleware("LOGOUT", "Auth"), logout);
+router.post("/logout", logout);
 router.post(
   "/change-password",
   authMiddleware.userAuth,
-  auditMiddleware("UPDATED", "Password"),
   changePassword,
 );
 router.get("/me", authMiddleware.userAuth, getMe);
@@ -57,7 +53,6 @@ router.post(
   authMiddleware.authorizeRoles("admin"),
   validateCreateUser,
   validateRequest,
-  auditMiddleware("CREATED", "User"),
   createUser,
 );
 router.get(
@@ -81,7 +76,6 @@ router.patch(
   authMiddleware.authorizeRoles("admin"),
   validateUpdateUserStatus,
   validateRequest,
-  auditMiddleware("UPDATED", "User"),
   updateUserStatus,
 );
 

@@ -1,6 +1,5 @@
 const express = require("express");
 const Test = require("../models/test.model");
-const auditMiddleware = require("../middlewares/audit.middleware");
 const {
   getTests,
   getTestById,
@@ -48,7 +47,6 @@ router.post(
   authMiddleware.authorizeRoles("system_admin"),
   validateCreateTest,
   validateRequest,
-  auditMiddleware("CREATED", "GlobalTest"),
   createGlobalTest
 );
 
@@ -57,7 +55,6 @@ router.patch(
   authMiddleware.authorizeRoles("system_admin"),
   validateUpdateTest,
   validateRequest,
-  auditMiddleware("UPDATED", "GlobalTest"),
   updateGlobalTest
 );
 
@@ -66,21 +63,18 @@ router.delete(
   authMiddleware.authorizeRoles("system_admin"),
   validateDeleteTest,
   validateRequest,
-  auditMiddleware("DELETED", "GlobalTest"),
   deleteGlobalTest
 );
 
 router.post(
   "/global/:id/import",
   authMiddleware.authorizePermissions("manage_tests"),
-  auditMiddleware("IMPORTED", "Test"),
   importGlobalTest
 );
 
 router.post(
   "/global/:id/update-imported",
   authMiddleware.authorizePermissions("manage_tests"),
-  auditMiddleware("UPDATED_FROM_GLOBAL", "Test"),
   updateImportedGlobalTest
 );
 
@@ -107,7 +101,6 @@ router.post(
   authMiddleware.authorizeRoles("system_admin"),
   validateCreateTest,
   validateRequest,
-  auditMiddleware("CREATED", "Test"),
   createTest
 );
 
@@ -118,7 +111,6 @@ router.patch(
   authMiddleware.authorizeOwnership(Test),
   validateUpdateTest,
   validateRequest,
-  auditMiddleware("UPDATED", "Test"),
   updateTest
 );
 
@@ -129,7 +121,6 @@ router.delete(
   authMiddleware.authorizeOwnership(Test),
   validateDeleteTest,
   validateRequest,
-  auditMiddleware("DELETED", "Test"),
   deleteTest
 );
 

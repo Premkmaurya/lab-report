@@ -1,6 +1,5 @@
 const express = require("express");
 
-const auditMiddleware = require("../middlewares/audit.middleware");
 const {
   getPatientTests,
   getPatientTestById,
@@ -47,7 +46,6 @@ router.get(
   "/:id",
   validateGetPatientTestById,
   validateRequest,
-  auditMiddleware("VIEWED", "Report"),
   getPatientTestById,
 );
 
@@ -56,7 +54,6 @@ router.get(
   "/:id/test/:testId",
   validateGetReportAndTestTemplate,
   validateRequest,
-  auditMiddleware("VIEWED", "Report"),
   getReportAndTestTemplate,
 );
 
@@ -66,7 +63,6 @@ router.post(
   injectTenantOnCreate,
   validateCreatePatientTest,
   validateRequest,
-  auditMiddleware("CREATED", "Report"),
   createPatientTest
 );
 
@@ -75,7 +71,6 @@ router.patch(
   "/:id",
   validateUpdatePatientTest,
   validateRequest,
-  auditMiddleware("UPDATED", "Report"),
   updatePatientTest
 );
 
@@ -84,7 +79,6 @@ router.delete(
   "/:id",
   validateDeletePatientTest,
   validateRequest,
-  auditMiddleware("DELETED", "Report"),
   deletePatientTest
 );
 
@@ -93,7 +87,6 @@ router.patch(
   "/:id/add-test",
   validateAddTestToReport,
   validateRequest,
-  auditMiddleware("UPDATED", "Report"),
   addTestToReport
 );
 
@@ -102,7 +95,6 @@ router.post(
   "/:id/print",
   validateGetPatientTestById,
   validateRequest,
-  auditMiddleware("PRINTED", "Report"),
   recordPrint
 );
 
