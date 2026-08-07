@@ -1,12 +1,10 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { getVerificationUrl, generateQrDataUrl } from "../../../utils/qrCodeUtils";
 
 export const usePublicReport = (token) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [report, setReport] = useState(null);
-  const [qrDataUrl, setQrDataUrl] = useState("");
 
   // Patient Verification Challenge State
   const [requireVerification, setRequireVerification] = useState(false);
@@ -64,10 +62,6 @@ export const usePublicReport = (token) => {
   useEffect(() => {
     if (token) {
       fetchPublicReport();
-      const verifyUrl = getVerificationUrl(token);
-      generateQrDataUrl(verifyUrl, { size: 100, margin: 1 }).then((url) => {
-        if (url) setQrDataUrl(url);
-      });
     }
   }, [token]);
 
@@ -105,7 +99,6 @@ export const usePublicReport = (token) => {
     loading,
     error,
     report,
-    qrDataUrl,
     requireVerification,
     verificationInput,
     setVerificationInput,

@@ -119,10 +119,20 @@ const getPatientTests = asyncHandler(async (req, res) => {
     .sort({ createdAt: -1 })
     .lean();
 
-  const formattedPatientTests = patientTests.map(report => ({
-    ...report,
-    totalPrice: computeTotalPrice(report),
-  }));
+  const crypto = require("crypto");
+  const formattedPatientTests = await Promise.all(
+    patientTests.map(async (report) => {
+      if (!report.verificationToken && report._id) {
+        const token = crypto.randomBytes(32).toString("hex");
+        await PatientTest.updateOne({ _id: report._id }, { $set: { verificationToken: token } });
+        report.verificationToken = token;
+      }
+      return {
+        ...report,
+        totalPrice: computeTotalPrice(report),
+      };
+    })
+  );
 
   res.status(200).json({
     success: true,
@@ -182,10 +192,20 @@ const getTestsByPatientId = asyncHandler(async (req, res) => {
     .sort({ createdAt: -1 })
     .lean();
 
-  const formattedPatientTests = patientTests.map(report => ({
-    ...report,
-    totalPrice: computeTotalPrice(report),
-  }));
+  const crypto = require("crypto");
+  const formattedPatientTests = await Promise.all(
+    patientTests.map(async (report) => {
+      if (!report.verificationToken && report._id) {
+        const token = crypto.randomBytes(32).toString("hex");
+        await PatientTest.updateOne({ _id: report._id }, { $set: { verificationToken: token } });
+        report.verificationToken = token;
+      }
+      return {
+        ...report,
+        totalPrice: computeTotalPrice(report),
+      };
+    })
+  );
 
   res.status(200).json({
     success: true,

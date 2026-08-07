@@ -215,19 +215,6 @@ export const PrintTemplateDesigner = () => {
     }));
   };
 
-  const updateQrCodeSetting = (key, value) => {
-    setTemplate((prev) => ({
-      ...prev,
-      elements: {
-        ...(prev?.elements || {}),
-        qrCode: {
-          ...(prev?.elements?.qrCode || {}),
-          [key]: value,
-        },
-      },
-    }));
-  };
-
   /**
    * Build the local template state from a saved (DB) template.
    * 
@@ -611,12 +598,6 @@ export const PrintTemplateDesigner = () => {
             onClick={() => setActiveTab("bar-code")}
           >
             Bar Code
-          </button>
-          <button
-            className={`flex-1 py-3 font-medium border-b-2 text-xs md:text-sm ${activeTab === "qr-code" ? "border-electric-cobalt text-electric-cobalt" : "border-transparent text-slate-500"}`}
-            onClick={() => setActiveTab("qr-code")}
-          >
-            QR Code
           </button>
         </div>
 
@@ -1603,113 +1584,6 @@ export const PrintTemplateDesigner = () => {
                 </div>
               </div>
             </>
-          )}
-
-          {activeTab === "qr-code" && (
-            <div className="space-y-4">
-              <div className="flex items-center space-x-2 pb-2 border-b border-slate-200">
-                <input
-                  type="checkbox"
-                  id="showQrCode"
-                  checked={template.elements?.qrCode?.enabled ?? true}
-                  onChange={(e) =>
-                    updateQrCodeSetting("enabled", e.target.checked)
-                  }
-                  className="rounded border-slate-300 text-electric-cobalt focus:ring-electric-cobalt cursor-pointer"
-                />
-                <label
-                  htmlFor="showQrCode"
-                  className="text-sm font-semibold text-slate-700 cursor-pointer"
-                >
-                  Enable QR Code in Footer
-                </label>
-              </div>
-
-              <div className="p-3 bg-slate-50 border border-slate-200 rounded text-xs text-slate-600">
-                <span className="font-semibold text-slate-800">Placement:</span> Centered horizontally in the footer between Lab Technician and Pathologist signatures.
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
-                    QR Size (px)
-                  </label>
-                  <input
-                    type="number"
-                    min="40"
-                    max="150"
-                    className="w-full text-sm border-slate-300 rounded px-2 py-1.5"
-                    value={template.elements?.qrCode?.size ?? 70}
-                    onChange={(e) =>
-                      updateQrCodeSetting("size", Number(e.target.value))
-                    }
-                  />
-                </div>
-                <div>
-                  <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
-                    Label Font Size (px)
-                  </label>
-                  <input
-                    type="number"
-                    min="8"
-                    max="14"
-                    className="w-full text-sm border-slate-300 rounded px-2 py-1.5"
-                    value={template.elements?.qrCode?.labelFontSize ?? 10}
-                    onChange={(e) =>
-                      updateQrCodeSetting("labelFontSize", Number(e.target.value))
-                    }
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
-                  Label Text
-                </label>
-                <input
-                  type="text"
-                  className="w-full text-sm border-slate-300 rounded px-2.5 py-1.5"
-                  value={template.elements?.qrCode?.labelText !== undefined ? template.elements.qrCode.labelText : "Scan to Verify Report"}
-                  onChange={(e) =>
-                    updateQrCodeSetting("labelText", e.target.value)
-                  }
-                  placeholder="e.g. Scan to Verify Report"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
-                    Margin Top (px)
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    max="50"
-                    className="w-full text-sm border-slate-300 rounded px-2 py-1.5"
-                    value={template.elements?.qrCode?.marginTop ?? 0}
-                    onChange={(e) =>
-                      updateQrCodeSetting("marginTop", Number(e.target.value))
-                    }
-                  />
-                </div>
-                <div>
-                  <label className="block text-[11px] font-medium text-slate-500 mb-1 uppercase">
-                    Margin Bottom (px)
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    max="50"
-                    className="w-full text-sm border-slate-300 rounded px-2 py-1.5"
-                    value={template.elements?.qrCode?.marginBottom ?? 0}
-                    onChange={(e) =>
-                      updateQrCodeSetting("marginBottom", Number(e.target.value))
-                    }
-                  />
-                </div>
-              </div>
-            </div>
           )}
         </div>
       </div>

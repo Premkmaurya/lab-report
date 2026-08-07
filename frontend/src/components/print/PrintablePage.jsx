@@ -24,7 +24,6 @@
 import { PatientInfo }     from '../report/PatientInfo';
 import { SignatureSection } from '../report/SignatureSection';
 import { BarcodeElement }  from './BarcodeElement';
-import { QrCodeElement }   from './QrCodeElement';
 import { checkAbnormalResult } from '../../utils/resultUtils';
 import './styles/print.css';
 
@@ -38,7 +37,6 @@ export const PrintablePage = ({
   rows         = [],
   pageNumber   = 1,
   barcodeSvgString = null,
-  qrCodeSvgString = null,
   zoom         = 1,
 }) => {
   /* ── Template values ──────────────────────────────────────────── */
@@ -51,7 +49,6 @@ export const PrintablePage = ({
   const marginLeft   = parseInt(page.marginLeft   || 15);
 
   const barcodeSettings = template?.elements?.barcode || { enabled: true };
-  const qrCodeSettings  = template?.elements?.qrCode  || { enabled: true };
 
   // Element-level style overrides from the print template designer
   const deptStyles   = template?.elements?.departmentHeading || {};
@@ -373,7 +370,6 @@ export const PrintablePage = ({
           patient={patient}
           report={report}
           template={template}
-          qrCodeSvgString={qrCodeSvgString}
         />
       </div>
     </div>

@@ -736,3 +736,41 @@
 {"level":"warn","message":"Token Rejected | Blacklisted token attempted for user: user123","service":"laboratory-management-system","timestamp":"2026-08-07 12:35:39"}
 {"level":"info","message":"Token Blacklisted | All active tokens revoked for user: user123","service":"laboratory-management-system","timestamp":"2026-08-07 12:35:39"}
 {"level":"error","message":"Redis Error during blacklist check: The client is closed","service":"laboratory-management-system","timestamp":"2026-08-07 12:35:39"}
+{"level":"info","message":"Token Blacklisted | User: user123 | Hash: 0df7d1da6f77... | TTL: 600s","service":"laboratory-management-system","timestamp":"2026-08-07 14:43:34"}
+{"level":"info","message":"Token Blacklisted | User: user123 | Hash: 0df7d1da6f77... | TTL: 600s","service":"laboratory-management-system","timestamp":"2026-08-07 14:43:34"}
+{"level":"warn","message":"Token Rejected | Blacklisted token attempted for user: user123","service":"laboratory-management-system","timestamp":"2026-08-07 14:43:34"}
+{"level":"info","message":"Token Blacklisted | All active tokens revoked for user: user123","service":"laboratory-management-system","timestamp":"2026-08-07 14:43:34"}
+{"level":"error","message":"Redis Error during blacklist check: The client is closed","service":"laboratory-management-system","timestamp":"2026-08-07 14:43:34"}
+{"level":"info","message":"Token Blacklisted | User: user123 | Hash: 1537a45f598c... | TTL: 600s","service":"laboratory-management-system","timestamp":"2026-08-07 15:02:43"}
+{"level":"info","message":"Token Blacklisted | User: user123 | Hash: 1537a45f598c... | TTL: 600s","service":"laboratory-management-system","timestamp":"2026-08-07 15:02:43"}
+{"level":"warn","message":"Token Rejected | Blacklisted token attempted for user: user123","service":"laboratory-management-system","timestamp":"2026-08-07 15:02:43"}
+{"level":"info","message":"Token Blacklisted | All active tokens revoked for user: user123","service":"laboratory-management-system","timestamp":"2026-08-07 15:02:43"}
+{"level":"error","message":"Redis Error during blacklist check: The client is closed","service":"laboratory-management-system","timestamp":"2026-08-07 15:02:43"}
+{"level":"info","message":"Token Blacklisted | User: user123 | Hash: fdc8aab0ae2b... | TTL: 600s","service":"laboratory-management-system","timestamp":"2026-08-07 15:11:13"}
+{"level":"info","message":"Token Blacklisted | User: user123 | Hash: fdc8aab0ae2b... | TTL: 600s","service":"laboratory-management-system","timestamp":"2026-08-07 15:11:13"}
+{"level":"warn","message":"Token Rejected | Blacklisted token attempted for user: user123","service":"laboratory-management-system","timestamp":"2026-08-07 15:11:13"}
+{"level":"info","message":"Token Blacklisted | All active tokens revoked for user: user123","service":"laboratory-management-system","timestamp":"2026-08-07 15:11:13"}
+{"level":"error","message":"Redis Error during blacklist check: The client is closed","service":"laboratory-management-system","timestamp":"2026-08-07 15:11:13"}
+{"level":"info","message":"Server is running on port 3000 in development mode","service":"laboratory-management-system","timestamp":"2026-08-07 15:31:21"}
+{"level":"info","message":"Redis client connected","service":"laboratory-management-system","timestamp":"2026-08-07 15:31:22"}
+{"level":"info","message":"Redis client ready","service":"laboratory-management-system","timestamp":"2026-08-07 15:31:22"}
+{"level":"info","message":"Database connected successfully","service":"laboratory-management-system","timestamp":"2026-08-07 15:31:22"}
+{"level":"info","message":"\u001b[0mGET /api/auth/me \u001b[36m304\u001b[0m 951.597 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-07 15:32:03"}
+{"level":"info","message":"\u001b[0mGET /api/auth/me \u001b[36m304\u001b[0m 2224.192 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-07 15:32:06"}
+{"level":"info","message":"\u001b[0mGET /api/settings/print-template \u001b[32m200\u001b[0m 831.192 ms - 3448\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-07 15:32:07"}
+{"level":"info","message":"\u001b[0mGET /api/laboratories?limit=100 \u001b[36m304\u001b[0m 977.741 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-07 15:32:07"}
+{"level":"info","message":"\u001b[0mGET /api/settings/print-template \u001b[36m304\u001b[0m 866.107 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-07 15:32:08"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests?date=today&timezoneOffset=-330 \u001b[32m200\u001b[0m 665.068 ms - 34\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-07 15:32:09"}
+{"level":"info","message":"\u001b[0mGET /api/patients \u001b[32m200\u001b[0m 1151.282 ms - 27209\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-07 15:32:10"}
+{"level":"debug","message":"Cache miss for key: tenant:global:doctors:all","service":"laboratory-management-system","timestamp":"2026-08-07 15:32:10"}
+{"level":"info","message":"\u001b[0mGET /api/tests \u001b[32m200\u001b[0m 1379.626 ms - 66139\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-07 15:32:10"}
+{"level":"info","message":"\u001b[0mGET /api/doctors \u001b[32m200\u001b[0m 1589.130 ms - 599\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-07 15:32:10"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests \u001b[32m200\u001b[0m 2637.208 ms - 325891\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-07 15:32:11"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests?date=yesterday&timezoneOffset=-330 \u001b[32m200\u001b[0m 883.589 ms - 64810\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-07 15:32:14"}
+{"level":"info","message":"\u001b[0mGET /api/patients/6a74abaa2f9ecdd15882fe5e \u001b[32m200\u001b[0m 699.818 ms - 610\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-07 15:32:18"}
+{"level":"info","message":"\u001b[0mGET /api/patients/6a74abaa2f9ecdd15882fe5e \u001b[36m304\u001b[0m 722.972 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-07 15:32:19"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/patient/6a74abaa2f9ecdd15882fe5e \u001b[32m200\u001b[0m 846.513 ms - 28176\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-07 15:32:19"}
+{"level":"info","message":"\u001b[0mGET /api/patient-tests/patient/6a74abaa2f9ecdd15882fe5e \u001b[36m304\u001b[0m 836.648 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-07 15:32:20"}
+{"level":"info","message":"\u001b[0mGET /api/settings/print-template?laboratoryId=6a6b71a48205f8a6bca38669&patientId=6a74abaa2f9ecdd15882fe5e&reportId=6a74abad2f9ecdd15882fea9 \u001b[32m200\u001b[0m 824.480 ms - 25668\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-07 15:32:24"}
+{"level":"info","message":"\u001b[0mPOST /api/patient-tests/6a74abad2f9ecdd15882fea9/print \u001b[32m200\u001b[0m 1206.889 ms - 29513\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-07 15:32:25"}
+{"level":"info","message":"\u001b[0mGET /api/settings/print-template?laboratoryId=6a6b71a48205f8a6bca38669&patientId=6a74abaa2f9ecdd15882fe5e&reportId=6a74abad2f9ecdd15882fea9 \u001b[36m304\u001b[0m 761.295 ms - -\u001b[0m","service":"laboratory-management-system","timestamp":"2026-08-07 15:32:25"}

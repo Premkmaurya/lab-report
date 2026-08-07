@@ -192,19 +192,6 @@ const printTemplateSchema = new mongoose.Schema(
         lineColor: { type: String, default: "#000000" },
         background: { type: String, default: "transparent" },
       },
-      qrCode: {
-        enabled: { type: Boolean, default: true },
-        position: { type: String, default: "footer_center" },
-        size: { type: Number, default: 70 },
-        labelText: { type: String, default: "Scan to Verify Report" },
-        labelFontSize: { type: Number, default: 10 },
-        marginTop: { type: Number, default: 0 },
-        marginBottom: { type: Number, default: 0 },
-        margin: { type: Number, default: 0 },
-        border: { type: Boolean, default: false },
-        borderColor: { type: String, default: "#000000" },
-        borderWidth: { type: Number, default: 1 },
-      },
       parameter: {
         type: elementStyleSchema,
          default: () => ({

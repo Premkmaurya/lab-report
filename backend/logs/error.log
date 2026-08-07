@@ -45,3 +45,6 @@
 {"level":"error","message":"Redis Client Error: getaddrinfo ENOTFOUND redis-18860.c10.us-east-1-4.ec2.cloud.redislabs.com","service":"laboratory-management-system","timestamp":"2026-08-07 00:23:26"}
 {"level":"error","message":"Redis Error during blacklist check: The client is closed","service":"laboratory-management-system","timestamp":"2026-08-07 12:23:53"}
 {"level":"error","message":"Redis Error during blacklist check: The client is closed","service":"laboratory-management-system","timestamp":"2026-08-07 12:35:39"}
+{"level":"error","message":"Redis Error during blacklist check: The client is closed","service":"laboratory-management-system","timestamp":"2026-08-07 14:43:34"}
+{"level":"error","message":"Redis Error during blacklist check: The client is closed","service":"laboratory-management-system","timestamp":"2026-08-07 15:02:43"}
+{"level":"error","message":"Redis Error during blacklist check: The client is closed","service":"laboratory-management-system","timestamp":"2026-08-07 15:11:13"}

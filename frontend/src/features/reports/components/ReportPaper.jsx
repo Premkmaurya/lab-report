@@ -3,7 +3,7 @@ import { ReportPatientInfo } from "./ReportPatientInfo";
 import { ReportTestTable } from "./ReportTestTable";
 import { ReportSignatures } from "./ReportSignatures";
 
-export const ReportPaper = ({ report, qrDataUrl, formatReportDate }) => {
+export const ReportPaper = ({ report, formatReportDate }) => {
   return (
     <div className="bg-white border border-[#D9DEE7] rounded-lg shadow-sm p-6 sm:p-8 min-h-[900px] flex flex-col justify-between">
       <div className="space-y-6">
@@ -14,8 +14,8 @@ export const ReportPaper = ({ report, qrDataUrl, formatReportDate }) => {
         <ReportTestTable tests={report?.tests || []} />
       </div>
 
-      {/* Signatures & QR Code Section (Pinned to Bottom) */}
-      <ReportSignatures report={report} qrDataUrl={qrDataUrl} />
+      {/* Signatures Section (Pinned to Bottom) */}
+      <ReportSignatures report={report} />
     </div>
   );
 };

@@ -10,7 +10,6 @@ export const VerifyReportPage = () => {
     loading,
     error,
     report,
-    qrDataUrl,
     requireVerification,
     verificationInput,
     setVerificationInput,
@@ -115,7 +114,6 @@ export const VerifyReportPage = () => {
       <div className="max-w-[850px] mx-auto">
         <ReportPaper
           report={report}
-          qrDataUrl={qrDataUrl}
           formatReportDate={formatReportDate}
         />
       </div>

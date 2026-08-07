@@ -3,9 +3,10 @@ const Patient = require("../models/patient.model");
 const Laboratory = require("../models/laboratory.model");
 const LabDetails = require("../models/labDetails.model");
 const PrintTemplate = require("../models/printTemplate.model");
-const QRCode = require("qrcode");
 const PDFDocument = require("pdfkit");
 const crypto = require("crypto");
+const mongoose = require("mongoose");
+const logger = require("../utils/logger");
 
 /**
  * Ensures a PatientTest has a verification token.
@@ -13,7 +14,11 @@ const crypto = require("crypto");
 const ensureVerificationToken = async (patientTest) => {
   if (!patientTest.verificationToken) {
     patientTest.verificationToken = crypto.randomBytes(32).toString("hex");
-    await patientTest.save();
+    if (patientTest.save) {
+      await patientTest.save();
+    } else {
+      await PatientTest.updateOne({ _id: patientTest._id }, { $set: { verificationToken: patientTest.verificationToken } });
+    }
   }
   return patientTest.verificationToken;
 };
@@ -52,23 +57,51 @@ const verifyPatientMatch = (patient, input) => {
  * Get sanitized public report data by verification token.
  */
 const getPublicReportByToken = async (token, patientVerificationInput, req) => {
-  const patientTest = await PatientTest.findOne({ verificationToken: token })
+  logger.info(`[ReportVerification] Verification requested for token: "${token}"`);
+
+  let patientTest = await PatientTest.findOne({ verificationToken: token })
     .populate("patientId")
     .populate({
       path: "tests.testId",
       populate: { path: "departmentId", select: "name" },
     });
 
-  if (!patientTest || patientTest.deleted) {
+  // Fallback: If not found by verificationToken and token is a valid ObjectId, search by _id
+  if (!patientTest && mongoose.Types.ObjectId.isValid(token)) {
+    logger.info(`[ReportVerification] Verification token not found, trying MongoDB _id lookup for: "${token}"`);
+    patientTest = await PatientTest.findById(token)
+      .populate("patientId")
+      .populate({
+        path: "tests.testId",
+        populate: { path: "departmentId", select: "name" },
+      });
+
+    if (patientTest) {
+      await ensureVerificationToken(patientTest);
+      logger.info(`[ReportVerification] Found report by _id and backfilled verificationToken: "${patientTest.verificationToken}"`);
+    }
+  }
+
+  if (!patientTest) {
+    logger.warn(`[ReportVerification] Verification failed: No report matched query for token "${token}"`);
+    return { error: "Invalid or expired report.", statusCode: 404 };
+  }
+
+  if (patientTest.deleted) {
+    logger.warn(`[ReportVerification] Verification failed: Report "${patientTest._id}" is marked as deleted`);
     return { error: "Invalid or expired report.", statusCode: 404 };
   }
 
   if (patientTest.verificationEnabled === false) {
+    logger.warn(`[ReportVerification] Verification failed: Verification disabled for report "${patientTest._id}"`);
     return { error: "Report verification is disabled for this report.", statusCode: 403 };
   }
 
+  logger.info(`[ReportVerification] Matched report "${patientTest._id}" for token "${token}"`);
+
   const patient = patientTest.patientId;
   if (!patient) {
+    logger.warn(`[ReportVerification] Verification failed: Patient record missing for report "${patientTest._id}"`);
     return { error: "Patient record not found for this report.", statusCode: 404 };
   }
 
@@ -99,6 +132,7 @@ const getPublicReportByToken = async (token, patientVerificationInput, req) => {
   if (requirePatientVerification && patientVerificationInput) {
     const isMatched = verifyPatientMatch(patient, patientVerificationInput);
     if (!isMatched) {
+      logger.warn(`[ReportVerification] Patient challenge failed for report "${patientTest._id}" with input "${patientVerificationInput}"`);
       return {
         requirePatientVerification: true,
         verificationFailed: true,
@@ -107,8 +141,6 @@ const getPublicReportByToken = async (token, patientVerificationInput, req) => {
       };
     }
   }
-
-
 
   // Sanitize public response without internal IDs
   const sanitizedReport = {
@@ -122,7 +154,7 @@ const getPublicReportByToken = async (token, patientVerificationInput, req) => {
     patientName: patient.name || "N/A",
     visitId: patient.visitId || "N/A",
     visitNumber: patient.visitNumber || "",
-    reportId: patientTest.verificationToken.substring(0, 12).toUpperCase(),
+    reportId: patientTest.verificationToken ? patientTest.verificationToken.substring(0, 12).toUpperCase() : patientTest._id.toString().substring(0, 12).toUpperCase(),
     age: patient.age ? `${patient.age} Yrs` : "N/A",
     gender: patient.gender || "N/A",
     doctor: patient.referredDoctor || "Self / General",
@@ -152,12 +184,21 @@ const getPublicReportByToken = async (token, patientVerificationInput, req) => {
  * Generate PDF buffer on demand for public download.
  */
 const generateReportPDF = async (token, req) => {
-  const patientTest = await PatientTest.findOne({ verificationToken: token })
+  let patientTest = await PatientTest.findOne({ verificationToken: token })
     .populate("patientId")
     .populate({
       path: "tests.testId",
       populate: { path: "departmentId", select: "name" },
     });
+
+  if (!patientTest && mongoose.Types.ObjectId.isValid(token)) {
+    patientTest = await PatientTest.findById(token)
+      .populate("patientId")
+      .populate({
+        path: "tests.testId",
+        populate: { path: "departmentId", select: "name" },
+      });
+  }
 
   if (!patientTest || patientTest.deleted || patientTest.verificationEnabled === false) {
     throw new Error("Invalid or expired report.");
@@ -177,12 +218,6 @@ const generateReportPDF = async (token, req) => {
   }
 
 
-
-  // Generate QR Data URL
-  const domain = process.env.FRONTEND_URL || (req ? `${req.protocol}://${req.get("host")}` : "http://localhost:5173");
-  const verifyUrl = `${domain.replace(/\/$/, "")}/report/verify/${token}`;
-  const qrDataUrl = await QRCode.toDataURL(verifyUrl, { margin: 1, width: 120 });
-  const qrBuffer = Buffer.from(qrDataUrl.split(",")[1], "base64");
 
   return new Promise((resolve, reject) => {
     try {
@@ -296,12 +331,6 @@ const generateReportPDF = async (token, req) => {
       // Left: Technician Signature Block
       doc.fillColor("#0F172A").fontSize(9).font("Helvetica-Bold").text("System Admin", 40, y + 25);
       doc.font("Helvetica").fontSize(8).fillColor("#64748B").text("Lab Technician", 40, y + 37);
-
-      // Center: QR Code (70x70) & Label "Scan to Verify Report"
-      const qrSize = 70;
-      const qrX = Math.round((595.28 - qrSize) / 2); // Perfectly centered on A4 (595.28 width)
-      doc.image(qrBuffer, qrX, y, { width: qrSize, height: qrSize });
-      doc.fontSize(9).font("Helvetica-Bold").fillColor("#334155").text("Scan to Verify Report", 40, y + qrSize + 2, { width: 515, align: "center" });
 
       // Right: Pathologist Signature Block
       doc.fillColor("#0F172A").fontSize(9).font("Helvetica-Bold").text("Pathologist", 400, y + 25, { width: 155, align: "right" });
