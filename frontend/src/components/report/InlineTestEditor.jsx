@@ -5,6 +5,7 @@ import { useForm, useFieldArray, useWatch } from "react-hook-form";
 import { checkAbnormalResult } from "../../utils/resultUtils";
 import { resolveReferenceRange } from "../../utils/referenceRangeResolver";
 import { evaluateTokens, migrateFormula } from "../../utils/formulaUtils";
+import { CreatableResultSelect } from "./CreatableResultSelect";
 
 export const InlineTestEditor = ({
   reportId,
@@ -512,24 +513,20 @@ export const InlineTestEditor = ({
 
                                   if (item.isListParameter) {
                                     return (
-                                      <select
-                                        className="w-full min-w-[120px] bg-white border border-electric-cobalt focus:border-ink-navy focus:ring-1 focus:ring-ink-navy rounded-inputs px-3 py-1.5 text-sm font-medium text-charcoal transition-colors"
-                                        {...rest}
-                                        onChange={(e) => {
-                                          onChange(e);
+                                      <CreatableResultSelect
+                                        value={getValues(`results.${index}.value`) || ""}
+                                        allowedValues={item.allowedValues || []}
+                                        onChange={(newVal) => {
+                                          setValue(`results.${index}.value`, newVal, { shouldDirty: true, shouldValidate: true });
                                           recalculateFormulas();
                                         }}
-                                        ref={(e) => {
+                                        onBlur={rest.onBlur}
+                                        inputRef={(e) => {
                                           ref(e);
                                           inputRefs.current[index] = e;
                                         }}
                                         onKeyDown={(e) => handleKeyDown(e, index)}
-                                      >
-                                        <option value="">Select...</option>
-                                        {(item.allowedValues || []).map((opt, i) => (
-                                          <option key={i} value={opt}>{opt}</option>
-                                        ))}
-                                      </select>
+                                      />
                                     );
                                   }
 

@@ -3,8 +3,13 @@ import API from "./api";
 const API_URL = "/settings/print-template";
 
 export const printTemplateService = {
-  getTemplate: async (laboratoryId) => {
-    const params = laboratoryId ? { laboratoryId } : {};
+  getTemplate: async (paramsOrLabId) => {
+    let params = {};
+    if (typeof paramsOrLabId === "string") {
+      params = { laboratoryId: paramsOrLabId };
+    } else if (paramsOrLabId && typeof paramsOrLabId === "object") {
+      params = { ...paramsOrLabId };
+    }
     const response = await API.get(API_URL, { params });
     return response.data;
   },

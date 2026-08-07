@@ -11,7 +11,16 @@ const injectTenantFilter = async (req, res, next) => {
     }
 
     if (req.user.role === 'system_admin') {
-      const targetLabId = req.query.laboratoryId || req.headers['x-laboratory-id'] || req.body?.laboratoryId;
+      let targetLabId = req.query.laboratoryId || req.headers['x-laboratory-id'] || req.body?.laboratoryId;
+
+      if (!targetLabId && (req.query.patientId || req.body?.patientId)) {
+        const pId = req.query.patientId || req.body?.patientId;
+        const patient = await Patient.findById(pId).select('laboratoryId').lean();
+        if (patient && patient.laboratoryId) {
+          targetLabId = patient.laboratoryId.toString();
+        }
+      }
+
       if (targetLabId) {
         req.tenantFilter = { laboratoryId: targetLabId };
         req.laboratoryId = targetLabId;

@@ -45,6 +45,7 @@
  */
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { usePrintTemplate }   from '../../context/PrintTemplateContext';
+import { printTemplateService } from '../../services/printTemplateService';
 import { PrintablePage, A4_WIDTH_PX } from './PrintablePage';
 import { BarcodeElement }     from './BarcodeElement';
 import { PatientInfo }        from '../report/PatientInfo';
@@ -63,8 +64,51 @@ export const PrintOrchestrator = ({
   printWindowRef, // { current: Window } — opened BEFORE this component mounts
   onComplete,
 }) => {
-  const ctx      = usePrintTemplate();
-  const template = customTemplate || (ctx ? ctx.template : null);
+  const ctx = usePrintTemplate();
+  const [targetTemplate, setTargetTemplate] = useState(customTemplate || null);
+  const [isTemplateLoading, setIsTemplateLoading] = useState(!customTemplate);
+
+  useEffect(() => {
+    if (customTemplate) {
+      setTargetTemplate(customTemplate);
+      setIsTemplateLoading(false);
+      return;
+    }
+
+    let isMounted = true;
+    setIsTemplateLoading(true);
+
+    const loadTemplate = async () => {
+      try {
+        const labId = patient?.laboratoryId?._id || patient?.laboratoryId || report?.laboratoryId?._id || report?.laboratoryId || report?.patientId?.laboratoryId?._id || report?.patientId?.laboratoryId;
+        const patientId = patient?._id || report?.patientId?._id || report?.patientId;
+        const reportId = report?._id;
+
+        const res = await printTemplateService.getTemplate({
+          laboratoryId: labId,
+          patientId,
+          reportId,
+        });
+
+        if (isMounted) {
+          const tData = res?.data || res?.template || null;
+          setTargetTemplate(tData);
+          setIsTemplateLoading(false);
+        }
+      } catch (err) {
+        console.error("[PrintOrchestrator] Error fetching patient laboratory print template:", err);
+        if (isMounted) {
+          setTargetTemplate(ctx ? ctx.template : null);
+          setIsTemplateLoading(false);
+        }
+      }
+    };
+
+    loadTemplate();
+    return () => { isMounted = false; };
+  }, [patient, report, customTemplate]);
+
+  const template = targetTemplate || (ctx ? ctx.template : null);
 
   const rows = useMemo(() => buildRows(report, patient), [report, patient]);
 
@@ -108,6 +152,8 @@ export const PrintOrchestrator = ({
 
   /* ── Phase 1: Measure DOM heights after mount ────────────────── */
   useEffect(() => {
+    if (isTemplateLoading) return;
+
     // 250 ms gives BarcodeElement's useEffect time to populate the SVG
     // inside the measurement probe before we read dimensions.
     const timer = setTimeout(() => {
@@ -119,7 +165,7 @@ export const PrintOrchestrator = ({
       });
     }, 250);
     return () => clearTimeout(timer);
-  }, []);
+  }, [isTemplateLoading, template]);
 
   /* ── Phase 2: Paginate with real measurements ────────────────── */
   useEffect(() => {
@@ -181,7 +227,7 @@ export const PrintOrchestrator = ({
       overflow:   'hidden',
     }}>
       {/* ── Phase 1: Measurement Probe ───────────────────────────── */}
-      {!measurements && (
+      {!isTemplateLoading && !measurements && (
         <div style={{ width: `${contentWidth}px`, overflow: 'hidden' }}>
 
           {/* Header probe: BarcodeElement + PatientInfo */}
